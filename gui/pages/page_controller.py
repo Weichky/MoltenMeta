@@ -4,9 +4,7 @@ import PySide6QtAds as QtAds
 from gui.pages.home_page import HomePage
 
 class PageController:
-    """
-    控制 Workspace 中的 Page
-    """
+
     def __init__(self, dock_manager: QtAds.CDockManager):
         self.dock_manager = dock_manager
         self.pages = {}  # 页面缓存
