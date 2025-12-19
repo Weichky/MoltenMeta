@@ -31,10 +31,11 @@ def main():
     app = QApplication(sys.argv)
     
     # 默认使用系统语言或设置为中文
-    locale = QLocale.system().name()  #  "zh_CN" 或 "en_US" 等
+    locale = QLocale.system().name()  # 例如 "zh_CN" 或 "en_US"
+    print(f"System locale: {locale}")
     
     # 加载翻译
-    translator = load_translator(app, locale)  # 目前没有配置文件，暂时按照系统语言加载
+    # translator = load_translator(app, "zh_CN")  # 可以在这里设置默认语言
     
     # 创建并显示主窗口
     window = MainWindow()
