@@ -1,40 +1,27 @@
 from PySide6 import QtWidgets, QtCore
-from PySide6.QtCore import QCoreApplication
+from PySide6.QtCore import QCoreApplication, Signal
 
 
-class Tile(QtWidgets.QFrame):
-    """一个简单的磁贴组件"""
+class Tile(QtWidgets.QPushButton):
 
     def __init__(self, title: str, parent=None):
-        super().__init__(parent)
-
-        self.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.setFrameShadow(QtWidgets.QFrame.Raised)
-
-        layout = QtWidgets.QVBoxLayout(self)
-
-        self.label = QtWidgets.QLabel()
-        self.label.setAlignment(QtCore.Qt.AlignCenter)
-        # 移除硬编码样式，让系统主题决定外观
-        # self.label.setStyleSheet("font-weight: bold;")
-
-        layout.addStretch()
-        layout.addWidget(self.label)
-        layout.addStretch()
+        super().__init__(title, parent)
 
         self.setMinimumSize(120, 80)
         
     def set_title(self, title):
-        """设置磁贴标题"""
-        self.label.setText(title)
+        self.setText(title)
         
     def retranslateUi(self, title):
-        """翻译磁贴标题"""
-        self.label.setText(QCoreApplication.translate("homepage", title, None))
+        self.setText(QCoreApplication.translate("homepage", title, None))
 
 
 class HomePage(QtWidgets.QWidget):
-    """主页页面"""
+    # 定义自定义信号
+    projectButtonClicked = Signal()
+    databaseButtonClicked = Signal()
+    simulationButtonClicked = Signal()
+    settingsButtonClicked = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -45,15 +32,16 @@ class HomePage(QtWidgets.QWidget):
         self.root_layout.setSpacing(16)
         self.root_layout.setContentsMargins(24, 24, 24, 24)
 
+        self.root_layout.addStretch()
+
         # ===== 顶部标题 =====
         self.title = QtWidgets.QLabel()
         self.title.setAlignment(QtCore.Qt.AlignCenter)
-        # 移除硬编码样式，让系统主题决定外观
         # self.title.setStyleSheet("font-size: 24px; font-weight: 600;")
 
         self.root_layout.addWidget(self.title)
 
-        # ===== 中部 4x4 Grid（放 4 个磁贴）=====
+        # ===== 中部 4x4 Grid =====
         self.grid_container = QtWidgets.QWidget(self)
         self.grid = QtWidgets.QGridLayout(self.grid_container)
         self.grid.setSpacing(12)
@@ -80,18 +68,33 @@ class HomePage(QtWidgets.QWidget):
 
         self.root_layout.addStretch()
         
+        # 连接按钮信号
+        self._connect_signals()
+        
         # 初始化翻译
         self.retranslateUi()
 
+    def _connect_signals(self):
+        PROJECT_INDEX = 0
+        DATABASE_INDEX = 1
+        SIMULATION_INDEX = 2
+        SETTINGS_INDEX = 3
+        
+        self.tiles[PROJECT_INDEX].clicked.connect(self.projectButtonClicked.emit)
+        self.tiles[DATABASE_INDEX].clicked.connect(self.databaseButtonClicked.emit)
+        self.tiles[SIMULATION_INDEX].clicked.connect(self.simulationButtonClicked.emit)
+        self.tiles[SETTINGS_INDEX].clicked.connect(self.settingsButtonClicked.emit)
+
     def retranslateUi(self):
-        """翻译界面文本"""
-        self.title.setText(QCoreApplication.translate("homepage", "Welcome", None))
-        self.description.setText(QCoreApplication.translate(
+        welcome_text = QCoreApplication.translate("homepage", "Welcome", None)
+        self.title.setText("<h1>"+welcome_text+"</h1>")
+        software_description = QCoreApplication.translate(
             "homepage", 
             "This software provides an integrated environment for "
             "data management, simulation, and analysis. "
             "All modules are designed to be extensible and reproducible.",
-            None))
+            None)
+        self.description.setText("<h6>"+software_description+"</h6>")
             
         # 翻译磁贴
         tile_titles = ["Project", "Database", "Simulation", "Settings"]
@@ -99,7 +102,4 @@ class HomePage(QtWidgets.QWidget):
             tile.retranslateUi(title)
 
     def resizeEvent(self, event):
-        """处理窗口大小调整事件，使布局自适应"""
         super().resizeEvent(event)
-        # 可以在这里添加特定的响应式逻辑
-        # 目前使用GridLayout已经具备了基本的响应式能力

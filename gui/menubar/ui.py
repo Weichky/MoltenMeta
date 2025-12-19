@@ -2,13 +2,13 @@ from PySide6.QtWidgets import (
     QMenu,
     QMenuBar,
 )
-from PySide6.QtCore import QCoreApplication
+from PySide6.QtCore import QObject
 
 from PySide6.QtGui import (
     QAction,
 )
 
-class UiMenubar(object):
+class UiMenubar(QObject):
 
     def setupUi(self, menubar: QMenuBar):
         # 创建菜单
@@ -142,18 +142,19 @@ class UiMenubar(object):
         self.actionAbout = QAction(menubar)
         self.actionAbout.setObjectName(u"actionAbout")
 
-        # 将菜单添加到菜单栏
+        # 添加菜单到菜单栏
         menubar.addAction(self.menuFile.menuAction())
         menubar.addAction(self.menuEdit.menuAction())
         menubar.addAction(self.menuView.menuAction())
         menubar.addAction(self.menuSession.menuAction())
-        menubar.addAction(self.menuSimulation.menuAction())
-        menubar.addAction(self.menuData.menuAction())
         menubar.addAction(self.menuWindow.menuAction())
+        menubar.addAction(self.menuData.menuAction())
+        self.menuData.addAction(self.menuDatabase.menuAction())
+        menubar.addAction(self.menuSimulation.menuAction())
         menubar.addAction(self.menuTools.menuAction())
         menubar.addAction(self.menuHelp.menuAction())
-
-        # 将动作添加到对应菜单
+        
+        # 添加动作到菜单
         ## File 菜单
         self.menuFile.addAction(self.actionNew)
         self.menuFile.addAction(self.actionOpen)
@@ -168,7 +169,7 @@ class UiMenubar(object):
         self.menuFile.addAction(self.actionPrint)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
-
+        
         ## Edit 菜单
         self.menuEdit.addAction(self.actionUndo)
         self.menuEdit.addAction(self.actionRedo)
@@ -181,10 +182,7 @@ class UiMenubar(object):
         self.menuEdit.addAction(self.actionRename)
         self.menuEdit.addAction(self.actionMoveUp)
         self.menuEdit.addAction(self.actionMoveDown)
-        self.menuEdit.addSeparator()
-        self.menuEdit.addAction(self.actionShow)
-        self.menuEdit.addAction(self.actionHide)
-
+        
         ## View 菜单
         self.menuView.addAction(self.actionZoomIn)
         self.menuView.addAction(self.actionZoomOut)
@@ -212,57 +210,57 @@ class UiMenubar(object):
 
     def retranslateUi(self, menubar: QMenuBar):
         # 设置菜单标题
-        self.menuFile.setTitle(QCoreApplication.translate("menubar", u"File", None))
-        self.menuEdit.setTitle(QCoreApplication.translate("menubar", u"Edit", None))
-        self.menuView.setTitle(QCoreApplication.translate("menubar", u"View", None))
-        self.menuSession.setTitle(QCoreApplication.translate("menubar", u"Session", None))
-        self.menuWindow.setTitle(QCoreApplication.translate("menubar", u"Window", None))
-        self.menuData.setTitle(QCoreApplication.translate("menubar", u"Data", None))
-        self.menuDatabase.setTitle(QCoreApplication.translate("menubar", u"Database", None))
-        self.menuSimulation.setTitle(QCoreApplication.translate("menubar", u"Simulation", None))
-        self.menuTools.setTitle(QCoreApplication.translate("menubar", u"Tools", None))
-        self.menuHelp.setTitle(QCoreApplication.translate("menubar", u"Help", None))
+        self.menuFile.setTitle(self.tr(u"File"))
+        self.menuEdit.setTitle(self.tr(u"Edit"))
+        self.menuView.setTitle(self.tr(u"View"))
+        self.menuSession.setTitle(self.tr(u"Session"))
+        self.menuWindow.setTitle(self.tr(u"Window"))
+        self.menuData.setTitle(self.tr(u"Data"))
+        self.menuDatabase.setTitle(self.tr(u"Database"))
+        self.menuSimulation.setTitle(self.tr(u"Simulation"))
+        self.menuTools.setTitle(self.tr(u"Tools"))
+        self.menuHelp.setTitle(self.tr(u"Help"))
 
         # 设置动作文本
         ## File 菜单动作
-        self.actionNew.setText(QCoreApplication.translate("menubar", u"New", None))
-        self.actionOpen.setText(QCoreApplication.translate("menubar", u"Open", None))
-        self.actionClose.setText(QCoreApplication.translate("menubar", u"Close", None))
-        self.actionSave.setText(QCoreApplication.translate("menubar", u"Save", None))
-        self.actionSaveAs.setText(QCoreApplication.translate("menubar", u"Save As", None))
-        self.actionImportFile.setText(QCoreApplication.translate("menubar", u"Import", None))
-        self.actionExportFile.setText(QCoreApplication.translate("menubar", u"Export", None))
-        self.actionPrint.setText(QCoreApplication.translate("menubar", u"Print", None))
-        self.actionExit.setText(QCoreApplication.translate("menubar", u"Exit", None))
+        self.actionNew.setText(self.tr(u"New"))
+        self.actionOpen.setText(self.tr(u"Open"))
+        self.actionClose.setText(self.tr(u"Close"))
+        self.actionSave.setText(self.tr(u"Save"))
+        self.actionSaveAs.setText(self.tr(u"Save As"))
+        self.actionImportFile.setText(self.tr(u"Import"))
+        self.actionExportFile.setText(self.tr(u"Export"))
+        self.actionPrint.setText(self.tr(u"Print"))
+        self.actionExit.setText(self.tr(u"Exit"))
 
         ## Edit 菜单动作
-        self.actionUndo.setText(QCoreApplication.translate("menubar", u"Undo", None))
-        self.actionRedo.setText(QCoreApplication.translate("menubar", u"Redo", None))
-        self.actionCut.setText(QCoreApplication.translate("menubar", u"Cut", None))
-        self.actionCopy.setText(QCoreApplication.translate("menubar", u"Copy", None))
-        self.actionPaste.setText(QCoreApplication.translate("menubar", u"Paste", None))
-        self.actionDelete.setText(QCoreApplication.translate("menubar", u"Delete", None))
-        self.actionRename.setText(QCoreApplication.translate("menubar", u"Rename", None))
-        self.actionMoveUp.setText(QCoreApplication.translate("menubar", u"Move Up", None))
-        self.actionMoveDown.setText(QCoreApplication.translate("menubar", u"Move Down", None))
-        self.actionShow.setText(QCoreApplication.translate("menubar", u"Show", None))
-        self.actionHide.setText(QCoreApplication.translate("menubar", u"Hide", None))
+        self.actionUndo.setText(self.tr(u"Undo"))
+        self.actionRedo.setText(self.tr(u"Redo"))
+        self.actionCut.setText(self.tr(u"Cut"))
+        self.actionCopy.setText(self.tr(u"Copy"))
+        self.actionPaste.setText(self.tr(u"Paste"))
+        self.actionDelete.setText(self.tr(u"Delete"))
+        self.actionRename.setText(self.tr(u"Rename"))
+        self.actionMoveUp.setText(self.tr(u"Move Up"))
+        self.actionMoveDown.setText(self.tr(u"Move Down"))
+        self.actionShow.setText(self.tr(u"Show"))
+        self.actionHide.setText(self.tr(u"Hide"))
 
         ## View 菜单动作
-        self.actionZoomIn.setText(QCoreApplication.translate("menubar", u"Zoom In", None))
-        self.actionZoomOut.setText(QCoreApplication.translate("menubar", u"Zoom Out", None))
-        self.actionFilter.setText(QCoreApplication.translate("menubar", u"Filter", None))
-        self.actionReloadData.setText(QCoreApplication.translate("menubar", u"Reload", None))
+        self.actionZoomIn.setText(self.tr(u"Zoom In"))
+        self.actionZoomOut.setText(self.tr(u"Zoom Out"))
+        self.actionFilter.setText(self.tr(u"Filter"))
+        self.actionReloadData.setText(self.tr(u"Reload"))
 
         ## Database 子菜单动作
-        self.actionImportDatabase.setText(QCoreApplication.translate("menubar", u"Import", None))
-        self.actionBackupDatabase.setText(QCoreApplication.translate("menubar", u"Backup", None))
-        self.actionRecoveryDatabase.setText(QCoreApplication.translate("menubar", u"Recovery", None))
+        self.actionImportDatabase.setText(self.tr(u"Import"))
+        self.actionBackupDatabase.setText(self.tr(u"Backup"))
+        self.actionRecoveryDatabase.setText(self.tr(u"Recovery"))
 
         ## Window 菜单动作
-        self.actionFullScreen.setText(QCoreApplication.translate("menubar", u"Full Screen", None))
+        self.actionFullScreen.setText(self.tr(u"Full Screen"))
 
         ## Help 菜单动作
-        self.actionManual.setText(QCoreApplication.translate("menubar", u"Manual", None))
-        self.actionSettings.setText(QCoreApplication.translate("menubar", u"Settings", None))
-        self.actionAbout.setText(QCoreApplication.translate("menubar", u"About", None))
+        self.actionManual.setText(self.tr(u"Manual"))
+        self.actionSettings.setText(self.tr(u"Settings"))
+        self.actionAbout.setText(self.tr(u"About"))

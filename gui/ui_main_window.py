@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
+from PySide6.QtCore import (
+    Qt,
+    QObject
+)
+from PySide6.QtWidgets import (
+    QMainWindow,
+    QStatusBar,
+    QWidget
+    )
 
-################################################################################
-## Simplified UI definition for main window
-################################################################################
-
-from PySide6.QtCore import (QCoreApplication, QRect, Qt)
-from PySide6.QtWidgets import (QMainWindow, QStatusBar, QWidget)
-
-class UiMainWindow(object):
+class UiMainWindow(QObject):
     def setupUi(self, mainWindow):
         if not mainWindow.objectName():
             mainWindow.setObjectName(u"mainWindow")
@@ -28,4 +29,4 @@ class UiMainWindow(object):
         self.retranslateUi(mainWindow)
         
     def retranslateUi(self, mainWindow):
-        mainWindow.setWindowTitle(QCoreApplication.translate("mainWindow", u"Molten Meta", None))
+        mainWindow.setWindowTitle(self.tr(u"Molten Meta"))

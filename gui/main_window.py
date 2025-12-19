@@ -36,14 +36,20 @@ class MainWindow(QMainWindow):
         self.sidebar.ui.homeButton.clicked.connect(
             self.workspace.controller.show_home
         )
+        self.sidebar.ui.settingsButton.clicked.connect(
+            self.workspace.controller.show_settings
+        )
+        
+        # 连接菜单栏设置动作
+        self.menubar.ui.actionSettings.triggered.connect(
+            self.workspace.controller.show_settings
+        )
         
         # 启动时自动显示主页
         self.workspace.controller.show_home()
 
     def changeEvent(self, event):
-        """
-        捕获系统主题变化事件
-        """
+
         if event.type() == QEvent.Type.ThemeChange:
             # 当系统主题变化时，更新应用程序的调色板
             QApplication.setPalette(QApplication.style().standardPalette())
@@ -52,17 +58,13 @@ class MainWindow(QMainWindow):
         super().changeEvent(event)
     
     def updateTheme(self):
-        """
-        更新所有子部件的主题
-        """
+
         # 递归更新所有子部件
         self.setStyleSheet("")
         self.updateStylesRecursive(self)
     
     def updateStylesRecursive(self, widget):
-        """
-        递归更新部件样式
-        """
+
         widget.setStyle(widget.style())
         for child in widget.children():
             if isinstance(child, QWidget):
