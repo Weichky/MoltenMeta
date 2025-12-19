@@ -13,5 +13,5 @@ class Workspace(QtWidgets.QWidget):
         self.dock_manager = QtAds.CDockManager(self)
         layout.addWidget(self.dock_manager)
 
-        # 控制器
+        # Controller
         self.controller = PageController(self.dock_manager)

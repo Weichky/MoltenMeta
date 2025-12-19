@@ -20,19 +20,19 @@ class MainWindow(QMainWindow):
         self.ui = UiMainWindow()
         self.ui.setupUi(self)
 
-        # 设置菜单栏
+        # Set menubar
         self.menubar = MenubarWidget(self)
         self.setMenuBar(self.menubar)
 
-        # 设置侧边栏
+        # Set sidebar
         self.sidebar = SidebarWidget(self)
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.sidebar)
 
-        # 设置工作区
+        # Set workspace
         self.workspace = Workspace(self)
         self.setCentralWidget(self.workspace)
 
-        # 连接信号槽
+        # Connect signals
         self.sidebar.ui.homeButton.clicked.connect(
             self.workspace.controller.show_home
         )
@@ -40,31 +40,28 @@ class MainWindow(QMainWindow):
             self.workspace.controller.show_settings
         )
         
-        # 连接菜单栏设置动作
+        # Connect menubar settings action
         self.menubar.ui.actionSettings.triggered.connect(
             self.workspace.controller.show_settings
         )
         
-        # 启动时自动显示主页
+        # Automatically show home page on startup
         self.workspace.controller.show_home()
 
     def changeEvent(self, event):
-
         if event.type() == QEvent.Type.ThemeChange:
-            # 当系统主题变化时，更新应用程序的调色板
+            # Update application palette when system theme changes
             QApplication.setPalette(QApplication.style().standardPalette())
-            # 强制更新所有子部件
+            # Force update all child widgets
             self.updateTheme()
         super().changeEvent(event)
     
     def updateTheme(self):
-
-        # 递归更新所有子部件
+        # Recursively update all child widgets
         self.setStyleSheet("")
         self.updateStylesRecursive(self)
     
     def updateStylesRecursive(self, widget):
-
         widget.setStyle(widget.style())
         for child in widget.children():
             if isinstance(child, QWidget):

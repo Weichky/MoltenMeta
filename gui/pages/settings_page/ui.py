@@ -10,70 +10,113 @@ class UiSettingsPage(QObject):
         self.root_layout.setContentsMargins(0, 0, 0, 0)
         self.root_layout.setSpacing(0)
 
-        # 创建可调整大小的分割器
+        # Create resizable splitter
         self.splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
         self.splitter.setObjectName("settingsSplitter")
+        self.splitter.setChildrenCollapsible(False)  # Prevent child widgets from being completely collapsed
         
-        # ===== 左侧导航面板 =====
+        # ===== Left Navigation Panel =====
         self.nav_panel = QtWidgets.QWidget()
         self.nav_panel.setObjectName("settingsNavPanel")
-        self.nav_panel.setMinimumWidth(100)  # 设置最小宽度
-        self.nav_panel.setMaximumWidth(300)  # 设置最大宽度
+        # Set size constraints using relative units
+        self._setup_nav_panel_constraints(settingsPage)
         
         self.nav_layout = QtWidgets.QVBoxLayout(self.nav_panel)
         self.nav_layout.setContentsMargins(0, 0, 0, 0)
         
-        # 创建滚动区域用于侧边栏按钮
+        # Create scroll area for sidebar buttons
         self.nav_scroll = QtWidgets.QScrollArea()
         self.nav_scroll.setWidgetResizable(True)
         self.nav_scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.nav_scroll.setObjectName("navScrollArea")
         
-        # 创建包含按钮的容器widget
+        # Create container widget with buttons
         self.nav_buttons_widget = QtWidgets.QWidget()
         self.nav_buttons_layout = QtWidgets.QVBoxLayout(self.nav_buttons_widget)
         self.nav_buttons_layout.setContentsMargins(0, 0, 0, 0)
-        self.nav_buttons_layout.setAlignment(QtCore.Qt.AlignTop)  # 顶部对齐
+        self.nav_buttons_layout.setAlignment(QtCore.Qt.AlignTop)  # Align to top
         
-        # 添加导航项
+        # Add navigation items
         self.general_button = QtWidgets.QPushButton()
         self.general_button.setCheckable(True)
         self.general_button.setChecked(True)
         self.nav_buttons_layout.addWidget(self.general_button)
         
-        # 将按钮容器设置为滚动区域的widget
+        # Set button container as scroll area widget
         self.nav_scroll.setWidget(self.nav_buttons_widget)
         
-        # 添加滚动区域到导航面板布局
+        # Add scroll area to navigation panel layout
         self.nav_layout.addWidget(self.nav_scroll)
         
-        # ===== 中间主要内容区域 =====
+        # ===== Middle Main Content Area =====
         self.content_area = QtWidgets.QStackedWidget()
         self.content_area.setObjectName("settingsContentArea")
         
-        # 创建通用设置页面
+        # Create general settings page
         self.general_page = self._create_general_page()
         self.content_area.addWidget(self.general_page)
         
-        # 添加到分割器
+        # Add to splitter
         self.splitter.addWidget(self.nav_panel)
         self.splitter.addWidget(self.content_area)
         
-        # 设置初始大小
-        self.splitter.setSizes([150, 650])
+        # Set initial size ratio (relative values)
+        self._setup_splitter_sizes(settingsPage)
         
-        # 添加分割器到主布局
+        # Add splitter to main layout
         self.root_layout.addWidget(self.splitter)
         
+        # Connect window resize signal
+        settingsPage.installEventFilter(self._create_resize_event_filter(settingsPage))
+        
+    def _setup_nav_panel_constraints(self, parent):
+        """Set navigation panel size constraints based on parent window size."""
+        # Get parent window dimensions
+        parent_width = parent.width()
+        
+        # Set navigation panel min/max width based on parent window width
+        # Minimum width is 1/12 of parent window width, but no less than 100 pixels
+        min_width = max(int(parent_width / 12), 100)
+        # Maximum width is 1/4 of parent window width, but no more than 300 pixels
+        max_width = min(int(parent_width / 4), 300)
+        
+        self.nav_panel.setMinimumWidth(min_width)
+        self.nav_panel.setMaximumWidth(max_width)
+        
+    def _setup_splitter_sizes(self, parent):
+        """Set splitter initial size ratio."""
+        # Get parent window dimensions
+        parent_width = parent.width()
+        
+        # Set initial sizes based on parent window width
+        nav_width = max(int(parent_width / 8), 150)
+        content_width = parent_width - nav_width
+        
+        self.splitter.setSizes([nav_width, content_width])
+        
+    def _create_resize_event_filter(self, parent):
+        """Create window resize event filter."""
+        ui_self = self
+        
+        class ResizeEventFilter(QtCore.QObject):
+            def eventFilter(self, obj, event):
+                if event.type() == QtCore.QEvent.Resize:
+                    # Reset navigation panel constraints when window is resized
+                    ui_self._setup_nav_panel_constraints(parent)
+                    ui_self._setup_splitter_sizes(parent)
+                return False
+                
+        return ResizeEventFilter()
+        
     def _create_general_page(self):
-        """创建通用设置页面"""
+        """Create general settings page."""
         page = QtWidgets.QWidget()
         page.setObjectName("generalPage")
         layout = QtWidgets.QVBoxLayout(page)
         layout.setSpacing(10)
         layout.setContentsMargins(10, 10, 10, 10)
         
-        # 语言设置
+        # Language settings
         lang_group = QtWidgets.QGroupBox()
         lang_group.setObjectName("languageGroup")
         lang_layout = QtWidgets.QVBoxLayout(lang_group)
@@ -94,8 +137,8 @@ class UiSettingsPage(QObject):
         return page
         
     def _connect_signals(self):
-        """连接信号"""
-        # 使用互斥按钮组确保只有一个按钮被选中
+        """Connect signals."""
+        # Use exclusive button group to ensure only one button is checked
         self.button_group = QtWidgets.QButtonGroup()
         self.button_group.addButton(self.general_button)
         self.button_group.setExclusive(True)
@@ -103,19 +146,19 @@ class UiSettingsPage(QObject):
         self.general_button.clicked.connect(lambda: self.content_area.setCurrentIndex(0))
         
     def retranslateUi(self):
-        """翻译界面文本"""
-        # 导航按钮
+        """Translate UI text."""
+        # Navigation buttons
         self.general_button.setText(self.tr("General"))
         
-        # 通用设置页面
+        # General settings page
         self.lang_label.setText(self.tr("Language:"))
         
-        # 清空并重新添加带翻译的选项
+        # Clear and re-add translated options
         self.lang_combo.clear()
         self.lang_combo.addItem(self.tr("English"), "en")
         self.lang_combo.addItem(self.tr("Simplified Chinese"), "zh_CN")
         
-        # 组框标题
+        # Group box titles
         for i in range(self.content_area.count()):
             widget = self.content_area.widget(i)
             if widget.objectName() == "generalPage":

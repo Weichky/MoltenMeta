@@ -11,7 +11,7 @@ from PySide6.QtGui import (
 class UiMenubar(QObject):
 
     def setupUi(self, menubar: QMenuBar):
-        # 创建菜单
+        # Create menus
         self.menuFile = QMenu(menubar)
         self.menuFile.setObjectName(u"menuFile")
         
@@ -42,8 +42,8 @@ class UiMenubar(QObject):
         self.menuHelp = QMenu(menubar)
         self.menuHelp.setObjectName(u"menuHelp")
 
-        # 创建动作
-        ## File 菜单动作
+        # Create actions
+        ## File menu actions
         self.actionNew = QAction(menubar)
         self.actionNew.setObjectName(u"actionNew")
         
@@ -71,7 +71,7 @@ class UiMenubar(QObject):
         self.actionExit = QAction(menubar)
         self.actionExit.setObjectName(u"actionExit")
 
-        ## Edit 菜单动作
+        ## Edit menu actions
         self.actionUndo = QAction(menubar)
         self.actionUndo.setObjectName(u"actionUndo")
         
@@ -105,7 +105,7 @@ class UiMenubar(QObject):
         self.actionHide = QAction(menubar)
         self.actionHide.setObjectName(u"actionHide")
 
-        ## View 菜单动作
+        ## View menu actions
         self.actionZoomIn = QAction(menubar)
         self.actionZoomIn.setObjectName(u"actionZoomIn")
         
@@ -118,7 +118,7 @@ class UiMenubar(QObject):
         self.actionReloadData = QAction(menubar)
         self.actionReloadData.setObjectName(u"actionReloadData")
 
-        ## Database 子菜单动作
+        ## Database submenu actions
         self.actionImportDatabase = QAction(menubar)
         self.actionImportDatabase.setObjectName(u"actionImportDatabase")
         
@@ -128,11 +128,11 @@ class UiMenubar(QObject):
         self.actionRecoveryDatabase = QAction(menubar)
         self.actionRecoveryDatabase.setObjectName(u"actionRecoveryDatabase")
 
-        ## Window 菜单动作
+        ## Window menu actions
         self.actionFullScreen = QAction(menubar)
         self.actionFullScreen.setObjectName(u"actionFullScreen")
 
-        ## Help 菜单动作
+        ## Help menu actions
         self.actionManual = QAction(menubar)
         self.actionManual.setObjectName(u"actionManual")
         
@@ -142,7 +142,7 @@ class UiMenubar(QObject):
         self.actionAbout = QAction(menubar)
         self.actionAbout.setObjectName(u"actionAbout")
 
-        # 添加菜单到菜单栏
+        # Add menus to menubar
         menubar.addAction(self.menuFile.menuAction())
         menubar.addAction(self.menuEdit.menuAction())
         menubar.addAction(self.menuView.menuAction())
@@ -154,8 +154,8 @@ class UiMenubar(QObject):
         menubar.addAction(self.menuTools.menuAction())
         menubar.addAction(self.menuHelp.menuAction())
         
-        # 添加动作到菜单
-        ## File 菜单
+        # Add actions to menus
+        ## File menu
         self.menuFile.addAction(self.actionNew)
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addAction(self.actionClose)
@@ -170,7 +170,7 @@ class UiMenubar(QObject):
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
         
-        ## Edit 菜单
+        ## Edit menu
         self.menuEdit.addAction(self.actionUndo)
         self.menuEdit.addAction(self.actionRedo)
         self.menuEdit.addSeparator()
@@ -183,33 +183,33 @@ class UiMenubar(QObject):
         self.menuEdit.addAction(self.actionMoveUp)
         self.menuEdit.addAction(self.actionMoveDown)
         
-        ## View 菜单
+        ## View menu
         self.menuView.addAction(self.actionZoomIn)
         self.menuView.addAction(self.actionZoomOut)
         self.menuView.addAction(self.actionFilter)
         self.menuView.addAction(self.actionReloadData)
 
-        ## Window 菜单
+        ## Window menu
         self.menuWindow.addAction(self.actionFullScreen)
 
-        ## Help 菜单
+        ## Help menu
         self.menuHelp.addAction(self.actionManual)
         self.menuHelp.addAction(self.actionSettings)
         self.menuHelp.addSeparator()
         self.menuHelp.addAction(self.actionAbout)
 
-        ## Data 菜单
+        ## Data menu
         self.menuData.addAction(self.actionFilter)
         self.menuData.addAction(self.menuDatabase.menuAction())
         self.menuData.addAction(self.actionReloadData)
         
-        ## Database 子菜单
+        ## Database submenu
         self.menuDatabase.addAction(self.actionImportDatabase)
         self.menuDatabase.addAction(self.actionBackupDatabase)
         self.menuDatabase.addAction(self.actionRecoveryDatabase)
 
     def retranslateUi(self, menubar: QMenuBar):
-        # 设置菜单标题
+        # Set menu titles
         self.menuFile.setTitle(self.tr(u"File"))
         self.menuEdit.setTitle(self.tr(u"Edit"))
         self.menuView.setTitle(self.tr(u"View"))
@@ -221,8 +221,8 @@ class UiMenubar(QObject):
         self.menuTools.setTitle(self.tr(u"Tools"))
         self.menuHelp.setTitle(self.tr(u"Help"))
 
-        # 设置动作文本
-        ## File 菜单动作
+        # Set action texts
+        ## File menu actions
         self.actionNew.setText(self.tr(u"New"))
         self.actionOpen.setText(self.tr(u"Open"))
         self.actionClose.setText(self.tr(u"Close"))
@@ -233,7 +233,7 @@ class UiMenubar(QObject):
         self.actionPrint.setText(self.tr(u"Print"))
         self.actionExit.setText(self.tr(u"Exit"))
 
-        ## Edit 菜单动作
+        ## Edit menu actions
         self.actionUndo.setText(self.tr(u"Undo"))
         self.actionRedo.setText(self.tr(u"Redo"))
         self.actionCut.setText(self.tr(u"Cut"))
@@ -246,21 +246,21 @@ class UiMenubar(QObject):
         self.actionShow.setText(self.tr(u"Show"))
         self.actionHide.setText(self.tr(u"Hide"))
 
-        ## View 菜单动作
+        ## View menu actions
         self.actionZoomIn.setText(self.tr(u"Zoom In"))
         self.actionZoomOut.setText(self.tr(u"Zoom Out"))
         self.actionFilter.setText(self.tr(u"Filter"))
         self.actionReloadData.setText(self.tr(u"Reload"))
 
-        ## Database 子菜单动作
+        ## Database submenu actions
         self.actionImportDatabase.setText(self.tr(u"Import"))
         self.actionBackupDatabase.setText(self.tr(u"Backup"))
         self.actionRecoveryDatabase.setText(self.tr(u"Recovery"))
 
-        ## Window 菜单动作
+        ## Window menu actions
         self.actionFullScreen.setText(self.tr(u"Full Screen"))
 
-        ## Help 菜单动作
+        ## Help menu actions
         self.actionManual.setText(self.tr(u"Manual"))
         self.actionSettings.setText(self.tr(u"Settings"))
         self.actionAbout.setText(self.tr(u"About"))

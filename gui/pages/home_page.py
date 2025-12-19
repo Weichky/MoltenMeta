@@ -17,7 +17,7 @@ class Tile(QtWidgets.QPushButton):
 
 
 class HomePage(QtWidgets.QWidget):
-    # 定义自定义信号
+    # Define custom signals
     projectButtonClicked = Signal()
     databaseButtonClicked = Signal()
     simulationButtonClicked = Signal()
@@ -34,14 +34,14 @@ class HomePage(QtWidgets.QWidget):
 
         self.root_layout.addStretch()
 
-        # ===== 顶部标题 =====
+        # ===== Top Title =====
         self.title = QtWidgets.QLabel()
         self.title.setAlignment(QtCore.Qt.AlignCenter)
         # self.title.setStyleSheet("font-size: 24px; font-weight: 600;")
 
         self.root_layout.addWidget(self.title)
 
-        # ===== 中部 4x4 Grid =====
+        # ===== Middle 4x4 Grid =====
         self.grid_container = QtWidgets.QWidget(self)
         self.grid = QtWidgets.QGridLayout(self.grid_container)
         self.grid.setSpacing(12)
@@ -53,13 +53,13 @@ class HomePage(QtWidgets.QWidget):
         for tile, (r, c) in zip(self.tiles, positions):
             self.grid.addWidget(tile, r, c)
 
-        # 让 grid 居中
+        # Center the grid
         self.grid.setRowStretch(2, 1)
         self.grid.setColumnStretch(2, 1)
 
         self.root_layout.addWidget(self.grid_container, alignment=QtCore.Qt.AlignCenter)
 
-        # ===== 底部说明文字 =====
+        # ===== Bottom Description Text =====
         self.description = QtWidgets.QLabel()
         self.description.setWordWrap(True)
         self.description.setAlignment(QtCore.Qt.AlignCenter)
@@ -68,10 +68,10 @@ class HomePage(QtWidgets.QWidget):
 
         self.root_layout.addStretch()
         
-        # 连接按钮信号
+        # Connect button signals
         self._connect_signals()
         
-        # 初始化翻译
+        # Initialize translation
         self.retranslateUi()
 
     def _connect_signals(self):
@@ -96,7 +96,7 @@ class HomePage(QtWidgets.QWidget):
             None)
         self.description.setText("<h6>"+software_description+"</h6>")
             
-        # 翻译磁贴
+        # Translate tiles
         tile_titles = ["Project", "Database", "Simulation", "Settings"]
         for tile, title in zip(self.tiles, tile_titles):
             tile.retranslateUi(title)

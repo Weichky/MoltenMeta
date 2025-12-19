@@ -14,28 +14,36 @@ from PySide6.QtWidgets import (
 
 class UiSidebar(QObject):
     def setupUi(self, dock: QDockWidget):
-        # 设置dock widget属性
+        # Set dock widget properties
         if not dock.objectName():
             dock.setObjectName(u"sidebar")
         
+        # Set sidebar resizable, but not allowed to dock at top or bottom
+        dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+        dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable | 
+                        QDockWidget.DockWidgetFeature.DockWidgetFloatable |
+                        QDockWidget.DockWidgetFeature.DockWidgetClosable)
+
+        dock.DockWidgetClosable = False
+
         dock.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         dock.setFloating(False)
         dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable|QDockWidget.DockWidgetFeature.DockWidgetMovable)
 
-        # 创建内容部件和布局
+        # Create content widget and layout
         self.contents = QWidget(dock)
         self.contents.setObjectName(u"dockWidgetContents")
         
         self.verticalLayout = QVBoxLayout(self.contents)
         self.verticalLayout.setObjectName(u"verticalLayout")
         
-        # 创建侧边栏布局
+        # Create sidebar layout
         self.sidebarLayout = QVBoxLayout()
         self.sidebarLayout.setSpacing(0)
         self.sidebarLayout.setObjectName(u"sidebarLayout")
         self.sidebarLayout.setSizeConstraint(QLayout.SizeConstraint.SetMaximumSize)
         
-        # 创建主页按钮
+        # Create home button
         self.homeButton = QPushButton(self.contents)
         self.homeButton.setObjectName(u"homeButton")
         
@@ -47,7 +55,7 @@ class UiSidebar(QObject):
         
         self.sidebarLayout.addWidget(self.homeButton)
         
-        # 创建设置按钮
+        # Create settings button
         self.settingsButton = QPushButton(self.contents)
         self.settingsButton.setObjectName(u"settingsButton")
         
@@ -59,7 +67,7 @@ class UiSidebar(QObject):
         
         self.sidebarLayout.addWidget(self.settingsButton)
         
-        # 添加垂直间隔器
+        # Add vertical spacer
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
         self.sidebarLayout.addItem(self.verticalSpacer)
         
@@ -71,6 +79,26 @@ class UiSidebar(QObject):
         dock.setWidget(self.contents)
 
     def retranslateUi(self, dock: QDockWidget):
-        # 设置按钮文本
+        # Set button texts
         self.homeButton.setText(self.tr(u"Home"))
         self.settingsButton.setText(self.tr(u"Settings"))
+        
+    def adjust_sidebar_size(self, sidebar):
+        """
+        Adjust sidebar size constraints based on parent window size.
+        
+        Args:
+            sidebar: The sidebar widget to adjust.
+        """
+        # Get parent window dimensions
+        parent_width = sidebar.parent().width()
+        
+        # Set navigation panel minimum and maximum width based on parent window width
+        # Minimum width is 1/12 of parent window width, but no less than 100 pixels
+        min_width = max(int(parent_width / 12), 100)
+        # Maximum width is 1/4 of parent window width, but no more than 300 pixels
+        max_width = min(int(parent_width / 4), 300)
+        
+        # Apply size constraints to sidebar
+        sidebar.setMinimumWidth(min_width)
+        sidebar.setMaximumWidth(max_width)

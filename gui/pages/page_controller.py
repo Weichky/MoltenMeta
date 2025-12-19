@@ -8,16 +8,16 @@ class PageController:
 
     def __init__(self, dock_manager: QtAds.CDockManager):
         self.dock_manager = dock_manager
-        self.pages = {}  # 页面缓存
+        self.pages = {}  # Page cache
 
     def show_home(self):
-        # 如果 dock 被删除或关闭，或者第一次
+        # If dock is deleted/closed or first time
         if "home" not in self.pages or self.pages["home"] is None:
             home_page = HomePage()
             dock = QtAds.CDockWidget("Home")
             dock.setWidget(home_page)
 
-            # 连接主页按钮信号
+            # Connect homepage button signals
             home_page.projectButtonClicked.connect(self.show_project)
             home_page.databaseButtonClicked.connect(self.show_database)
             home_page.simulationButtonClicked.connect(self.show_simulation)
@@ -32,8 +32,8 @@ class PageController:
             dock.toggleView()
 
     def show_settings(self):
-        """显示设置页面"""
-        # 如果 dock 被删除或关闭，或者第一次
+        """Show settings page."""
+        # If dock is deleted/closed or first time
         if "settings" not in self.pages or self.pages["settings"] is None:
             settings_page = SettingsPage()
             dock = QtAds.CDockWidget("Settings")
@@ -48,17 +48,17 @@ class PageController:
             dock.toggleView()
 
     def show_project(self):
-        """显示项目页面（占位符）"""
+        """Show project page (placeholder)."""
         print("Project page opened")
 
     def show_database(self):
-        """显示数据库页面（占位符）"""
+        """Show database page (placeholder)."""
         print("Database page opened")
 
     def show_simulation(self):
-        """显示仿真页面（占位符）"""
+        """Show simulation page (placeholder)."""
         print("Simulation page opened")
 
     def _on_dock_closed(self, name: str):
-        # 用户关闭 dock 时清理引用
+        # Clean up reference when user closes dock
         self.pages[name] = None
