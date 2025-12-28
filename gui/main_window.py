@@ -16,9 +16,29 @@ from gui.pages.workspace import Workspace
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
+
         super().__init__(parent)
         self.ui = UiMainWindow()
         self.ui.setupUi(self)
+
+            
+        # Init CDockManager Configuration Flags
+        QtAds.CDockManager.setConfigFlag(QtAds.CDockManager.OpaqueSplitterResize, True)
+
+        QtAds.CDockManager.setConfigFlag(QtAds.CDockManager.DockAreaHasCloseButton, False)
+        QtAds.CDockManager.setConfigFlag(QtAds.CDockManager.AllTabsHaveCloseButton, False)
+        QtAds.CDockManager.setConfigFlag(QtAds.CDockManager.DockAreaHasUndockButton, False)
+        QtAds.CDockManager.setConfigFlag(QtAds.CDockManager.DockAreaHasTabsMenuButton, False)
+        
+        QtAds.CDockManager.setConfigFlag(QtAds.CDockManager.FocusHighlighting, False)
+
+        QtAds.CDockManager.setAutoHideConfigFlag(QtAds.CDockManager.AutoHideFeatureEnabled, True)
+        QtAds.CDockManager.setAutoHideConfigFlag(QtAds.CDockManager.DockAreaHasAutoHideButton, True)
+
+        # SITE: "You must set the configuration flags before creating the dock manager instance
+        # otherwise the manager will not be created correctly and will crash upon being created.
+        # That means, setting the configurations flags is the first thing you must do,
+        # if you use the library."
 
         # Set menubar
         self.menubar = MenubarWidget(self)

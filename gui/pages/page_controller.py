@@ -19,6 +19,10 @@ class PageController:
             dock = QtAds.CDockWidget("Home")
             dock.setWidget(home_page)
 
+            # look like indifferent on MacOS
+            # waiting for trying on Windows and Linux
+            # dock.setFeature(QtAds.CDockWidget.DockWidgetFocusable, True)
+
             dock.visibilityChanged.connect(self._onDockVisibilityChanged)
 
             # Connect homepage button signals
@@ -46,6 +50,8 @@ class PageController:
             settings_page = SettingsPage()
             dock = QtAds.CDockWidget("Settings")
             dock.setWidget(settings_page)
+            
+            # dock.setFeature(QtAds.CDockWidget.DockWidgetFocusable, True)
 
             dock.visibilityChanged.connect(self._onDockVisibilityChanged)
 
