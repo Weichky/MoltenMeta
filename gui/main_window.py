@@ -34,19 +34,19 @@ class MainWindow(QMainWindow):
 
         # Connect signals
         self.sidebar.ui.homeButton.clicked.connect(
-            self.workspace.controller.show_home
+            self.workspace.controller.showHome
         )
         self.sidebar.ui.settingsButton.clicked.connect(
-            self.workspace.controller.show_settings
+            self.workspace.controller.showSettings
         )
         
         # Connect menubar settings action
         self.menubar.ui.action_settings.triggered.connect(
-            self.workspace.controller.show_settings
+            self.workspace.controller.showSettings
         )
         
         # Automatically show home page on startup
-        self.workspace.controller.show_home()
+        self.workspace.controller.showHome()
 
     def changeEvent(self, event):
         if event.type() == QEvent.Type.ThemeChange:

@@ -3,15 +3,25 @@ import PySide6QtAds as QtAds
 
 from gui.pages.page_controller import PageController
 
+from gui.background_layer import BackgroundLayer
+
 class Workspace(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        layout = QtWidgets.QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(QtWidgets.QStackedLayout())
 
+        # Dock manager
         self.dock_manager = QtAds.CDockManager(self)
-        layout.addWidget(self.dock_manager)
+        self.layout().addWidget(self.dock_manager)
 
-        # Controller
-        self.controller = PageController(self.dock_manager)
+        # Background layer (NOT inside dock_manager)
+        self.background = BackgroundLayer(self)
+        self.layout().addWidget(self.background)
+
+        self.background.hide()
+
+        self.controller = PageController(
+            self.dock_manager,
+            self.background
+        )
