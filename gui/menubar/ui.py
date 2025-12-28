@@ -12,255 +12,253 @@ class UiMenubar(QObject):
 
     def setupUi(self, menubar: QMenuBar):
         # Create menus
-        self.menuFile = QMenu(menubar)
-        self.menuFile.setObjectName(u"menuFile")
+        self.menu_file = QMenu(menubar)
+        self.menu_file.setObjectName(u"menuFile")
         
-        self.menuEdit = QMenu(menubar)
-        self.menuEdit.setObjectName(u"menuEdit")
+        self.menu_edit = QMenu(menubar)
+        self.menu_edit.setObjectName(u"menuEdit")
+
+        self.menu_view = QMenu(menubar)
+        self.menu_view.setObjectName(u"menuView")
+
+        self.menu_session = QMenu(menubar)
+        self.menu_session.setObjectName(u"menuSession")
         
-        self.menuView = QMenu(menubar)
-        self.menuView.setObjectName(u"menuView")
+        self.menu_window = QMenu(menubar)
+        self.menu_window.setObjectName(u"menuWindow")
+
+        self.menu_data = QMenu(menubar)
+        self.menu_data.setObjectName(u"menuData")
+
+        self.menu_database = QMenu(self.menu_data)
+        self.menu_database.setObjectName(u"menuDatabase")
         
-        self.menuSession = QMenu(menubar)
-        self.menuSession.setObjectName(u"menuSession")
-        
-        self.menuWindow = QMenu(menubar)
-        self.menuWindow.setObjectName(u"menuWindow")
-        
-        self.menuData = QMenu(menubar)
-        self.menuData.setObjectName(u"menuData")
-        
-        self.menuDatabase = QMenu(self.menuData)
-        self.menuDatabase.setObjectName(u"menuDatabase")
-        
-        self.menuSimulation = QMenu(menubar)
-        self.menuSimulation.setObjectName(u"menuSimulation")
-        
-        self.menuTools = QMenu(menubar)
-        self.menuTools.setObjectName(u"menuTools")
-        
-        self.menuHelp = QMenu(menubar)
-        self.menuHelp.setObjectName(u"menuHelp")
+        self.menu_simulation = QMenu(menubar)
+        self.menu_simulation.setObjectName(u"menuSimulation")
+
+        self.menu_tools = QMenu(menubar)
+        self.menu_tools.setObjectName(u"menuTools")
+
+        self.menu_help = QMenu(menubar)
+        self.menu_help.setObjectName(u"menuHelp")
 
         # Create actions
         ## File menu actions
-        self.actionNew = QAction(menubar)
-        self.actionNew.setObjectName(u"actionNew")
+        self.action_new = QAction(menubar)
+        self.action_new.setObjectName(u"actionNew")
         
-        self.actionOpen = QAction(menubar)
-        self.actionOpen.setObjectName(u"actionOpen")
+        self.action_open = QAction(menubar)
+        self.action_open.setObjectName(u"actionOpen")
         
-        self.actionClose = QAction(menubar)
-        self.actionClose.setObjectName(u"actionClose")
+        self.action_close = QAction(menubar)
+        self.action_close.setObjectName(u"actionClose")
         
-        self.actionSave = QAction(menubar)
-        self.actionSave.setObjectName(u"actionSave")
-        
-        self.actionSaveAs = QAction(menubar)
-        self.actionSaveAs.setObjectName(u"actionSaveAs")
-        
-        self.actionImportFile = QAction(menubar)
-        self.actionImportFile.setObjectName(u"actionImportFile")
-        
-        self.actionExportFile = QAction(menubar)
-        self.actionExportFile.setObjectName(u"actionExportFile")
-        
-        self.actionPrint = QAction(menubar)
-        self.actionPrint.setObjectName(u"actionPrint")
-        
-        self.actionExit = QAction(menubar)
-        self.actionExit.setObjectName(u"actionExit")
+        self.action_save = QAction(menubar)
+        self.action_save.setObjectName(u"actionSave")
 
+        self.action_save_as = QAction(menubar)
+        self.action_save_as.setObjectName(u"actionSaveAs")
+
+        self.action_import_file = QAction(menubar)
+        self.action_import_file.setObjectName(u"actionImportFile")
+        
+        self.action_export_file = QAction(menubar)
+        self.action_export_file.setObjectName(u"actionExportFile")
+        
+        self.action_print = QAction(menubar)
+        self.action_print.setObjectName(u"actionPrint")
+        
+        self.action_exit = QAction(menubar)
+        self.action_exit.setObjectName(u"actionExit")
         ## Edit menu actions
-        self.actionUndo = QAction(menubar)
-        self.actionUndo.setObjectName(u"actionUndo")
+        self.action_undo = QAction(menubar)
+        self.action_undo.setObjectName(u"actionUndo")
         
-        self.actionRedo = QAction(menubar)
-        self.actionRedo.setObjectName(u"actionRedo")
+        self.action_redo = QAction(menubar)
+        self.action_redo.setObjectName(u"actionRedo")
         
-        self.actionCut = QAction(menubar)
-        self.actionCut.setObjectName(u"actionCut")
+        self.action_cut = QAction(menubar)
+        self.action_cut.setObjectName(u"actionCut")
         
-        self.actionCopy = QAction(menubar)
-        self.actionCopy.setObjectName(u"actionCopy")
+        self.action_copy = QAction(menubar)
+        self.action_copy.setObjectName(u"actionCopy")
+
+        self.action_paste = QAction(menubar)
+        self.action_paste.setObjectName(u"actionPaste")
+
+        self.action_delete = QAction(menubar)
+        self.action_delete.setObjectName(u"actionDelete")
         
-        self.actionPaste = QAction(menubar)
-        self.actionPaste.setObjectName(u"actionPaste")
+        self.action_rename = QAction(menubar)
+        self.action_rename.setObjectName(u"actionRename")
+
+        self.action_move_up = QAction(menubar)
+        self.action_move_up.setObjectName(u"actionMoveUp")
+
+        self.action_move_down = QAction(menubar)
+        self.action_move_down.setObjectName(u"actionMoveDown")
         
-        self.actionDelete = QAction(menubar)
-        self.actionDelete.setObjectName(u"actionDelete")
-        
-        self.actionRename = QAction(menubar)
-        self.actionRename.setObjectName(u"actionRename")
-        
-        self.actionMoveUp = QAction(menubar)
-        self.actionMoveUp.setObjectName(u"actionMoveUp")
-        
-        self.actionMoveDown = QAction(menubar)
-        self.actionMoveDown.setObjectName(u"actionMoveDown")
-        
-        self.actionShow = QAction(menubar)
-        self.actionShow.setObjectName(u"actionShow")
-        
-        self.actionHide = QAction(menubar)
-        self.actionHide.setObjectName(u"actionHide")
+        self.action_show = QAction(menubar)
+        self.action_show.setObjectName(u"actionShow")
+
+        self.action_hide = QAction(menubar)
+        self.action_hide.setObjectName(u"actionHide")
 
         ## View menu actions
-        self.actionZoomIn = QAction(menubar)
-        self.actionZoomIn.setObjectName(u"actionZoomIn")
+        self.action_zoom_in = QAction(menubar)
+        self.action_zoom_in.setObjectName(u"actionZoomIn")
         
-        self.actionZoomOut = QAction(menubar)
-        self.actionZoomOut.setObjectName(u"actionZoomOut")
+        self.action_zoom_out = QAction(menubar)
+        self.action_zoom_out.setObjectName(u"actionZoomOut")
         
-        self.actionFilter = QAction(menubar)
-        self.actionFilter.setObjectName(u"actionFilter")
+        self.action_filter = QAction(menubar)
+        self.action_filter.setObjectName(u"actionFilter")
         
-        self.actionReloadData = QAction(menubar)
-        self.actionReloadData.setObjectName(u"actionReloadData")
+        self.action_reload_data = QAction(menubar)
+        self.action_reload_data.setObjectName(u"actionReloadData")
 
         ## Database submenu actions
-        self.actionImportDatabase = QAction(menubar)
-        self.actionImportDatabase.setObjectName(u"actionImportDatabase")
+        self.action_import_database = QAction(menubar)
+        self.action_import_database.setObjectName(u"actionImportDatabase")
         
-        self.actionBackupDatabase = QAction(menubar)
-        self.actionBackupDatabase.setObjectName(u"actionBackupDatabase")
-        
-        self.actionRecoveryDatabase = QAction(menubar)
-        self.actionRecoveryDatabase.setObjectName(u"actionRecoveryDatabase")
+        self.action_backup_database = QAction(menubar)
+        self.action_backup_database.setObjectName(u"actionBackupDatabase")
+
+        self.action_recovery_database = QAction(menubar)
+        self.action_recovery_database.setObjectName(u"actionRecoveryDatabase")
 
         ## Window menu actions
-        self.actionFullScreen = QAction(menubar)
-        self.actionFullScreen.setObjectName(u"actionFullScreen")
+        self.action_full_screen = QAction(menubar)
+        self.action_full_screen.setObjectName(u"actionFullScreen")
 
         ## Help menu actions
-        self.actionManual = QAction(menubar)
-        self.actionManual.setObjectName(u"actionManual")
+        self.action_manual = QAction(menubar)
+        self.action_manual.setObjectName(u"actionManual")
         
-        self.actionSettings = QAction(menubar)
-        self.actionSettings.setObjectName(u"actionSettings")
+        self.action_settings = QAction(menubar)
+        self.action_settings.setObjectName(u"actionSettings")
         
-        self.actionAbout = QAction(menubar)
-        self.actionAbout.setObjectName(u"actionAbout")
+        self.action_about = QAction(menubar)
+        self.action_about.setObjectName(u"actionAbout")
 
         # Add menus to menubar
-        menubar.addAction(self.menuFile.menuAction())
-        menubar.addAction(self.menuEdit.menuAction())
-        menubar.addAction(self.menuView.menuAction())
-        menubar.addAction(self.menuSession.menuAction())
-        menubar.addAction(self.menuWindow.menuAction())
-        menubar.addAction(self.menuData.menuAction())
-        self.menuData.addAction(self.menuDatabase.menuAction())
-        menubar.addAction(self.menuSimulation.menuAction())
-        menubar.addAction(self.menuTools.menuAction())
-        menubar.addAction(self.menuHelp.menuAction())
+        menubar.addAction(self.menu_file.menuAction())
+        menubar.addAction(self.menu_edit.menuAction())
+        menubar.addAction(self.menu_view.menuAction())
+        menubar.addAction(self.menu_session.menuAction())
+        menubar.addAction(self.menu_window.menuAction())
+        menubar.addAction(self.menu_data.menuAction())
+        self.menu_data.addAction(self.menu_database.menuAction())
+        menubar.addAction(self.menu_simulation.menuAction())
+        menubar.addAction(self.menu_tools.menuAction())
+        menubar.addAction(self.menu_help.menuAction())
         
         # Add actions to menus
         ## File menu
-        self.menuFile.addAction(self.actionNew)
-        self.menuFile.addAction(self.actionOpen)
-        self.menuFile.addAction(self.actionClose)
-        self.menuFile.addSeparator()
-        self.menuFile.addAction(self.actionSave)
-        self.menuFile.addAction(self.actionSaveAs)
-        self.menuFile.addSeparator()
-        self.menuFile.addAction(self.actionImportFile)
-        self.menuFile.addAction(self.actionExportFile)
-        self.menuFile.addSeparator()
-        self.menuFile.addAction(self.actionPrint)
-        self.menuFile.addSeparator()
-        self.menuFile.addAction(self.actionExit)
+        self.menu_file.addAction(self.action_new)
+        self.menu_file.addAction(self.action_open)
+        self.menu_file.addAction(self.action_close)
+        self.menu_file.addSeparator()
+        self.menu_file.addAction(self.action_save)
+        self.menu_file.addAction(self.action_save_as)
+        self.menu_file.addSeparator()
+        self.menu_file.addAction(self.action_import_file)
+        self.menu_file.addAction(self.action_export_file)
+        self.menu_file.addSeparator()
+        self.menu_file.addAction(self.action_print)
+        self.menu_file.addSeparator()
+        self.menu_file.addAction(self.action_exit)
         
         ## Edit menu
-        self.menuEdit.addAction(self.actionUndo)
-        self.menuEdit.addAction(self.actionRedo)
-        self.menuEdit.addSeparator()
-        self.menuEdit.addAction(self.actionCut)
-        self.menuEdit.addAction(self.actionCopy)
-        self.menuEdit.addAction(self.actionPaste)
-        self.menuEdit.addAction(self.actionDelete)
-        self.menuEdit.addSeparator()
-        self.menuEdit.addAction(self.actionRename)
-        self.menuEdit.addAction(self.actionMoveUp)
-        self.menuEdit.addAction(self.actionMoveDown)
-        
+        self.menu_edit.addAction(self.action_undo)
+        self.menu_edit.addAction(self.action_redo)
+        self.menu_edit.addSeparator()
+        self.menu_edit.addAction(self.action_cut)
+        self.menu_edit.addAction(self.action_copy)
+        self.menu_edit.addAction(self.action_paste)
+        self.menu_edit.addAction(self.action_delete)
+        self.menu_edit.addSeparator()
+        self.menu_edit.addAction(self.action_rename)
+        self.menu_edit.addAction(self.action_move_up)
+        self.menu_edit.addAction(self.action_move_down)
+
         ## View menu
-        self.menuView.addAction(self.actionZoomIn)
-        self.menuView.addAction(self.actionZoomOut)
-        self.menuView.addAction(self.actionFilter)
-        self.menuView.addAction(self.actionReloadData)
+        self.menu_view.addAction(self.action_zoom_in)
+        self.menu_view.addAction(self.action_zoom_out)
+        self.menu_view.addAction(self.action_filter)
+        self.menu_view.addAction(self.action_reload_data)
 
         ## Window menu
-        self.menuWindow.addAction(self.actionFullScreen)
+        self.menu_window.addAction(self.action_full_screen)
 
         ## Help menu
-        self.menuHelp.addAction(self.actionManual)
-        self.menuHelp.addAction(self.actionSettings)
-        self.menuHelp.addSeparator()
-        self.menuHelp.addAction(self.actionAbout)
+        self.menu_help.addAction(self.action_manual)
+        self.menu_help.addAction(self.action_settings)
+        self.menu_help.addSeparator()
+        self.menu_help.addAction(self.action_about)
 
         ## Data menu
-        self.menuData.addAction(self.actionFilter)
-        self.menuData.addAction(self.menuDatabase.menuAction())
-        self.menuData.addAction(self.actionReloadData)
-        
+        self.menu_data.addAction(self.action_filter)
+        self.menu_data.addAction(self.menu_database.menuAction())
+        self.menu_data.addAction(self.action_reload_data)
+
         ## Database submenu
-        self.menuDatabase.addAction(self.actionImportDatabase)
-        self.menuDatabase.addAction(self.actionBackupDatabase)
-        self.menuDatabase.addAction(self.actionRecoveryDatabase)
+        self.menu_database.addAction(self.action_import_database)
+        self.menu_database.addAction(self.action_backup_database)
+        self.menu_database.addAction(self.action_recovery_database)
 
     def retranslateUi(self, menubar: QMenuBar):
         # Set menu titles
-        self.menuFile.setTitle(self.tr(u"File"))
-        self.menuEdit.setTitle(self.tr(u"Edit"))
-        self.menuView.setTitle(self.tr(u"View"))
-        self.menuSession.setTitle(self.tr(u"Session"))
-        self.menuWindow.setTitle(self.tr(u"Window"))
-        self.menuData.setTitle(self.tr(u"Data"))
-        self.menuDatabase.setTitle(self.tr(u"Database"))
-        self.menuSimulation.setTitle(self.tr(u"Simulation"))
-        self.menuTools.setTitle(self.tr(u"Tools"))
-        self.menuHelp.setTitle(self.tr(u"Help"))
+        self.menu_file.setTitle(self.tr(u"File"))
+        self.menu_edit.setTitle(self.tr(u"Edit"))
+        self.menu_view.setTitle(self.tr(u"View"))
+        self.menu_session.setTitle(self.tr(u"Session"))
+        self.menu_window.setTitle(self.tr(u"Window"))
+        self.menu_data.setTitle(self.tr(u"Data"))
+        self.menu_database.setTitle(self.tr(u"Database"))
+        self.menu_simulation.setTitle(self.tr(u"Simulation"))
+        self.menu_tools.setTitle(self.tr(u"Tools"))
+        self.menu_help.setTitle(self.tr(u"Help"))
 
         # Set action texts
         ## File menu actions
-        self.actionNew.setText(self.tr(u"New"))
-        self.actionOpen.setText(self.tr(u"Open"))
-        self.actionClose.setText(self.tr(u"Close"))
-        self.actionSave.setText(self.tr(u"Save"))
-        self.actionSaveAs.setText(self.tr(u"Save As"))
-        self.actionImportFile.setText(self.tr(u"Import"))
-        self.actionExportFile.setText(self.tr(u"Export"))
-        self.actionPrint.setText(self.tr(u"Print"))
-        self.actionExit.setText(self.tr(u"Exit"))
+        self.action_new.setText(self.tr(u"New"))
+        self.action_open.setText(self.tr(u"Open"))
+        self.action_close.setText(self.tr(u"Close"))
+        self.action_save.setText(self.tr(u"Save"))
+        self.action_save_as.setText(self.tr(u"Save As"))
+        self.action_import_file.setText(self.tr(u"Import"))
+        self.action_export_file.setText(self.tr(u"Export"))
+        self.action_print.setText(self.tr(u"Print"))
+        self.action_exit.setText(self.tr(u"Exit"))
 
         ## Edit menu actions
-        self.actionUndo.setText(self.tr(u"Undo"))
-        self.actionRedo.setText(self.tr(u"Redo"))
-        self.actionCut.setText(self.tr(u"Cut"))
-        self.actionCopy.setText(self.tr(u"Copy"))
-        self.actionPaste.setText(self.tr(u"Paste"))
-        self.actionDelete.setText(self.tr(u"Delete"))
-        self.actionRename.setText(self.tr(u"Rename"))
-        self.actionMoveUp.setText(self.tr(u"Move Up"))
-        self.actionMoveDown.setText(self.tr(u"Move Down"))
-        self.actionShow.setText(self.tr(u"Show"))
-        self.actionHide.setText(self.tr(u"Hide"))
-
+        self.action_undo.setText(self.tr(u"Undo"))
+        self.action_redo.setText(self.tr(u"Redo"))
+        self.action_cut.setText(self.tr(u"Cut"))
+        self.action_copy.setText(self.tr(u"Copy"))
+        self.action_paste.setText(self.tr(u"Paste"))
+        self.action_delete.setText(self.tr(u"Delete"))
+        self.action_rename.setText(self.tr(u"Rename"))
+        self.action_move_up.setText(self.tr(u"Move Up"))
+        self.action_move_down.setText(self.tr(u"Move Down"))
+        self.action_show.setText(self.tr(u"Show"))
+        self.action_hide.setText(self.tr(u"Hide"))
         ## View menu actions
-        self.actionZoomIn.setText(self.tr(u"Zoom In"))
-        self.actionZoomOut.setText(self.tr(u"Zoom Out"))
-        self.actionFilter.setText(self.tr(u"Filter"))
-        self.actionReloadData.setText(self.tr(u"Reload"))
+        self.action_zoom_in.setText(self.tr(u"Zoom In"))
+        self.action_zoom_out.setText(self.tr(u"Zoom Out"))
+        self.action_filter.setText(self.tr(u"Filter"))
+        self.action_reload_data.setText(self.tr(u"Reload"))
 
         ## Database submenu actions
-        self.actionImportDatabase.setText(self.tr(u"Import"))
-        self.actionBackupDatabase.setText(self.tr(u"Backup"))
-        self.actionRecoveryDatabase.setText(self.tr(u"Recovery"))
+        self.action_import_database.setText(self.tr(u"Import"))
+        self.action_backup_database.setText(self.tr(u"Backup"))
+        self.action_recovery_database.setText(self.tr(u"Recovery"))
 
         ## Window menu actions
-        self.actionFullScreen.setText(self.tr(u"Full Screen"))
+        self.action_full_screen.setText(self.tr(u"Full Screen"))
 
         ## Help menu actions
-        self.actionManual.setText(self.tr(u"Manual"))
-        self.actionSettings.setText(self.tr(u"Settings"))
-        self.actionAbout.setText(self.tr(u"About"))
+        self.action_manual.setText(self.tr(u"Manual"))
+        self.action_settings.setText(self.tr(u"Settings"))
+        self.action_about.setText(self.tr(u"About"))

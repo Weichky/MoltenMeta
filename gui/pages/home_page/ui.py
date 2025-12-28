@@ -1,5 +1,5 @@
 from PySide6 import QtWidgets, QtCore
-from PySide6.QtCore import QCoreApplication, Signal
+from PySide6.QtCore import QObject, QCoreApplication
 
 
 class Tile(QtWidgets.QPushButton):
@@ -16,19 +16,14 @@ class Tile(QtWidgets.QPushButton):
         self.setText(QCoreApplication.translate("homepage", title, None))
 
 
-class HomePage(QtWidgets.QWidget):
-    # Define custom signals
-    projectButtonClicked = Signal()
-    databaseButtonClicked = Signal()
-    simulationButtonClicked = Signal()
-    settingsButtonClicked = Signal()
+class UiHomePage(QObject):
+    def setupUi(self, homePage: QtWidgets.QWidget):
+        if not homePage.objectName():
+            homePage.setObjectName("homePage")
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        
         self.tiles = []
 
-        self.root_layout = QtWidgets.QVBoxLayout(self)
+        self.root_layout = QtWidgets.QVBoxLayout(homePage)
         self.root_layout.setSpacing(16)
         self.root_layout.setContentsMargins(24, 24, 24, 24)
 
@@ -37,12 +32,11 @@ class HomePage(QtWidgets.QWidget):
         # ===== Top Title =====
         self.title = QtWidgets.QLabel()
         self.title.setAlignment(QtCore.Qt.AlignCenter)
-        # self.title.setStyleSheet("font-size: 24px; font-weight: 600;")
 
         self.root_layout.addWidget(self.title)
 
         # ===== Middle 4x4 Grid =====
-        self.grid_container = QtWidgets.QWidget(self)
+        self.grid_container = QtWidgets.QWidget(homePage)
         self.grid = QtWidgets.QGridLayout(self.grid_container)
         self.grid.setSpacing(12)
 
@@ -67,23 +61,6 @@ class HomePage(QtWidgets.QWidget):
         self.root_layout.addWidget(self.description)
 
         self.root_layout.addStretch()
-        
-        # Connect button signals
-        self._connect_signals()
-        
-        # Initialize translation
-        self.retranslateUi()
-
-    def _connect_signals(self):
-        PROJECT_INDEX = 0
-        DATABASE_INDEX = 1
-        SIMULATION_INDEX = 2
-        SETTINGS_INDEX = 3
-        
-        self.tiles[PROJECT_INDEX].clicked.connect(self.projectButtonClicked.emit)
-        self.tiles[DATABASE_INDEX].clicked.connect(self.databaseButtonClicked.emit)
-        self.tiles[SIMULATION_INDEX].clicked.connect(self.simulationButtonClicked.emit)
-        self.tiles[SETTINGS_INDEX].clicked.connect(self.settingsButtonClicked.emit)
 
     def retranslateUi(self):
         welcome_text = QCoreApplication.translate("homepage", "Welcome", None)
@@ -100,6 +77,3 @@ class HomePage(QtWidgets.QWidget):
         tile_titles = ["Project", "Database", "Simulation", "Settings"]
         for tile, title in zip(self.tiles, tile_titles):
             tile.retranslateUi(title)
-
-    def resizeEvent(self, event):
-        super().resizeEvent(event)

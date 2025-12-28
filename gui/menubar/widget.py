@@ -10,9 +10,9 @@ class MenubarWidget(QMenuBar):
         self.ui.retranslateUi(self)
         
         # 连接系统操作相关的槽函数
-        self.ui.actionExit.triggered.connect(parent.close)
-        self.ui.actionFullScreen.triggered.connect(self.toggleFullScreen)
-        
+        self.ui.action_exit.triggered.connect(parent.close)
+        self.ui.action_full_screen.triggered.connect(self.toggleFullScreen)
+
     def toggleFullScreen(self):
         mainWindow = self.parent()
         if mainWindow.isFullScreen():

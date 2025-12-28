@@ -2,7 +2,7 @@ from PySide6 import QtWidgets
 import PySide6QtAds as QtAds
 
 from gui.pages.home_page import HomePage
-from gui.pages.settings_page.widget import SettingsPage
+from gui.pages.settings_page import SettingsPage
 
 class PageController:
 

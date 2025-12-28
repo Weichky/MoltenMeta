@@ -41,7 +41,7 @@ class MainWindow(QMainWindow):
         )
         
         # Connect menubar settings action
-        self.menubar.ui.actionSettings.triggered.connect(
+        self.menubar.ui.action_settings.triggered.connect(
             self.workspace.controller.show_settings
         )
         
