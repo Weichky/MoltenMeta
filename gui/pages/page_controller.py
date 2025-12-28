@@ -4,7 +4,6 @@ import PySide6QtAds as QtAds
 from gui.pages.home_page import HomePage
 from gui.pages.settings_page import SettingsPage
 
-from gui.background_layer import BackgroundLayer
 class PageController:
 
     def __init__(self, dock_manager: QtAds.CDockManager, background_layer: QtWidgets.QWidget):
@@ -75,9 +74,14 @@ class PageController:
         """Show simulation page (placeholder)."""
         print("Simulation page opened")
 
+    # A dock is visible if it is not floating or hidden
     def _hasVisibleDock(self) -> bool:
-        return any(dock and dock.isVisible() for dock in self.pages.values())
+        return any(
+            dock and dock.isVisible() and not dock.isFloating()
+            for dock in self.pages.values()
+        )
 
+    # Variable "visible" is not used
     def _onDockVisibilityChanged(self, visible):
         if self._hasVisibleDock():
             self.background_layer.hide()

@@ -1,3 +1,5 @@
+# This page only shows when all of pages in dock is invisible or floating
+
 from PySide6 import QtWidgets, QtCore
 from PySide6.QtCore import Signal, QCoreApplication
 

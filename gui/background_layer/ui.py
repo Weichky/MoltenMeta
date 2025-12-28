@@ -14,4 +14,4 @@ class UiBackgroundLayer(QObject):
 
         layout.addWidget(self.label)
     def retranslateUi(self):
-        self.label.setText(u"Background Page")
+        self.label.setText(self.tr("Background Page"))

@@ -16,7 +16,7 @@ class UiSidebar(QObject):
     def setupUi(self, dock: QDockWidget):
         # Set dock widget properties
         if not dock.objectName():
-            dock.setObjectName(u"sidebar")
+            dock.setObjectName("sidebar")
         
         # Set sidebar resizable, but not allowed to dock at top or bottom
         dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
@@ -32,20 +32,20 @@ class UiSidebar(QObject):
 
         # Create content widget and layout
         self.contents = QWidget(dock)
-        self.contents.setObjectName(u"dockWidgetContents")
+        self.contents.setObjectName("dockWidgetContents")
         
         self.verticalLayout = QVBoxLayout(self.contents)
-        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setObjectName("verticalLayout")
         
         # Create sidebar layout
         self.sidebarLayout = QVBoxLayout()
         self.sidebarLayout.setSpacing(0)
-        self.sidebarLayout.setObjectName(u"sidebarLayout")
+        self.sidebarLayout.setObjectName("sidebarLayout")
         self.sidebarLayout.setSizeConstraint(QLayout.SizeConstraint.SetMaximumSize)
         
         # Create home button
         self.homeButton = QPushButton(self.contents)
-        self.homeButton.setObjectName(u"homeButton")
+        self.homeButton.setObjectName("homeButton")
         
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -57,7 +57,7 @@ class UiSidebar(QObject):
         
         # Create settings button
         self.settingsButton = QPushButton(self.contents)
-        self.settingsButton.setObjectName(u"settingsButton")
+        self.settingsButton.setObjectName("settingsButton")
         
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -80,8 +80,8 @@ class UiSidebar(QObject):
 
     def retranslateUi(self, dock: QDockWidget):
         # Set button texts
-        self.homeButton.setText(self.tr(u"Home"))
-        self.settingsButton.setText(self.tr(u"Settings"))
+        self.homeButton.setText(self.tr("Home"))
+        self.settingsButton.setText(self.tr("Settings"))
         
     def adjust_sidebar_size(self, sidebar):
         """

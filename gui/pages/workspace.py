@@ -19,6 +19,7 @@ class Workspace(QtWidgets.QWidget):
         self.background = BackgroundLayer(self)
         self.layout().addWidget(self.background)
 
+        # default
         self.background.hide()
 
         self.controller = PageController(
