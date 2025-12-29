@@ -4,69 +4,37 @@ import PySide6QtAds as QtAds
 from gui.pages.home_page import HomePage
 from gui.pages.settings_page import SettingsPage
 
+
+from dataclasses import dataclass
+from typing import Callable
+
 class PageController:
 
     def __init__(self, dock_manager: QtAds.CDockManager, background_layer: QtWidgets.QWidget):
+
+        # page_spec
+        self._home_spec = DockPageSpec(
+            "home",
+            "Home",
+            HomePage,
+            self._connectHomeSignals
+        )
+
+        self._settings_spec = DockPageSpec(
+            "settings",
+            "Settings",
+            SettingsPage
+        )
 
         self.dock_manager = dock_manager
         self.background_layer = background_layer
         self.pages = {}  # Page cache
 
     def showHome(self):
-        dock = self.pages.get("home")
-        if dock is None:
-            home_page = HomePage()
-            dock = QtAds.CDockWidget("Home")
-            dock.setWidget(home_page)
-
-            # look like indifferent on MacOS
-            # waiting for trying on Windows and Linux
-            # dock.setFeature(QtAds.CDockWidget.DockWidgetFocusable, True)
-
-            dock.visibilityChanged.connect(self._onDockVisibilityChanged)
-
-            # Connect homepage button signals
-            home_page.projectButtonClicked.connect(self.showProject)
-            home_page.databaseButtonClicked.connect(self.showDatabase)
-            home_page.simulationButtonClicked.connect(self.showSimulation)
-            home_page.settingsButtonClicked.connect(self.showSettings)
-
-            self.dock_manager.addDockWidget(
-                QtAds.DockWidgetArea.CenterDockWidgetArea, dock
-            )
-            self.pages["home"] = dock
-
-            return
-        
-        if not dock.isVisible():
-            dock.setVisible(True)
-            dock.toggleView()
-
-        dock.raise_()       
+        self._showPage(self._home_spec)
 
     def showSettings(self):
-        dock = self.pages.get("settings")
-        if dock is None:
-            settings_page = SettingsPage()
-            dock = QtAds.CDockWidget("Settings")
-            dock.setWidget(settings_page)
-            
-            # dock.setFeature(QtAds.CDockWidget.DockWidgetFocusable, True)
-
-            dock.visibilityChanged.connect(self._onDockVisibilityChanged)
-
-            self.dock_manager.addDockWidget(
-                QtAds.DockWidgetArea.CenterDockWidgetArea, dock
-            )
-            self.pages["settings"] = dock
-
-            return
-
-        if not dock.isVisible():
-            dock.setVisible(True)
-            dock.toggleView()
-
-        dock.raise_()
+        self._showPage(self._settings_spec)
 
     def showProject(self):
         """Show project page (placeholder)."""
@@ -94,3 +62,60 @@ class PageController:
         else:
             self.background_layer.show()
             self.background_layer.raise_()
+
+    def _getArea(self):
+        containers = self.dock_manager.dockContainers()
+
+        area = None
+        if containers:
+            areas = containers[0].openedDockAreas()
+            if areas:
+                area = areas[0]
+
+        return area
+    
+    def _showPage(self, spec: DockPageSpec):
+        dock = self.pages.get(spec.key)
+
+        if dock is None:
+            widget = spec.factory()
+            dock = QtAds.CDockWidget(spec.title)
+            dock.setWidget(widget)
+
+            dock.visibilityChanged.connect(self._onDockVisibilityChanged)
+
+            if spec.onCreate:
+                spec.onCreate(widget)
+
+            self.pages[spec.key] = dock
+
+            self.dock_manager.addDockWidget(
+                QtAds.DockWidgetArea.CenterDockWidgetArea,
+                dock,
+                self._getArea()
+            )
+
+            return
+        
+        if not dock.isVisible():
+            dock.setVisible(True)
+            dock.toggleView()
+        
+        dock.raise_()
+
+    def _connectHomeSignals(self, page: HomePage):
+        page.projectButtonClicked.connect(self.showProject)
+        page.databaseButtonClicked.connect(self.showDatabase)
+        page.simulationButtonClicked.connect(self.showSimulation)
+        page.settingsButtonClicked.connect(self.showSettings)
+    
+###############################################################################
+
+
+@dataclass
+class DockPageSpec:
+    key: str
+    title: str
+    factory: Callable[[], QtWidgets.QWidget]
+    onCreate: Callable[[QtWidgets.QWidget], None] | None = None
+
