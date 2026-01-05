@@ -1,8 +1,11 @@
 from pathlib import Path
 import tomllib
 from typing import Dict, Any
+from core.log import getLogger
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+logger = getLogger("config loader")
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 DEFAULT_CONFIG = BASE_DIR / "assets" / "config.toml"
 USER_CONFIG = BASE_DIR / "config.toml"
@@ -23,10 +26,13 @@ def loadConfig() -> Dict[str, Any]:
     with DEFAULT_CONFIG.open("rb") as f:
         base = tomllib.load(f)
 
-    if USER_CONFIG.exists():
+    if not USER_CONFIG.exists():
+        logger.warning("No user config found, using default config")
+
+    else:
         with USER_CONFIG.open("rb") as f:
             override = tomllib.load(f)
-        return mergeConfig(base, override)
+        base = mergeConfig(base, override)
 
     return base
 
@@ -34,5 +40,5 @@ def getConfig() -> Dict[str, Any]:
     global _config
     if _config is None:
         _config = loadConfig()
-        
+
     return _config

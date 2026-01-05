@@ -4,6 +4,7 @@ import PySide6QtAds as QtAds
 from gui.pages.home_page import HomePage
 from gui.pages.settings_page import SettingsPage
 
+from core.log import getLogger
 
 from dataclasses import dataclass
 from typing import Callable
@@ -11,6 +12,8 @@ from typing import Callable
 class PageController:
 
     def __init__(self, dock_manager: QtAds.CDockManager, background_layer: QtWidgets.QWidget):
+
+        self.logger = getLogger(__name__)
 
         # page_spec
         self._home_spec = DockPageSpec(
@@ -37,16 +40,14 @@ class PageController:
         self._showPage(self._settings_spec)
 
     def showProject(self):
-        """Show project page (placeholder)."""
-        print("Project page opened")
+        self.logger.debug("Project page not implemented yet")
 
     def showDatabase(self):
-        """Show database page (placeholder)."""
-        print("Database page opened")
+        self.logger.debug("Database page not implemented yet")
 
     def showSimulation(self):
-        """Show simulation page (placeholder)."""
-        print("Simulation page opened")
+        self.logger.debug("Simulation page not implemented yet")
+
 
     # A dock is visible if it is not floating or hidden
     def _hasVisibleDock(self) -> bool:
