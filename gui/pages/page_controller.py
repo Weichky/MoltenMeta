@@ -63,6 +63,9 @@ class PageController:
             self.background_layer.show()
             self.background_layer.raise_()
 
+    # Get the dock area
+    # Btw notice QtADS's C++ src code to learn more about the api
+    # The Python version documents are in need of improvement and even not complete
     def _getArea(self):
         containers = self.dock_manager.dockContainers()
 
@@ -110,7 +113,6 @@ class PageController:
         page.settingsButtonClicked.connect(self.showSettings)
     
 ###############################################################################
-
 
 @dataclass
 class DockPageSpec:

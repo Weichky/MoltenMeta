@@ -1,0 +1,5 @@
+/Users/weichky/Repositories/MoltenMeta/gui/sidebar/ui.py
+/Users/weichky/Repositories/MoltenMeta/gui/ui_main_window.py
+/Users/weichky/Repositories/MoltenMeta/gui/menubar/ui.py
+/Users/weichky/Repositories/MoltenMeta/gui/background_layer/ui.py
+/Users/weichky/Repositories/MoltenMeta/gui/pages/settings_page/ui.py

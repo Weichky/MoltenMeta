@@ -1,5 +1,0 @@
-[project]
-name = "main window"
-
-[tool.pyside6-project]
-files = ["main_window.py", "main_window.ui", "pages/workspace.py", "pages/home_page.py", "ui_main_window.py"]
