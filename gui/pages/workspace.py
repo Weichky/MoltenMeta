@@ -13,6 +13,7 @@ class Workspace(QtWidgets.QWidget):
 
         # Dock manager
         self.dock_manager = QtAds.CDockManager(self)
+
         self.layout().addWidget(self.dock_manager)
 
         # Background layer (NOT inside dock_manager)

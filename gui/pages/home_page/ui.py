@@ -9,11 +9,8 @@ class Tile(QtWidgets.QPushButton):
 
         self.setMinimumSize(120, 80)
         
-    def set_title(self, title):
+    def setTitle(self, title):
         self.setText(title)
-        
-    def retranslateUi(self, title):
-        self.setText(QCoreApplication.translate("homepage", title, None))
 
 
 class UiHomePage(QObject):
@@ -40,7 +37,7 @@ class UiHomePage(QObject):
         self.grid = QtWidgets.QGridLayout(self.grid_container)
         self.grid.setSpacing(12)
 
-        tile_names = ["Project", "Database", "Simulation", "Settings"]
+        tile_names = [self.tr("Project"), self.tr("Database"), self.tr("Simulation"), self.tr("Settings")]
         self.tiles = [Tile(name) for name in tile_names]
 
         positions = [(0, 0), (0, 1), (1, 0), (1, 1)]
@@ -63,17 +60,18 @@ class UiHomePage(QObject):
         self.root_layout.addStretch()
 
     def retranslateUi(self):
-        welcome_text = QCoreApplication.translate("homepage", "Welcome", None)
+        welcome_text = self.tr("Welcome")
         self.title.setText("<h1>"+welcome_text+"</h1>")
-        software_description = QCoreApplication.translate(
-            "homepage", 
-            "This software provides an integrated environment for "
-            "data management, simulation, and analysis. "
-            "All modules are designed to be extensible and reproducible.",
-            None)
+
+        software_description = (
+            self.tr("This software provides an integrated environment for ")
+            + self.tr("data management, simulation, and analysis. ")
+            + self.tr("All modules are designed to be extensible and reproducible.")
+        )
+
         self.description.setText("<h6>"+software_description+"</h6>")
             
         # Translate tiles
-        tile_titles = ["Project", "Database", "Simulation", "Settings"]
+        tile_titles = [self.tr("Project"), self.tr("Database"), self.tr("Simulation"), self.tr("Settings")]
         for tile, title in zip(self.tiles, tile_titles):
-            tile.retranslateUi(title)
+            tile.setText(title)

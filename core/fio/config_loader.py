@@ -10,8 +10,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DEFAULT_CONFIG = BASE_DIR / "assets" / "config.toml"
 USER_CONFIG = BASE_DIR / "config.toml"
 
-_config: Dict[str, Any] | None = None
-
 def mergeConfig(base: dict, override: dict) -> dict:
     result = base.copy()
     for k, v in override.items():
@@ -35,10 +33,3 @@ def loadConfig() -> Dict[str, Any]:
         base = mergeConfig(base, override)
 
     return base
-
-def getConfig() -> Dict[str, Any]:
-    global _config
-    if _config is None:
-        _config = loadConfig()
-
-    return _config

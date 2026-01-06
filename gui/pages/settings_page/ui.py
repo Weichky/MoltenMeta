@@ -1,8 +1,8 @@
 from PySide6 import QtWidgets, QtCore
 from PySide6.QtCore import QObject
 
-from core.configure import getLogLevelMap
-from i18n.language import getSupportedLanguagesMap
+from core.log import getLogLevelMap
+from i18n import getSupportedLanguagesNameMap
 
 class UiSettingsPage(QObject):
     def setupUi(self, settingsPage: QtWidgets.QWidget):
@@ -185,7 +185,7 @@ class UiSettingsPage(QObject):
         self.lang_label.setText(self.tr("Language:"))
 
         self.lang_combo.clear()
-        for code, name in getSupportedLanguagesMap().items():
+        for code, name in getSupportedLanguagesNameMap().items():
             self.lang_combo.addItem(self.tr(name), code)
         
         # Log settings page

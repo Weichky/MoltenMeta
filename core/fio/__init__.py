@@ -1,1 +1,2 @@
-from .config_loader import getConfig, loadConfig
+from .config_loader import loadConfig
+from .language_package_loader import getLanguagePackagePath

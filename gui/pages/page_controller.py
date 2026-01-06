@@ -1,4 +1,5 @@
 from PySide6 import QtWidgets
+from PySide6.QtCore import QCoreApplication, QObject
 import PySide6QtAds as QtAds
 
 from gui.pages.home_page import HomePage
@@ -9,6 +10,12 @@ from core.log import getLogger
 from dataclasses import dataclass
 from typing import Callable
 
+
+# For more info about dock, see:
+# C++ source code:
+# src/DockManager.h
+# src/DockWidget.h
+
 class PageController:
 
     def __init__(self, dock_manager: QtAds.CDockManager, background_layer: QtWidgets.QWidget):
@@ -18,20 +25,38 @@ class PageController:
         # page_spec
         self._home_spec = DockPageSpec(
             key = "home",
-            title = "Home",
+            # NOTE:
+            # The following titleProvider must appear *here* (line 41, and the next is line 48),
+            # otherwise Qt's translation scanner will fail to pick it up.
+            #
+            # This is a known limitation of Qt's i18n tooling rather than a logic issue.
+            # An alternative is to omit <location> entries in the .ts file entirely,
+            # which removes the line-number dependency.
+            #
+            # The trade-off is that the source text ("Home Page", etc.)
+            # should then be treated as context-specific and not reused elsewhere.
+            #
+            # This might be fixed someday, but not today.
+            # It is damning, but currently the least fragile approach.
+            titleProvider=lambda: QCoreApplication.translate("DockPage", "Home Page"),
             factory = HomePage,
             onCreate = self._connectHomeSignals
         )
 
         self._settings_spec = DockPageSpec(
             key = "settings",
-            title = "Settings",
+            titleProvider=lambda: QCoreApplication.translate("DockPage", "Settings"),
             factory = SettingsPage
         )
 
         self.dock_manager = dock_manager
         self.background_layer = background_layer
         self.pages = {}  # Page cache
+
+        self.pageSpecs = {
+            self._home_spec.key: self._home_spec,
+            self._settings_spec.key: self._settings_spec
+        }
 
     def showHome(self):
         self._showPage(self._home_spec)
@@ -82,16 +107,14 @@ class PageController:
         dock = self.pages.get(spec.key)
 
         if dock is None:
-            widget = spec.factory()
-            dock = QtAds.CDockWidget(spec.title)
-            dock.setWidget(widget)
-
-            dock.visibilityChanged.connect(self._onDockVisibilityChanged)
-
-            if spec.onCreate:
-                spec.onCreate(widget)
+            dock = self._createPage(spec)
 
             self.pages[spec.key] = dock
+
+            # QtAds.CDockManager.addDockWidget parameters:
+            # 1) QtAds.DockWidgetArea      — target dock area
+            # 2) QtAds.CDockWidget         — dock widget to add
+            # 3) QtAds.CDockAreaWidget     — explicit target area (rarely used)
 
             self.dock_manager.addDockWidget(
                 QtAds.DockWidgetArea.CenterDockWidgetArea,
@@ -99,26 +122,61 @@ class PageController:
                 self._getArea()
             )
 
+            self.retranslateUi()
+
             return
         
+
         if not dock.isVisible():
-            dock.setVisible(True)
+            
+            # Notice that QtAds.CDockWidget has a method called setAsCurrentTab        
+            # dock.raise_()
+            # dock.setVisible(True)
             dock.toggleView()
-        
-        dock.raise_()
+    
+        dock.setAsCurrentTab()
+
+        self.retranslateUi()
+
+    def _createPage(self, spec: DockPageSpec) -> QtWidgets.QWidget:
+        widget = spec.factory()
+        dock = QtAds.CDockWidget(self.dock_manager, "")
+
+        # Set the object name
+        # See C++ source code src/DockWidget.h line 274 - 279:
+        #  * @note The object name of the dock widget is also set to the title. The
+        #  * object name is required by the dock manager to properly save and restore
+        #  * the state of the dock widget. That means, the title needs to be unique. If
+        #  * the title is not unique or if you would like to change the title during
+        #  * runtime, you need to set a unique object name explicitly by calling
+        #  * setObjectName() after construction.
+
+        dock.setObjectName(spec.key)
+        dock.setWidget(widget)
+        dock.visibilityChanged.connect(self._onDockVisibilityChanged)
+        if spec.onCreate:
+            spec.onCreate(widget)
+
+        return dock
 
     def _connectHomeSignals(self, page: HomePage):
         page.projectButtonClicked.connect(self.showProject)
         page.databaseButtonClicked.connect(self.showDatabase)
         page.simulationButtonClicked.connect(self.showSimulation)
         page.settingsButtonClicked.connect(self.showSettings)
-    
+
+    def retranslateUi(self):
+
+        for key, dock in self.pages.items():
+            spec = self.pageSpecs[key]
+            dock.setWindowTitle(spec.titleProvider())
+
 ###############################################################################
 
 @dataclass
 class DockPageSpec:
     key: str
-    title: str
+    titleProvider: Callable[[], str]
     factory: Callable[[], QtWidgets.QWidget]
     onCreate: Callable[[QtWidgets.QWidget], None] | None = None
 

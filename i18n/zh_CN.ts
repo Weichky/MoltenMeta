@@ -1,12 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1">
+<TS version="2.1" language="zh" sourcelanguage="en">
+<context>
+    <name>DockPage</name>
+    <message>
+        <source>Home Page</source>
+        <translation>主页</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>设置</translation>
+    </message>
+</context>
 <context>
     <name>UiBackgroundLayer</name>
     <message>
         <location filename="../gui/background_layer/ui.py" line="17"/>
         <source>Background Page</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
+    </message>
+</context>
+<context>
+    <name>UiHomePage</name>
+    <message>
+        <location filename="../gui/pages/home_page/ui.py" line="40"/>
+        <location filename="../gui/pages/home_page/ui.py" line="75"/>
+        <source>Project</source>
+        <translation>项目</translation>
+    </message>
+    <message>
+        <location filename="../gui/pages/home_page/ui.py" line="40"/>
+        <location filename="../gui/pages/home_page/ui.py" line="75"/>
+        <source>Database</source>
+        <translation>数据库</translation>
+    </message>
+    <message>
+        <location filename="../gui/pages/home_page/ui.py" line="40"/>
+        <location filename="../gui/pages/home_page/ui.py" line="75"/>
+        <source>Simulation</source>
+        <translation>模拟</translation>
+    </message>
+    <message>
+        <location filename="../gui/pages/home_page/ui.py" line="41"/>
+        <location filename="../gui/pages/home_page/ui.py" line="76"/>
+        <source>Settings</source>
+        <translation>设置</translation>
+    </message>
+    <message>
+        <location filename="../gui/pages/home_page/ui.py" line="64"/>
+        <source>Welcome</source>
+        <translation>欢迎</translation>
+    </message>
+    <message>
+        <location filename="../gui/pages/home_page/ui.py" line="68"/>
+        <source>This software provides an integrated environment for </source>
+        <translation>此软件提供了一个集成环境用于</translation>
+    </message>
+    <message>
+        <location filename="../gui/pages/home_page/ui.py" line="69"/>
+        <source>data management, simulation, and analysis. </source>
+        <translation>数据管理、模拟和分析。</translation>
+    </message>
+    <message>
+        <location filename="../gui/pages/home_page/ui.py" line="70"/>
+        <source>All modules are designed to be extensible and reproducible.</source>
+        <translation>模块设计考虑拓展性和可重现性。</translation>
     </message>
 </context>
 <context>
@@ -14,7 +72,7 @@
     <message>
         <location filename="../gui/ui_main_window.py" line="34"/>
         <source>Molten Meta</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -193,7 +251,7 @@
     <message>
         <location filename="../gui/menubar/ui.py" line="255"/>
         <source>Backup</source>
-        <translation type="unfinished"></translation>
+        <translation>备份</translation>
     </message>
     <message>
         <location filename="../gui/menubar/ui.py" line="256"/>

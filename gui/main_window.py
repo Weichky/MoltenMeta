@@ -8,6 +8,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QPalette
 import PySide6QtAds as QtAds
 
+from core.log import getLogger
+
 # Import the simplified main window UI
 from gui.ui_main_window import UiMainWindow
 from gui.sidebar import SidebarWidget
@@ -18,9 +20,11 @@ class MainWindow(QMainWindow):
     def __init__(self, parent=None):
 
         super().__init__(parent)
+
+        self.logger = getLogger(__name__)
+
         self.ui = UiMainWindow()
         self.ui.setupUi(self)
-
             
         # Init CDockManager Configuration Flags
         QtAds.CDockManager.setConfigFlag(QtAds.CDockManager.OpaqueSplitterResize, True)
@@ -67,7 +71,6 @@ class MainWindow(QMainWindow):
         
         # Automatically show home page on startup
         self.workspace.controller.showHome()
-
     def changeEvent(self, event):
         if event.type() == QEvent.Type.ThemeChange:
             # Update application palette when system theme changes
