@@ -1,6 +1,6 @@
 import logging
 
-def setLoggingLevel(level: str):
+def setLogLevel(level: str):
     level_map = {
         "debug": logging.DEBUG,
         "info": logging.INFO,
@@ -10,3 +10,12 @@ def setLoggingLevel(level: str):
     }
 
     logging.getLogger().setLevel(level_map[level])
+
+def getLogLevelMap() -> dict:
+    return {
+        "debug": logging.DEBUG,
+        "info": logging.INFO,
+        "warning": logging.WARNING,
+        "error": logging.ERROR,
+        "critical": logging.CRITICAL
+    }

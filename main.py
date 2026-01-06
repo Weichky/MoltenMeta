@@ -5,7 +5,7 @@ from PySide6.QtCore import QLocale, QTranslator, QLibraryInfo
 from gui.main_window import MainWindow
 from core.fio import loadConfig
 from core.log import getLogger, setupLogging
-from core.configure import setLoggingLevel
+from core.configure import setLogLevel
 
 import logging
 
@@ -31,7 +31,7 @@ def init():
 
     logger.info("Configuration ready")
 
-    setLoggingLevel(config["logging"]["level"])
+    setLogLevel(config["logging"]["level"])
 
     logger.info("Logging level: " + config["logging"]["level"])
     

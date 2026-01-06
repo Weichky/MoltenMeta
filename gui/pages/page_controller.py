@@ -17,16 +17,16 @@ class PageController:
 
         # page_spec
         self._home_spec = DockPageSpec(
-            "home",
-            "Home",
-            HomePage,
-            self._connectHomeSignals
+            key = "home",
+            title = "Home",
+            factory = HomePage,
+            onCreate = self._connectHomeSignals
         )
 
         self._settings_spec = DockPageSpec(
-            "settings",
-            "Settings",
-            SettingsPage
+            key = "settings",
+            title = "Settings",
+            factory = SettingsPage
         )
 
         self.dock_manager = dock_manager
