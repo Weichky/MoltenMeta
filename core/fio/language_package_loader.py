@@ -1,9 +1,6 @@
 from pathlib import Path
 
-from core.log import getLogger
 from i18n.language import getSupportedTranslationLanguages
-
-logger = getLogger(__name__)
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 

@@ -3,6 +3,8 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import QEvent, Qt, QObject
 
+from i18n import getI18nService
+
 from .ui import UiSidebar
 
 class ResizeEventFilter(QObject):
@@ -29,8 +31,14 @@ class SidebarWidget(QDockWidget):
         # Initial size adjustment
         self._adjust_sidebar_size()
 
+        # i18n
+        getI18nService().languageChanged.connect(self.retranslateUi)
+
     def _adjust_sidebar_size(self):
         """
         Adjust sidebar size based on parent window size.
         """
         self.ui.adjust_sidebar_size(self)
+
+    def retranslateUi(self):
+        self.ui.retranslateUi(self)

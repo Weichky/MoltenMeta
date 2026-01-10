@@ -1,11 +1,13 @@
 from PySide6 import QtWidgets
-from PySide6.QtCore import QCoreApplication, QObject
+from PySide6.QtCore import QCoreApplication
 import PySide6QtAds as QtAds
 
 from gui.pages.home_page import HomePage
 from gui.pages.settings_page import SettingsPage
 
 from core.log import getLogger
+
+from i18n import getI18nService
 
 from dataclasses import dataclass
 from typing import Callable
@@ -165,12 +167,15 @@ class PageController:
         page.simulationButtonClicked.connect(self.showSimulation)
         page.settingsButtonClicked.connect(self.showSettings)
 
+        # i18n
+        getI18nService().languageChanged.connect(self.retranslateUi)
+
     def retranslateUi(self):
 
         for key, dock in self.pages.items():
             spec = self.pageSpecs[key]
             dock.setWindowTitle(spec.titleProvider())
-
+            
 ###############################################################################
 
 @dataclass

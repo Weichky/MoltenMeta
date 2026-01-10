@@ -33,3 +33,9 @@ def setConfig(key: str, value: Any):
         raise RuntimeError("Config system not initialized")
     
     _config[key] = value
+
+def getLanguage() -> str:
+    return getConfig("locale")["language"]
+
+def setLanguage(language: str):
+    setConfig("locale", {"language": language})

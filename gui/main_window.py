@@ -10,7 +10,8 @@ import PySide6QtAds as QtAds
 
 from core.log import getLogger
 
-# Import the simplified main window UI
+from i18n import getI18nService
+
 from gui.ui_main_window import UiMainWindow
 from gui.sidebar import SidebarWidget
 from gui.menubar import MenubarWidget
@@ -69,6 +70,9 @@ class MainWindow(QMainWindow):
             self.workspace.controller.showSettings
         )
         
+        # i18n
+        getI18nService().languageChanged.connect(self.retranslateUi)
+
         # Automatically show home page on startup
         self.workspace.controller.showHome()
     def changeEvent(self, event):
@@ -89,3 +93,6 @@ class MainWindow(QMainWindow):
         for child in widget.children():
             if isinstance(child, QWidget):
                 self.updateStylesRecursive(child)
+
+    def retranslateUi(self):
+        self.ui.retranslateUi(self)

@@ -4,6 +4,8 @@ from PySide6.QtCore import QObject
 from core.log import getLogLevelMap
 from i18n import getSupportedLanguagesNameMap
 
+from core.config import getLanguage
+
 class UiSettingsPage(QObject):
     def setupUi(self, settingsPage: QtWidgets.QWidget):
         if not settingsPage.objectName():
@@ -145,6 +147,14 @@ class UiSettingsPage(QObject):
         
         lang_layout.addStretch()
         page_layout.addWidget(lang_group)
+
+        for code, name in getSupportedLanguagesNameMap().items():
+            self.lang_combo.addItem(name, code)
+
+        language = getLanguage()
+
+        self.lang_combo.setCurrentIndex(self.lang_combo.findData(language))
+
         page_layout.addStretch()
         
         return page
@@ -183,10 +193,6 @@ class UiSettingsPage(QObject):
         
         # General settings page
         self.lang_label.setText(self.tr("Language:"))
-
-        self.lang_combo.clear()
-        for code, name in getSupportedLanguagesNameMap().items():
-            self.lang_combo.addItem(self.tr(name), code)
         
         # Log settings page
         self.log_level_label.setText(self.tr("Log level:"))

@@ -12,5 +12,10 @@ class SettingsPage(QtWidgets.QWidget):
         self.ui.retranslateUi()
 
         # Create controller to handle logic
+        # Notice that signals are connected in the controller
+        # In other cases, signals are connected in the widget
         self.controller = SettingsController(self.ui)
         self.controller.connectSignals()
+
+    def retranslateUi(self):
+        self.ui.retranslateUi()

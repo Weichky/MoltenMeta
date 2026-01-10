@@ -1,1 +1,1 @@
-from .config import getConfigs, getConfig
+from .config import getConfigs, getConfig, getLanguage, setLanguage
