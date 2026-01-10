@@ -83,13 +83,7 @@ class UiSidebar(QObject):
         self.homeButton.setText(self.tr("Home"))
         self.settingsButton.setText(self.tr("Settings"))
         
-    def adjust_sidebar_size(self, sidebar):
-        """
-        Adjust sidebar size constraints based on parent window size.
-        
-        Args:
-            sidebar: The sidebar widget to adjust.
-        """
+    def adjustSidebarSize(self, sidebar):
         # Get parent window dimensions
         parent_width = sidebar.parent().width()
         

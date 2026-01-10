@@ -86,7 +86,6 @@ class UiSettingsPage(QObject):
         settingsPage.installEventFilter(self._createResizeEventFilter(settingsPage))
         
     def _setupNavPanelConstraints(self, parent):
-        """Set navigation panel size constraints based on parent window size."""
         # Get parent window dimensions
         parent_width = parent.width()
         
@@ -100,7 +99,6 @@ class UiSettingsPage(QObject):
         self.nav_panel.setMaximumWidth(max_width)
         
     def _setupSplitterSizes(self, parent):
-        """Set splitter initial size ratio."""
         # Get parent window dimensions
         parent_width = parent.width()
         
@@ -111,7 +109,6 @@ class UiSettingsPage(QObject):
         self.splitter.setSizes([nav_width, content_width])
         
     def _createResizeEventFilter(self, parent):
-        """Create window resize event filter."""
         ui_self = self
         
         class ResizeEventFilter(QtCore.QObject):
@@ -125,7 +122,6 @@ class UiSettingsPage(QObject):
         return ResizeEventFilter()
         
     def _createGeneralPage(self) -> QtWidgets.QWidget:
-        """Create general settings page."""
         page = QtWidgets.QWidget()
         page.setObjectName("generalPage")
         page_layout = QtWidgets.QVBoxLayout(page)
@@ -186,7 +182,6 @@ class UiSettingsPage(QObject):
 
 
     def retranslateUi(self):
-        """Translate UI text."""
         # Navigation buttons
         self.general_button.setText(self.tr("General"))
         self.log_button.setText(self.tr("Log"))

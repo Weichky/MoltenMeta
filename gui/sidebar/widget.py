@@ -29,16 +29,13 @@ class SidebarWidget(QDockWidget):
         parent.installEventFilter(self.resize_event_filter)
         
         # Initial size adjustment
-        self._adjust_sidebar_size()
+        self._adjustSidebarSize()
 
         # i18n
         getI18nService().languageChanged.connect(self.retranslateUi)
 
-    def _adjust_sidebar_size(self):
-        """
-        Adjust sidebar size based on parent window size.
-        """
-        self.ui.adjust_sidebar_size(self)
+    def _adjustSidebarSize(self):
+        self.ui.adjustSidebarSize(self)
 
     def retranslateUi(self):
         self.ui.retranslateUi(self)
