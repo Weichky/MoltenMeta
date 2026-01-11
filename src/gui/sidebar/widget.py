@@ -14,7 +14,7 @@ class ResizeEventFilter(QObject):
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.Resize:
-            self.sidebar._adjust_sidebar_size()
+            self.sidebar._adjustSidebarSize()
         return False
 
 class SidebarWidget(QDockWidget):
