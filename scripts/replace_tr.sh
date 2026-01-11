@@ -4,7 +4,14 @@
 A=' type="unfinished">'       # 要匹配的字符串A
 B="<"       # A后面不能跟的字符串B
 C=">"  # 替换为的字符串C
-FILE="../i18n/zh_CN.ts"  # 操作的文件路径
+
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+project_root="$(dirname "$script_dir")"
+
+i18n_dir="$project_root/src/resources/i18n"
+ts_file="$i18n_dir/zh_CN.ts"
+
+FILE="$ts_file"  # 操作的文件路径
 BACKUP=true    # 是否备份原文件（true/false）
 OUTPUT_NEW=false  # 是否输出到新文件（true时生成新文件，false时直接修改原文件）
 

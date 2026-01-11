@@ -2,7 +2,7 @@ from PySide6 import QtWidgets, QtCore
 from PySide6.QtCore import QObject
 
 from core.log import getLogLevelMap
-from i18n import getSupportedLanguagesNameMap
+from catalog import getSupportedLanguagesNameMap
 
 from core.config import getLanguage
 

@@ -1,16 +1,15 @@
 import sys
 from PySide6.QtWidgets import QApplication
 
-from gui.main_window import MainWindow
-from core.log import getLogger, setupLogging, setLogLevel
+from core.log import getLogger, setLogLevel
+
+from core.platform import getArgs
 
 from core.config import getConfigs
 
-from i18n import getI18nService, createI18nService
+from i18n import createI18nService
 
-import logging
-
-translator = None
+from gui.main_window import MainWindow
 
 def main():
 
@@ -22,19 +21,18 @@ def main():
     window.show()
     
     sys.exit(app.exec())
-
-
 def init(app):
-    setupLogging(logging.DEBUG)
+    config = getConfigs()
+
+    # Commands have higher priority
+    if getArgs().log_level:
+        setLogLevel(getArgs().log_level)
+    else:    
+        setLogLevel(config["logging"]["level"])
+
     logger = getLogger("main")
 
     logger.info("Starting application")
-
-    config = getConfigs()
-
-    setLogLevel(config["logging"]["level"])
-
-    logger.info("Logging level: " + config["logging"]["level"]) 
 
     i18n_service = createI18nService(app)
 

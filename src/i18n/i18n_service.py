@@ -2,7 +2,7 @@ from PySide6.QtCore import QTranslator, QObject, Signal
 
 from core.fio import getLanguagePackagePath
 
-from .language import isSupportedLanguage
+from catalog import isSupportedLanguage
 
 _i18nService: _I18nService | None = None
 
@@ -33,6 +33,11 @@ class _I18nService(QObject):
 
         self.languageChanged.emit()
 
+# Normally, these insignificant loading events can be automatically determined，
+# whether to create the application.
+# However, this module is different;
+# its creation depends on the QApplication passed in during the call,
+# therefore, a distinction must be made.
 # Remember to create service before get it
 def getI18nService() -> _I18nService:
     global _i18nService

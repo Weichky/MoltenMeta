@@ -1,11 +1,14 @@
 from pathlib import Path
 
-from i18n.language import getSupportedTranslationLanguages
+from importlib.resources import files
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+from catalog import getSupportedTranslationLanguages
 
-LANGUAGE_PACKAGE_PATH = BASE_DIR / "i18n"
+# BASE_DIR = Path(__file__).resolve().parent.parent.parent
+LANGUAGE_PACKAGE_PATH = files("resources.i18n")
 
+# Unfortunately, Qt Translator doesn't support a Path argument,
+# so we have to convert it to a string
 def getLanguagePackagePath(language: str) -> str | None:
     if language == "en":
         return None

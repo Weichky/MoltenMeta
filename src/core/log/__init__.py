@@ -1,1 +1,1 @@
-from .log import getLogger, setupLogging, getLogLevelMap, setLogLevel
+from .log import getLogger, setupLogging, getLogLevelMap, setLogLevel, LogLevel

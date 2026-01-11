@@ -8,7 +8,7 @@ set -e
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 project_root="$(dirname "$script_dir")"
 
-i18n_dir="$project_root/i18n"
+i18n_dir="$project_root/src/resources/i18n"
 ts_file="$i18n_dir/zh_CN.ts"
 
 tmp_list="$script_dir/.lupdate_files.txt"
