@@ -1,0 +1,286 @@
+2026-01-12 00:43:30 +0800 | refactor(core): migrate config loading to SQLite and update resource paths
+
+- Remove user config file usage in favor of SQLite database storage
+- Move config.toml to src/assets/default.toml as default configuration
+- Update config loading logic to use importlib.resources for packaging
+- Change runtime path handling to use platform-specific runtime directory
+- Mark user config as deprecated with info logging messages
+
+BREAKING CHANGE: User config.toml files are no longer used,
+switching to SQLite database for configuration persistence.
+
+feat(i18n): restructure localization resources and imports
+
+- Move translation files from i18n/ to src/resources/i18n/
+- Update script paths to reflect new i18n directory structure
+- Consolidate language utility functions into catalog module
+- Update import paths across multiple modules to use catalog
+- Remove redundant language.py file with centralized functionality
+
+refactor(log): improve logging system with centralized level mapping
+
+- Add LogLevel enum to catalog module for centralized log level definitions
+- Replace hardcoded log level mapping with dynamic mapping from LogLevel enum
+- Add proper type hints to logging functions
+- Improve error handling for invalid log levels
+- Update setLogLevel to apply level changes to all handlers
+
+refactor(platform): extract platform utilities and runtime path management
+
+- Create platform module with argument parsing and runtime path utilities
+- Move argument initialization logic to platform.args submodule
+- Add getRuntimePath function for cross-platform runtime directory access
+- Update main.py to use platform utilities instead of local implementations
+
+docs(i18n): add documentation for i18n service initialization constraints
+
+- Add comments explaining QApplication dependency for i18n service
+- Document the difference between automatic and manual service creation
+- Clarify when services should be created vs obtained via getter methods
+
+2026-01-11 21:31:47 +0800 | adjust file tree
+
+2026-01-10 23:52:39 +0800 | remove quotation-style comments
+
+2026-01-10 22:49:18 +0800 | eat(i18n): implement internationalization support with language switching
+
+- Add getLanguage and setLanguage functions to config module
+- Rename config_loader to config_io and remove unused logger imports
+- Implement language package loader without unnecessary logging
+- Add i18n service integration to background layer, main window,
+  menubar, home page, page controller, settings page and sidebar
+- Add language selection combo box to settings page with supported
+  languages mapping
+- Update default language from zh_CN to en in config.toml
+- Replace manual translation initialization with i18n service
+  throughout the application
+- Add language change signal connections to retranslate UI elements
+- Implement language validation and proper signal handling for
+  language switching
+
+2026-01-08 02:16:29 +0800 | add doc & pic
+
+2026-01-07 01:27:33 +0800 | refactor(core): move logging configuration functions to log module
+
+Move setLogLevel and getLogLevelMap functions from core.configure
+to core.log module for better organization and remove the now
+unused configure.py file.
+
+feat(i18n): add language support and translation infrastructure
+
+Add internationalization support with language package loading
+and translation functions. Update translation files and add
+language selection functionality to settings page.
+
+refactor(gui): improve page controller with translation support
+
+Update page controller to use proper translation mechanisms
+for dock page titles. Add retranslation functionality and
+improve widget creation process with proper object naming.
+
+feat(gui): enhance homepage with translation support
+
+Add translation support to homepage UI elements including
+tile titles, welcome text, and descriptions. Update UI to
+use proper Qt translation methods.
+
+refactor(gui): clean up main window and add logger initialization
+
+Add logger initialization to main window and remove unnecessary
+spacing from changeEvent method.
+
+refactor(core): update config loading and remove singleton pattern
+
+Replace singleton config pattern with direct loadConfig function
+and remove unused _config variable for simpler configuration
+management.
+
+refactor(gui): update settings page imports and language selection
+
+Update settings page to use new translation language map
+function from i18n module instead of old configuration approach.
+
+docs(page-controller): add documentation for QtAds dock management
+
+Add comments explaining QtAds dock widget management and the
+known limitation with Qt's translation scanner requiring
+titleProvider functions to be defined at specific locations.
+
+refactor(gui): add translation support to additional UI files
+
+Update background layer and main window UI files to include
+translation support and add new files to translation processing.
+
+2026-01-06 11:57:10 +0800 | chore(i18n): remove unfinished translation markers in zh_CN.ts
+
+2026-01-06 11:48:36 +0800 | feat(i18n): add Chinese translations partly
+
+2026-01-06 11:36:10 +0800 | efactor(core): rename setLoggingLevel to setLogLevel for consistency
+
+- Renamed function setLoggingLevel to setLogLevel in core/configure.py
+- Added getLogLevelMap function to expose logging level mappings
+
+refactor(gui): update DockPageSpec initialization with named parameters
+
+- Changed DockPageSpec initialization to use named parameters instead
+  of positional arguments in gui/pages/page_controller.py
+
+feat(gui): add log settings page and navigation to settings UI
+
+- Add log settings page with log level selection dropdown
+- Implement navigation button for log settings
+- Add spacing between navigation buttons in settings UI
+- Use named parameters for DockPageSpec initialization
+- Create SettingsController to handle settings logic
+- Update language combo box to use supported languages map
+- Add log level combo box with available logging levels
+- Implement proper method naming conventions (camelCase)
+
+2026-01-05 22:36:50 +0800 | chore: add gitignore entries for summary files and VSCodeCounter
+
+- Add tree.txt to .gitignore
+- Add .VSCodeCounter/ directory to .gitignore
+
+2026-01-05 22:26:10 +0800 | feat(logging): implement comprehensive logging system with configurable levels
+
+- Add debug, info, warning, error, and critical logging levels to configuration
+- Replace print statements with proper logger.debug calls in page controller
+- Initialize logging system in main application with configurable level
+- Set up logging infrastructure with setupLogging and getLogger functions
+- Configure logging level based on config.toml settings during application startup
+- Remove unused config_loader module and move functionality to core.fio
+
+2026-01-05 21:11:25 +0800 | refactor(config): replace JSON config with TOML and simplify loading
+
+- Replace JSON configuration with TOML format using tomllib
+- Remove environment detection logic and hardcoded paths
+- Implement config merging between default and user configs
+- Simplify API to just getConfig() and loadConfig() functions
+- Remove backward compatibility aliases and unused imports
+
+refactor(fio): update import structure and export functions
+
+- Update __init__.py to export new config functions only
+- Remove old config loading functions from public API
+
+refactor(gui): remove unused pyproject.toml and clean up code
+
+- Remove gui/pyproject.toml file that's no longer needed
+- Add documentation comments about QtADS dock area implementation
+- Clean up unnecessary blank lines in page_controller.py
+
+refactor(main): initialize config at application start
+
+- Move config loading to application initialization
+- Remove hardcoded development environment setting
+- Call loadConfig() during app startup instead of runtime detection
+
+2025-12-29 19:30:19 +0800 | refactor(gui): extract DockPageSpec class and consolidate page creation logic
+
+- Introduce DockPageSpec dataclass to encapsulate page specifications
+- Create _showPage method to handle common page creation and display logic
+- Extract _connectHomeSignals method for home page signal connections
+- Add _getArea method to retrieve dock area for proper widget placement
+- Remove duplicate code from showHome and showSettings methods
+- Use specification pattern to standardize page creation process
+- Improve code maintainability and reduce code duplication
+
+2025-12-29 04:43:42 +0800 | feat(gui): configure CDockManager flags for improved dock behavior
+
+- Set OpaqueSplitterResize to True for better splitter performance
+- Disable close buttons for dock areas and all tabs
+- Disable undock and tabs menu buttons for cleaner UI
+- Disable focus highlighting to reduce visual clutter
+- Enable auto-hide feature and auto-hide buttons
+- Add required configuration flag setup before dock manager instance creation
+- Comment out focusable dock widget feature (platform dependent behavior)
+
+2025-12-29 03:47:31 +0800 | refactor(gui): remove unnecessary u-string literals and improve dock visibility logic
+
+- Replace u-string literals with regular strings in objectName() calls across
+  multiple UI files
+- Update translation calls from self.tr(u"text") to self.tr("text") format
+- Add comment explaining background layer visibility condition
+- Remove unused BackgroundLayer import from page_controller.py
+- Add comment clarifying dock visibility check logic
+- Add explanatory comment for background layer default state
+
+2025-12-29 03:28:24 +0800 | refactor(gui): rename controller methods and remove old home page file
+
+- Rename show_home to showHome and show_settings to showSettings
+- Remove deprecated home_page.py file that was refactored
+- Update method calls in main_window.py to use new naming convention
+
+feat(gui): add background layer and dock visibility management
+
+- Add BackgroundLayer to workspace for better UI management
+- Implement dock visibility tracking in PageController
+- Show/hide background layer based on dock visibility state
+- Connect visibilityChanged signals to manage background display
+- Initialize background layer to be hidden by default
+
+refactor(gui): update PageController to use new method names
+
+- Rename all show_* methods to use camelCase convention
+- Update signal connections to use new method names
+- Improve dock visibility logic with proper show/hide management
+- Add background layer dependency to PageController initialization
+
+2025-12-29 00:14:01 +0800 | refactor(gui): update menubar actions and page imports to use snake_case naming
+
+- Change all menubar UI elements from camelCase to snake_case
+  (menuFile -> menu_file, actionSettings -> action_settings, etc.)
+- Update main_window.py to connect to the renamed action_settings
+- Move HomePage import to reference the widget submodule
+- Remove unused BackgroundPage and home_page files
+- Update SettingsPage import path to use the new structure
+- Update page_controller.py to use the new SettingsPage import path
+- Create __init__.py file for settings_page module
+
+2025-12-19 18:00:33 +0800 | Add .DS_Store to .gitignore
+
+2025-12-19 17:59:09 +0800 | Delete .DS_Store
+
+2025-12-19 17:32:04 +0800 | feat(gui): improve settings page layout
+
+- Improve settings page with responsive splitter and dynamic sizing
+- Add resize event handling for sidebar and settings navigation panel
+- Update menu bar and sidebar setup with clearer English descriptions
+- Refactor settings page to remove unused language change handler
+- Adjust window minimum size constraint in main window UI
+- Remove obsolete translation loader from main entry point
+- Add ConfigLoader
+
+2025-12-19 16:02:04 +0800 | Revert "feat(settings): remove unused language change handler logic"
+
+This reverts commit 1aea31e7327f4763931743d3e5f81f570e9e6fde.
+
+2025-12-19 15:35:57 +0800 | feat(settings): remove unused language change handler logic
+
+Removed the placeholder implementation for handling language changes
+in the settings page widget. The previous code included commented-out
+functionality and debug prints that are no longer needed.
+
+Also updated main.py to use system locale for translator loading,
+removing hardcoded language setting and enabling automatic locale detection.
+
+2025-12-19 15:30:03 +0800 | feat(gui): add settings page and integrate navigation
+
+- Add settings page with dedicated widget and controller logic
+- Integrate settings navigation via sidebar button and menu action
+- Connect homepage tile signals to corresponding page controllers
+- Implement placeholder methods for project, database, and simulation pages
+- Update UI components to support dynamic translations
+- Refactor main window theme handling and style updates
+- Remove hardcoded UI definitions and streamline component structure
+- Improve internationalization support in main application entry point
+
+2025-12-18 23:42:18 +0800 | 重写主题适应函数
+
+2025-12-18 23:21:26 +0800 | gui搭建初步框架
+
+2025-12-14 13:43:25 +0800 | 使用uv作为pyenv、pip和env的代替，重新部署了环境
+
+2025-12-13 05:15:53 +0800 | 初始化开发环境
+
+2025-12-13 04:16:12 +0800 | Initial commit

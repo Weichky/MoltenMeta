@@ -14,5 +14,5 @@ enable_file_logging = true
 enable_console = true
 
 [locale]
-language = "zh_CN"
+language = "en"
 theme = "default"
