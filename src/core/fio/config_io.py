@@ -1,13 +1,11 @@
 from pathlib import Path
 import tomllib
 from typing import Dict, Any
-from core.log import getLogger
+from core.log import getLogService
 
 from importlib.resources import files
 
 from core.platform import getRuntimePath
-
-logger = getLogger("config loader")
 
 # Traversable objects act the same as Path objects here.
 DEFAULT_CONFIG = files("resources") / "default.toml"
@@ -15,8 +13,10 @@ DEFAULT_CONFIG = files("resources") / "default.toml"
 # Donot use a user config file anymore,
 # using sqlite database instead.
 # USER_CONFIG = Path(__file__).resolve().parent.parent.parent/ "runtime" / "config.toml"
-logger.debug(getRuntimePath())
 USER_CONFIG = getRuntimePath() / "config.toml" if getRuntimePath() else None
+
+def _getLogger() -> 'logging'.Logger:
+    return getLogService().getLogger("config loader")
 
 def _mergeConfig(base: dict, override: dict) -> dict:
     result = base.copy()
@@ -29,6 +29,8 @@ def _mergeConfig(base: dict, override: dict) -> dict:
     return result
 # Shouldnot be used at elsewhere but config.py
 def _loadConfig() -> Dict[str, Any]:
+    logger = _getLogger()
+
     logger.debug("User config files are no longer used")
 
     with DEFAULT_CONFIG.open("rb") as f:

@@ -15,7 +15,7 @@ class BackgroundLayer(QtWidgets.QWidget):
         self.ui.retranslateUi()
 
         # i18n
-        getI18nService().languageChanged.connect(self.retranslateUi)
+        getI18nService().language_changed.connect(self.retranslateUi)
 
     def retranslateUi(self):
         self.ui.retranslateUi()

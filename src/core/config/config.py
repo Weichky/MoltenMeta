@@ -1,9 +1,6 @@
 from typing import Dict, Any
 
 from core.fio import _loadConfig
-from core.log import getLogger
-
-logger = getLogger(__name__)
 
 _config: Dict[str, Any] | None = None
 

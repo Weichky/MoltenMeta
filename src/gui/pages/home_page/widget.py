@@ -35,7 +35,7 @@ class HomePage(QtWidgets.QWidget):
         self.ui.tiles[SETTINGS_INDEX].clicked.connect(self.settingsButtonClicked.emit)
 
         # i18n
-        getI18nService().languageChanged.connect(self.retranslateUi)
+        getI18nService().language_changed.connect(self.retranslateUi)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)

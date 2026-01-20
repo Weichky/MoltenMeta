@@ -1,7 +1,9 @@
 import sys
 from PySide6.QtWidgets import QApplication
 
-from core.log import getLogger, setLogLevel, setupLogging
+from core.log import (
+    createLogService,
+)
 
 from core.platform import getArgs
 
@@ -30,20 +32,17 @@ def main():
     
     sys.exit(app.exec())
 def init(app):
-    # Can set log level here
-    # Accept logging level such as logging.DEBUG, logging.INFO, etc.
-    setupLogging()
+
+    log_service = createLogService(app)
 
     loadConfig()  
 
     if getArgs().log_level:
-        setLogLevel(getArgs().log_level)
+        log_service.setLogLevel(getArgs().log_level)
     else:    
-        setLogLevel(getLogLevel())
+        log_service.setLogLevel(getLogLevel())
 
-    logger = getLogger("main")
-
-    logger.info("Starting application")
+    logger = log_service.getLogger("main")
 
     i18n_service = createI18nService(app)
 

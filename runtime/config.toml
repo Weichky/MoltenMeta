@@ -9,7 +9,7 @@ python_version = "3.14.2"
 profile = "debug"
 
 [logging]
-level = "debug" #debug, info, warning, error, critical
+level = "info" #debug, info, warning, error, critical
 enable_file_logging = true
 enable_console = true
 

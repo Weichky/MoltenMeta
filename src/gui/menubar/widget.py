@@ -15,7 +15,7 @@ class MenubarWidget(QMenuBar):
         self.ui.action_full_screen.triggered.connect(self.toggleFullScreen)
 
         # i18n
-        getI18nService().languageChanged.connect(self.retranslateUi)
+        getI18nService().language_changed.connect(self.retranslateUi)
 
     def toggleFullScreen(self):
         mainWindow = self.parent()

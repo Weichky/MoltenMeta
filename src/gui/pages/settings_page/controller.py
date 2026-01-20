@@ -4,6 +4,7 @@ from PySide6.QtCore import QObject
 from .ui import UiSettingsPage
 
 from i18n import getI18nService
+from core.log import getLogService
 
 class SettingsController(QObject):
     def __init__(self, ui: UiSettingsPage):
@@ -24,11 +25,17 @@ class SettingsController(QObject):
 
     def connectSignals(self):
         self.ui.lang_combo.currentIndexChanged.connect(self._onLanguageChanged)
+        self.ui.log_level_combo.currentIndexChanged.connect(self._onLogLevelChanged)
 
         # i18n
         # Connect to self.ui instead of self.
-        getI18nService().languageChanged.connect(self.ui.retranslateUi)
+        getI18nService().language_changed.connect(self.ui.retranslateUi)
 
     def _onLanguageChanged(self, index: int):
         language = self.ui.lang_combo.itemData(index)
         getI18nService().setLanguage(language)
+
+    def _onLogLevelChanged(self, index: int):
+        level = self.ui.log_level_combo.itemData(index)
+        getLogService().setLogLevel(level)
+        getLogService().getLogger(__name__).debug(f"Log level changed to {level}")

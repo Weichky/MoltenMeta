@@ -4,10 +4,10 @@ from core.fio import getLanguagePackagePath
 
 from catalog import isSupportedLanguage
 
-_i18nService: _I18nService | None = None
+_i18n_service: _I18nService | None = None
 
 class _I18nService(QObject):
-    languageChanged = Signal()
+    language_changed = Signal()
 
     def __init__(self, app):
          super().__init__(app)
@@ -24,14 +24,14 @@ class _I18nService(QObject):
 
         if language == "en":
             self.translator = None
-            self.languageChanged.emit()
+            self.language_changed.emit()
             return
         
         self.translator = QTranslator(self.app)
         self.translator.load(getLanguagePackagePath(language))
         self.app.installTranslator(self.translator)
 
-        self.languageChanged.emit()
+        self.language_changed.emit()
 
 # Normally, these insignificant loading events can be automatically determined，
 # whether to create the application.
@@ -40,17 +40,17 @@ class _I18nService(QObject):
 # therefore, a distinction must be made.
 # Remember to create service before get it
 def getI18nService() -> _I18nService:
-    global _i18nService
-    if _i18nService:
-        return _i18nService
+    global _i18n_service
+    if _i18n_service:
+        return _i18n_service
     
     raise RuntimeError("i18n service not created")
 
 # You cannot create service twice
 def createI18nService(app) -> _I18nService:
-    global _i18nService
-    if _i18nService:
+    global _i18n_service
+    if _i18n_service:
         raise RuntimeError("I18n service already created")
     
-    _i18nService = _I18nService(app)
-    return _i18nService
+    _i18n_service = _I18nService(app)
+    return _i18n_service

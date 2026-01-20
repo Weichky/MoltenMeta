@@ -32,7 +32,7 @@ class SidebarWidget(QDockWidget):
         self._adjustSidebarSize()
 
         # i18n
-        getI18nService().languageChanged.connect(self.retranslateUi)
+        getI18nService().language_changed.connect(self.retranslateUi)
 
     def _adjustSidebarSize(self):
         self.ui.adjustSidebarSize(self)

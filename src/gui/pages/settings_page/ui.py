@@ -4,7 +4,10 @@ from PySide6.QtCore import QObject
 from core.log import getLogLevelMap
 from catalog import getSupportedLanguagesNameMap
 
-from core.config import getLanguage
+from core.config import (
+    getLanguage,
+    getLogLevel,
+)
 
 class UiSettingsPage(QObject):
     def setupUi(self, settingsPage: QtWidgets.QWidget):
@@ -176,6 +179,13 @@ class UiSettingsPage(QObject):
 
         log_level_layout.addStretch()
         page_layout.addWidget(log_level_group)
+
+        for level in getLogLevelMap().keys():
+            self.log_level_combo.addItem(self.tr(level), level)
+
+        log_level = getLogLevel()
+        self.log_level_combo.setCurrentIndex(self.log_level_combo.findData(log_level))
+
         page_layout.addStretch()
 
         return page
@@ -192,11 +202,6 @@ class UiSettingsPage(QObject):
         # Log settings page
         self.log_level_label.setText(self.tr("Log level:"))
 
-        self.log_level_combo.clear()
-
-        for level in getLogLevelMap().keys():
-            self.log_level_combo.addItem(self.tr(level), level)
-
         # Group box titles
         for i in range(self.content_area.count()):
             widget = self.content_area.widget(i)
@@ -204,3 +209,7 @@ class UiSettingsPage(QObject):
                 group = widget.findChild(QtWidgets.QGroupBox, "languageGroup")
                 if group:
                     group.setTitle(self.tr("Language Settings"))
+            if widget.objectName() == "loggingPage":
+                group = widget.findChild(QtWidgets.QGroupBox, "logLevelGroup")
+                if group:
+                    group.setTitle(self.tr("Logging Settings"))

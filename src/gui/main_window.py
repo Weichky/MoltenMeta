@@ -8,9 +8,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QPalette
 import PySide6QtAds as QtAds
 
-from core.log import getLogger
-
 from i18n import getI18nService
+from core.log import getLogService
 
 from gui.ui_main_window import UiMainWindow
 from gui.sidebar import SidebarWidget
@@ -22,7 +21,7 @@ class MainWindow(QMainWindow):
 
         super().__init__(parent)
 
-        self.logger = getLogger(__name__)
+        self.logger = getLogService().getLogger(__name__)
 
         self.ui = UiMainWindow()
         self.ui.setupUi(self)
@@ -71,7 +70,7 @@ class MainWindow(QMainWindow):
         )
         
         # i18n
-        getI18nService().languageChanged.connect(self.retranslateUi)
+        getI18nService().language_changed.connect(self.retranslateUi)
 
         # Automatically show home page on startup
         self.workspace.controller.showHome()

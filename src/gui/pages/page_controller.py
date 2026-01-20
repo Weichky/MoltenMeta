@@ -5,7 +5,7 @@ import PySide6QtAds as QtAds
 from gui.pages.home_page import HomePage
 from gui.pages.settings_page import SettingsPage
 
-from core.log import getLogger
+from core.log import getLogService
 
 from i18n import getI18nService
 
@@ -22,7 +22,7 @@ class PageController:
 
     def __init__(self, dock_manager: QtAds.CDockManager, background_layer: QtWidgets.QWidget):
 
-        self.logger = getLogger(__name__)
+        self.logger = getLogService().getLogger(__name__)
 
         # page_spec
         self._home_spec = DockPageSpec(
@@ -168,7 +168,7 @@ class PageController:
         page.settingsButtonClicked.connect(self.showSettings)
 
         # i18n
-        getI18nService().languageChanged.connect(self.retranslateUi)
+        getI18nService().language_changed.connect(self.retranslateUi)
 
     def retranslateUi(self):
 
