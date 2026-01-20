@@ -39,7 +39,6 @@ class _LogService(QObject):
 
 # Also see function getI18nService() in i18n_service.py
 def getLogService() -> _LogService:
-    global _log_service
     if _log_service:
         return _log_service
     
@@ -48,12 +47,11 @@ def getLogService() -> _LogService:
 # You cannot create service twice
 def createLogService(app) -> _LogService:
     global _log_service
+
     if _log_service:
         raise RuntimeError("Log service already created")
     
     _log_service = _LogService(app)
 
     getLogService().setupLogging()
-
-    getLogService().getLogger("log service").debug("Log service created")
     return _log_service

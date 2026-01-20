@@ -40,7 +40,6 @@ class _I18nService(QObject):
 # therefore, a distinction must be made.
 # Remember to create service before get it
 def getI18nService() -> _I18nService:
-    global _i18n_service
     if _i18n_service:
         return _i18n_service
     
