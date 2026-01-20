@@ -5,7 +5,8 @@ from catalog import LogLevel
 def getLogger(name: str) -> logging.Logger:
     return logging.getLogger(name)
 
-def setupLogging(level=logging.INFO):
+# default DEBUG
+def setupLogging(level=logging.DEBUG):
     logging.basicConfig(
         level=level,
         format="[%(levelname)s](%(name)s)|%(asctime)s|%(message)s",

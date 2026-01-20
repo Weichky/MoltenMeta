@@ -15,7 +15,8 @@ DEFAULT_CONFIG = files("resources") / "default.toml"
 # Donot use a user config file anymore,
 # using sqlite database instead.
 # USER_CONFIG = Path(__file__).resolve().parent.parent.parent/ "runtime" / "config.toml"
-USER_CONFIG = getRuntimePath() / "config.toml"
+logger.debug(getRuntimePath())
+USER_CONFIG = getRuntimePath() / "config.toml" if getRuntimePath() else None
 
 def _mergeConfig(base: dict, override: dict) -> dict:
     result = base.copy()
@@ -26,16 +27,20 @@ def _mergeConfig(base: dict, override: dict) -> dict:
             result[k] = v
 
     return result
-
-def loadConfig() -> Dict[str, Any]:
-    logger.info("User config files are no longer used")
+# Shouldnot be used at elsewhere but config.py
+def _loadConfig() -> Dict[str, Any]:
+    logger.debug("User config files are no longer used")
 
     with DEFAULT_CONFIG.open("rb") as f:
         base = tomllib.load(f)
 
+    if not USER_CONFIG:
+        logger.warning("No runtime path given, using default config")
+        return base
+
     if not USER_CONFIG.exists():
         logger.warning("No user config found, using default config")
-        logger.info("SQLite database will save user configs alternatively in the future")
+        logger.debug("SQLite database will save user configs alternatively in the future")
 
     else:
         with USER_CONFIG.open("rb") as f:

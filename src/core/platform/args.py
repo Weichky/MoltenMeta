@@ -35,4 +35,4 @@ def getArgs() -> argparse.Namespace:
     return _args
 
 def getRuntimePath() -> Path:
-    return Path(getArgs().runtime_path).resolve()
+    return Path(getArgs().runtime_path).resolve() if getArgs().runtime_path else None

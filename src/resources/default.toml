@@ -15,4 +15,5 @@ enable_console = true
 
 [locale]
 language = "en"
-theme = "default"
+theme = "teal"
+scheme = "light"

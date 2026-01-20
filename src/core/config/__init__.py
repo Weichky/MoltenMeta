@@ -1,1 +1,11 @@
-from .config import getConfigs, getConfig, getLanguage, setLanguage
+from .config import (
+    loadConfig,
+    getConfigs,
+    getConfig,
+    getLanguage,
+    setLanguage,
+    getLogLevel,
+    getThemeName,
+    getThemeXML,
+    getScheme
+)
