@@ -20,7 +20,7 @@ class _ThemeService(QObject, QtStyleTools):
     def __init__(self, app: 'QApplication'):
         super().__init__(app)
         self._app = app
-        self._logger = getLogService().getLogger("theme service")
+        self._logger = getLogService().getLogger(__name__)
 
 
     def applyTheme(
@@ -29,7 +29,7 @@ class _ThemeService(QObject, QtStyleTools):
             scheme: str | None = None,
             extra: list | None = None
         ) -> None:
-        self._logger.info(
+        self._logger.debug(
             "Applying theme: %s", theme_xml
         )
 

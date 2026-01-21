@@ -16,7 +16,7 @@ DEFAULT_CONFIG = files("resources") / "default.toml"
 USER_CONFIG = getRuntimePath() / "config.toml" if getRuntimePath() else None
 
 def _getLogger() -> 'logging'.Logger:
-    return getLogService().getLogger("config loader")
+    return getLogService().getLogger(__name__)
 
 def _mergeConfig(base: dict, override: dict) -> dict:
     result = base.copy()
