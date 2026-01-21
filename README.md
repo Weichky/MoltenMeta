@@ -6,7 +6,7 @@ A flexible software platform integrating a liquid metal property database with p
 ### Platform Requirements
 
 * **Windows**: Windows 10 or later
-* **macOS**: Supported (not exhaustively tested on all recent versions)
+* **macOS**: Supported (tested during development on a MacBook; not exhaustively tested on older macOS versionsd)
 * **Linux**: Supported with limitations (see below)
 
 ### Linux Display Server Notes
@@ -27,7 +27,7 @@ As a result:
 * Wayland sessions are considered **unsupported** at this time
 
 The upstream issue is tracked here:
-👉 [https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System/issues/738](Qt 6.9.0 + master result in broken windows on Ubuntu 22.04)
+👉 [Qt 6.9.0 + master result in broken windows on Ubuntu 22.04](https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System/issues/738)
 
 ### Recommendation for Linux Users
 
