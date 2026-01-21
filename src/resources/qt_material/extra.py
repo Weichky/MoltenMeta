@@ -1,3 +1,5 @@
+from platform import system
+
 default_extra = {
 
     # Button colors
@@ -10,4 +12,5 @@ default_extra = {
 
     # environ
     'pyside6': True,
+    'linux': system() == 'Linux',
 }
