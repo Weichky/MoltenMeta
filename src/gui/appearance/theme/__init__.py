@@ -1,4 +1,4 @@
-from .theme import (
-    applyStyleSheet,
-    getThemeList
+from .theme_service import (
+    createThemeService,
+    getThemeService,
 )

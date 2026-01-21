@@ -17,9 +17,11 @@ from core.config import (
 
 from i18n import createI18nService
 
-from gui.appearance.theme import applyStyleSheet
+from gui.appearance.theme import createThemeService
 
 from gui.main_window import MainWindow
+
+from resources.qt_material import default_extra
 
 def main():
 
@@ -48,7 +50,9 @@ def init(app):
 
     i18n_service.setLanguage(getLanguage())
 
-    applyStyleSheet(app, getThemeXML(), getScheme())
+    theme_service = createThemeService(app)
 
+    theme_service.applyTheme(getThemeXML(), getScheme(), default_extra)
+    
 if __name__ == "__main__":
     main()
