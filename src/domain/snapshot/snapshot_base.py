@@ -5,9 +5,9 @@ class SnapshotBase(ABC):
 
     @classmethod
     @abstractmethod
-    def from_row(cls, row) -> 'SnapshotBase':
+    def fromRow(cls, row) -> 'SnapshotBase':
         ...
     
     @abstractmethod
-    def to_record(self) -> dict:
+    def toRecord(self) -> dict:
         ...

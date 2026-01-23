@@ -2,7 +2,7 @@
 tree.txt
 .VSCodeCounter/
 
-# MacOs
+# MacOS
 .DS_Store
 
 # Byte-compiled / optimized / DLL files
@@ -57,6 +57,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+moltenmeta.egg-info/
 
 # Translations
 *.mo
