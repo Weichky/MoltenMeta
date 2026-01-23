@@ -3,17 +3,16 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE elements (
     id            INTEGER PRIMARY KEY,
     symbol        TEXT    NOT NULL UNIQUE,
-    atomic_wt     REAL,
-    atomic_r      REAL,
-    melting_pt   REAL,
-    mpt_density  REAL
+    atomic_mass   REAL,
+    atomic_radius REAL,
+    melting_point REAL,
+    melt_density  REAL
 );
 
 CREATE TABLE systems (
     id           INTEGER PRIMARY KEY,
     component    TEXT    NOT NULL,
     n_component  INTEGER NOT NULL,
-    description  TEXT
 );
 
 CREATE TABLE system_composition (
@@ -35,16 +34,16 @@ CREATE TABLE system_composition (
 CREATE TABLE properties (
     id        INTEGER PRIMARY KEY,
     name      TEXT NOT NULL UNIQUE,
-    symbol    TEXT,
-    unit      TEXT,
+    symbol    TEXT NOT NULL,
+    unit      TEXT NOT NULL,
     category  TEXT
 );
 
 CREATE TABLE methods (
     id       INTEGER PRIMARY KEY,
+    name     TEXT NOT NULL,
     type     TEXT,
-    name     TEXT,
-    details  TEXT
+    detail   TEXT
 );
 
 CREATE TABLE property_values (
@@ -73,8 +72,8 @@ CREATE TABLE property_values (
 
 CREATE TABLE meta (
     value_id     INTEGER PRIMARY KEY,
-    create_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
-    create_by    TEXT,
+    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by    TEXT,
     source_file  TEXT,
 
     FOREIGN KEY (value_id)
