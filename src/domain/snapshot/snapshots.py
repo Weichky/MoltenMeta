@@ -5,8 +5,52 @@ from .snapshot_base import SnapshotBase
 
 
 @dataclass
-class ElementSnapshot(SnapshotBase):
+class SymbolSnapshot(SnapshotBase):
     symbol: str = ""
+    name: Optional[str] = None
+    category: Optional[str] = None
+    id: Optional[int] = field(default=None, init=False)
+
+    @classmethod
+    def fromRow(cls, row) -> "SymbolSnapshot":
+        instance = cls(
+            symbol=row.get("symbol", ""),
+            name=row.get("name"),
+            category=row.get("category"),
+        )
+        instance.id = row.get("id")
+        return instance
+
+    def toRecord(self) -> dict:
+        return {
+            "symbol": self.symbol,
+            "name": self.name,
+            "category": self.category,
+        }
+
+
+@dataclass
+class UnitSnapshot(SnapshotBase):
+    symbol: str = ""
+    id: Optional[int] = field(default=None, init=False)
+
+    @classmethod
+    def fromRow(cls, row) -> "UnitSnapshot":
+        instance = cls(
+            symbol=row.get("symbol", ""),
+        )
+        instance.id = row.get("id")
+        return instance
+
+    def toRecord(self) -> dict:
+        return {
+            "symbol": self.symbol,
+        }
+
+
+@dataclass
+class ElementSnapshot(SnapshotBase):
+    symbol_id: int = 0
     atomic_mass: Optional[float] = None
     atomic_radius: Optional[float] = None
     melting_point: Optional[float] = None
@@ -16,7 +60,7 @@ class ElementSnapshot(SnapshotBase):
     @classmethod
     def fromRow(cls, row) -> "ElementSnapshot":
         instance = cls(
-            symbol=row.get("symbol", ""),
+            symbol_id=row.get("symbol_id", 0),
             atomic_mass=row.get("atomic_mass"),
             atomic_radius=row.get("atomic_radius"),
             melting_point=row.get("melting_point"),
@@ -27,7 +71,7 @@ class ElementSnapshot(SnapshotBase):
 
     def toRecord(self) -> dict:
         return {
-            "symbol": self.symbol,
+            "symbol_id": self.symbol_id,
             "atomic_mass": self.atomic_mass,
             "atomic_radius": self.atomic_radius,
             "melting_point": self.melting_point,
@@ -37,21 +81,24 @@ class ElementSnapshot(SnapshotBase):
 
 @dataclass
 class SystemSnapshot(SnapshotBase):
-    component: str = ""
-    n_component: int = 0
+    label: str = ""
+    n_component: Optional[int] = None
     id: Optional[int] = field(default=None, init=False)
 
     @classmethod
     def fromRow(cls, row) -> "SystemSnapshot":
         instance = cls(
-            component=row.get("component", ""),
-            n_component=row.get("n_component", 0),
+            label=row.get("label", ""),
+            n_component=row.get("n_component"),
         )
         instance.id = row.get("id")
         return instance
 
     def toRecord(self) -> dict:
-        return {"component": self.component, "n_component": self.n_component}
+        return {
+            "label": self.label,
+            "n_component": self.n_component,
+        }
 
 
 @dataclass
@@ -80,8 +127,8 @@ class SystemCompositionSnapshot(SnapshotBase):
 @dataclass
 class PropertySnapshot(SnapshotBase):
     name: str = ""
-    symbol: str = ""
-    unit: str = ""
+    symbol_id: int = 0
+    unit_id: int = 0
     category: Optional[str] = None
     id: Optional[int] = field(default=None, init=False)
 
@@ -89,8 +136,8 @@ class PropertySnapshot(SnapshotBase):
     def fromRow(cls, row) -> "PropertySnapshot":
         instance = cls(
             name=row.get("name", ""),
-            symbol=row.get("symbol", ""),
-            unit=row.get("unit", ""),
+            symbol_id=row.get("symbol_id", 0),
+            unit_id=row.get("unit_id", 0),
             category=row.get("category"),
         )
         instance.id = row.get("id")
@@ -99,8 +146,8 @@ class PropertySnapshot(SnapshotBase):
     def toRecord(self) -> dict:
         return {
             "name": self.name,
-            "symbol": self.symbol,
-            "unit": self.unit,
+            "symbol_id": self.symbol_id,
+            "unit_id": self.unit_id,
             "category": self.category,
         }
 
@@ -127,13 +174,36 @@ class MethodSnapshot(SnapshotBase):
 
 
 @dataclass
+class ConditionSnapshot(SnapshotBase):
+    name: str = ""
+    symbol_id: Optional[int] = None
+    unit_id: int = 0
+    id: Optional[int] = field(default=None, init=False)
+
+    @classmethod
+    def fromRow(cls, row) -> "ConditionSnapshot":
+        instance = cls(
+            name=row.get("name", ""),
+            symbol_id=row.get("symbol_id"),
+            unit_id=row.get("unit_id", 0),
+        )
+        instance.id = row.get("id")
+        return instance
+
+    def toRecord(self) -> dict:
+        return {
+            "name": self.name,
+            "symbol_id": self.symbol_id,
+            "unit_id": self.unit_id,
+        }
+
+
+@dataclass
 class PropertyValueSnapshot(SnapshotBase):
     system_id: int = 0
     property_id: int = 0
     method_id: Optional[int] = None
     value: float = 0.0
-    temperature: Optional[float] = None
-    pressure: Optional[float] = None
     id: Optional[int] = field(default=None, init=False)
 
     @classmethod
@@ -143,8 +213,6 @@ class PropertyValueSnapshot(SnapshotBase):
             property_id=row.get("property_id", 0),
             method_id=row.get("method_id"),
             value=row.get("value", 0.0),
-            temperature=row.get("temperature"),
-            pressure=row.get("pressure"),
         )
         instance.id = row.get("id")
         return instance
@@ -155,8 +223,29 @@ class PropertyValueSnapshot(SnapshotBase):
             "property_id": self.property_id,
             "method_id": self.method_id,
             "value": self.value,
-            "temperature": self.temperature,
-            "pressure": self.pressure,
+        }
+
+
+@dataclass
+class PropertyValueConditionSnapshot(SnapshotBase):
+    value_id: int = 0
+    condition_id: int = 0
+    condition_value: float = 0.0
+
+    @classmethod
+    def fromRow(cls, row) -> "PropertyValueConditionSnapshot":
+        instance = cls(
+            value_id=row.get("value_id", 0),
+            condition_id=row.get("condition_id", 0),
+            condition_value=row.get("value", 0.0),
+        )
+        return instance
+
+    def toRecord(self) -> dict:
+        return {
+            "value_id": self.value_id,
+            "condition_id": self.condition_id,
+            "value": self.condition_value,
         }
 
 
@@ -191,4 +280,29 @@ class MetaSnapshot(SnapshotBase):
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "created_by": self.created_by,
             "source_file": self.source_file,
+        }
+
+
+@dataclass
+class SettingSnapshot(SnapshotBase):
+    section: str = ""
+    key: str = ""
+    value: str = ""
+    id: Optional[int] = field(default=None, init=False)
+
+    @classmethod
+    def fromRow(cls, row) -> "SettingSnapshot":
+        instance = cls(
+            section=row.get("section", ""),
+            key=row.get("key", ""),
+            value=row.get("value", ""),
+        )
+        instance.id = row.get("id")
+        return instance
+
+    def toRecord(self) -> dict:
+        return {
+            "section": self.section,
+            "key": self.key,
+            "value": self.value,
         }
