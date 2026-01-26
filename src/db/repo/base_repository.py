@@ -93,11 +93,11 @@ class BaseRepository(ABC, Generic[T]):
 
     @abstractmethod
     def getTableName(self) -> str:
-        pass
+        ...
 
     @abstractmethod
     def getEntityClass(self) -> type[T]:
-        pass
+        ...
 
     def createTable(self) -> None:
         create_sql = self._getCreateTableSql()
@@ -107,7 +107,7 @@ class BaseRepository(ABC, Generic[T]):
 
     @abstractmethod
     def _getCreateTableSql(self) -> str:
-        pass
+        ...
 
     def insert(self, entity: T) -> int:
         table = self.getTableName()
