@@ -1,5 +1,5 @@
 from .base_repository import BaseRepository
-from domain.snapshot.snapshots import (
+from domain import (
     ElementSnapshot,
     SystemSnapshot,
     SystemCompositionSnapshot,
