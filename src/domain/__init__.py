@@ -1,4 +1,5 @@
 from .snapshot.snapshots import (
+    SettingsSnapshot,
     ElementSnapshot,
     SystemSnapshot,
     SystemCompositionSnapshot,
@@ -9,6 +10,7 @@ from .snapshot.snapshots import (
 )
 
 __all__ = [
+    "SettingsSnapshot",
     "ElementSnapshot",
     "SystemSnapshot",
     "SystemCompositionSnapshot",

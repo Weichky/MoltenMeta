@@ -1,8 +1,4 @@
-#!/usr/bin/env python3
-"""
-Database configuration and management for MoltenMeta
-Supports both SQLite and PostgreSQL databases
-"""
+# Manual rewriting is urgently needed
 
 import os
 import json
