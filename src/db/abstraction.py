@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 from enum import Enum
 
+from pathlib import Path
 
 class DatabaseType(Enum):
     SQLITE = "sqlite"
@@ -133,7 +134,7 @@ class DatabaseConfig:
         database: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
-        file_path: Optional[str] = None,
+        file_path: Optional[Path] = None,
         **kwargs,
     ):
         self.db_type = db_type

@@ -51,7 +51,7 @@ class DatabaseManager:
 
                 self._config = DatabaseConfig(
                     db_type=DatabaseType.SQLITE,
-                    file_path=str(runtime_path / "moltenmeta.db"),
+                    file_path=str(runtime_path / "moltenmeta.mmdb"),
                 )
 
             # Create connection based on database type
