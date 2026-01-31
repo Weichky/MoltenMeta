@@ -7,7 +7,7 @@ from catalog import DatabaseType, DatabaseConfig
 
 from core.config import getDatabaseType, getDatabaseFilePath
 
-from db import DatabaseManager
+from db import getDatabaseManager, DatabaseManager
 
 class DatabaseConfigManager:
     @classmethod
@@ -29,11 +29,34 @@ class DatabaseConfigManager:
                 db_type=db_type,
                 file_path=getDatabaseFilePath(),
             )
+        
+_database_service: Optional[DatabaseService] = None
+def getDatabaseService() -> DatabaseService:
+    global _database_service
+    if _database_service is None:
+        _database_service = DatabaseService()
+    return _database_service
+
+def configureDatabase(config: Optional[DatabaseConfig] = None) -> None:
+    global _database_service
+    if _database_service is None:
+        raise RuntimeError("Database service not created")
+
+    _database_service.configureDatabase(config)
+
+    if not _database_service.testConnection():
+        raise RuntimeError("Failed to connect to database")
+    
+def closeDatabase() -> None:
+    global _database_service
+    if _database_service:
+        _database_service.close()
+        _database_service = None
 
 class DatabaseService:
     def __init__(self):
         self._logger = getLogService().getLogger(__name__)
-        self._manager = DatabaseManager()
+        self._manager = getDatabaseManager()
 
     def configureDatabase(self, config: Optional[DatabaseConfig] = None) -> None:
         if config is None:
@@ -58,26 +81,3 @@ class DatabaseService:
 
     def close(self) -> None:
         self._manager.close()
-
-_database_service: Optional[DatabaseService] = None
-def getDatabaseService() -> DatabaseService:
-    global _database_service
-    if _database_service is None:
-        _database_service = DatabaseService()
-    return _database_service
-
-def configureDatabase(config: Optional[DatabaseConfig] = None) -> None:
-    global _database_service
-    if _database_service is None:
-        raise RuntimeError("Database service not created")
-
-    _database_service.configureDatabase(config)
-
-    if not _database_service.testConnection():
-        raise RuntimeError("Failed to connect to database")
-    
-def closeDatabase() -> None:
-    global _database_service
-    if _database_service:
-        _database_service.close()
-        _database_service = None    

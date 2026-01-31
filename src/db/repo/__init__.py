@@ -1,4 +1,5 @@
-from .base_repository import BaseRepository, DatabaseManager
+from .base_repository import BaseRepository
+
 from .repositories import (
     SettingsRepository,
     SymbolRepository,
@@ -16,7 +17,6 @@ from .repositories import (
 
 __all__ = [
     "BaseRepository",
-    "DatabaseManager",
     "SettingsRepository",
     "SymbolRepository",
     "UnitRepository",

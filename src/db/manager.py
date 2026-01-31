@@ -8,17 +8,17 @@ from core.platform import getRuntimePath
 from .adapters.sqlite import SQLiteConnection
 from .adapters.postgresql import PostgreSQLConnection
 
-class DatabaseManager:
-    """Manages database connections and provides unified interface"""
+_database_manager: Optional[DatabaseManager] = None
 
-    _instance = None
+def getDatabaseManager() -> DatabaseManager:
+    global _database_manager
+    if _database_manager is None:
+        _database_manager = DatabaseManager()
+    return _database_manager
+
+class DatabaseManager:
     _connection: Optional[DatabaseConnection] = None
     _config: Optional[DatabaseConfig] = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
 
     def configure(self, config: DatabaseConfig) -> None:
         """Configure database connection"""

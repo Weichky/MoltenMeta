@@ -13,7 +13,7 @@ from .repo.repositories import (
     MetaRepository,
 )
 
-from .manager import DatabaseManager
+from .manager import getDatabaseManager, DatabaseManager
 
 __all__ = [
     "SettingsRepository",
@@ -29,4 +29,5 @@ __all__ = [
     "PropertyValueConditionRepository",
     "MetaRepository",
     "DatabaseManager",
+    "getDatabaseManager",
 ]

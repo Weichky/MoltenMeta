@@ -3,7 +3,7 @@ from typing import List, Optional, TypeVar, Generic, Any, Protocol
 
 from core.log import getLogService
 from ..abstraction import DatabaseConnection
-from ..manager import DatabaseManager
+from ..manager import getDatabaseManager
 
 class EntityProtocol(Protocol):
     id: Optional[int]
@@ -18,7 +18,7 @@ T = TypeVar("T", bound=EntityProtocol)
 
 class BaseRepository(ABC, Generic[T]):
     def __init__(self):
-        self._db_manager = DatabaseManager()
+        self._db_manager = getDatabaseManager()
         self._logger = getLogService().getLogger(self.__class__.__name__)
 
     @property
