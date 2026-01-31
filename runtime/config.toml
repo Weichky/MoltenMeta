@@ -7,4 +7,8 @@ is_default_config = false
 [runtime]
 python_version = "3.14.2"
 profile = "debug"
+
+[database]
 db_type = "sqlite"
+file_path = "data"
+file_name = "moltenmeta.mmdb"

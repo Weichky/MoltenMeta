@@ -7,5 +7,9 @@ from .config import (
     getLogLevel,
     getThemeName,
     getThemeXML,
-    getScheme
+    getScheme,
+    getDatabaseType,
+    getDatabaseTypeName,
+    getDatabaseFileName,
+    getDatabaseFilePath
 )

@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional
 from .snapshot_base import SnapshotBase
 
+
 @dataclass
 class SettingsSnapshot(SnapshotBase):
     id: Optional[int] = field(default=None, init=False)
@@ -12,11 +13,7 @@ class SettingsSnapshot(SnapshotBase):
 
     @classmethod
     def fromRow(cls, row) -> "SettingsSnapshot":
-        instance = cls(
-            section=row["section"],
-            key=row["key"],
-            value=row["value"]
-        )
+        instance = cls(section=row["section"], key=row["key"], value=row["value"])
         instance.id = row.get("id")
         return instance
 
@@ -254,14 +251,14 @@ class PropertyValueSnapshot(SnapshotBase):
 class PropertyValueConditionSnapshot(SnapshotBase):
     value_id: int
     condition_id: int
-    condition_value: float
+    value: float
 
     @classmethod
     def fromRow(cls, row) -> "PropertyValueConditionSnapshot":
         instance = cls(
             value_id=row["value_id"],
             condition_id=row["condition_id"],
-            condition_value=row["value"],
+            value=row["value"],
         )
         return instance
 
@@ -269,7 +266,7 @@ class PropertyValueConditionSnapshot(SnapshotBase):
         return {
             "value_id": self.value_id,
             "condition_id": self.condition_id,
-            "value": self.condition_value,
+            "value": self.value,
         }
 
 

@@ -101,7 +101,7 @@ def test_database_operations():
             system_repo.createTable()
             print("✓ Systems table created")
 
-            system = SystemSnapshot(component="Fe-Cr", n_component=2)
+            system = SystemSnapshot(label="Fe-Cr", n_component=2)
             system_id = system_repo.insert(system)
             print(f"✓ System inserted with ID: {system_id}")
 

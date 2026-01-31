@@ -6,8 +6,10 @@ from ..abstraction import (
     DatabaseDialect,
     DatabaseConnection,
     DatabaseCursor,
-    DatabaseConfig,
 )
+
+from catalog import DatabaseConfig
+
 from core.log import getLogService
 
 

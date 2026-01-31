@@ -1,23 +1,28 @@
 from .base_repository import BaseRepository
 from domain import (
     SettingsSnapshot,
+    SymbolSnapshot,
+    UnitSnapshot,
     ElementSnapshot,
     SystemSnapshot,
     SystemCompositionSnapshot,
     PropertySnapshot,
     MethodSnapshot,
+    ConditionSnapshot,
     PropertyValueSnapshot,
+    PropertyValueConditionSnapshot,
     MetaSnapshot,
 )
 from typing import List, Optional
 
+
 class SettingsRepository(BaseRepository[SettingsSnapshot]):
     def getTableName(self) -> str:
         return "settings"
-    
+
     def getEntityClass(self) -> type[SettingsSnapshot]:
         return SettingsSnapshot
-    
+
     def _getCreateTableSql(self) -> str:
         dialect = self.dialect
         return f"""
@@ -29,7 +34,7 @@ class SettingsRepository(BaseRepository[SettingsSnapshot]):
             UNIQUE(section, key)
         )
         """
-                
+
     def findBySectionAndKey(self, section: str, key: str) -> Optional[SettingsSnapshot]:
         placeholder = self.dialect.getPlaceholder()
         sql = f"SELECT * FROM settings WHERE section = {placeholder} AND key = {placeholder}"
@@ -39,6 +44,7 @@ class SettingsRepository(BaseRepository[SettingsSnapshot]):
         if row:
             return SettingsSnapshot.fromRow(row)
         return None
+
 
 class ElementRepository(BaseRepository[ElementSnapshot]):
     def getTableName(self) -> str:
@@ -52,18 +58,19 @@ class ElementRepository(BaseRepository[ElementSnapshot]):
         return f"""
         CREATE TABLE IF NOT EXISTS elements (
             id {dialect.getAutoincrementType()},
-            symbol {dialect.getTextType()} NOT NULL UNIQUE,
+            symbol_id {dialect.getIntegerType()} NOT NULL,
             atomic_mass {dialect.getRealType()},
             atomic_radius {dialect.getRealType()},
             melting_point {dialect.getRealType()},
-            melt_density {dialect.getRealType()}
+            melt_density {dialect.getRealType()},
+            FOREIGN KEY (symbol_id) REFERENCES symbols(id) ON DELETE RESTRICT
         )
         """
 
-    def findBySymbol(self, symbol: str) -> Optional[ElementSnapshot]:
+    def findBySymbolId(self, symbol_id: int) -> Optional[ElementSnapshot]:
         placeholder = self.dialect.getPlaceholder()
-        sql = f"SELECT * FROM elements WHERE symbol = {placeholder}"
-        cursor = self.connection.execute(sql, [symbol])
+        sql = f"SELECT * FROM elements WHERE symbol_id = {placeholder}"
+        cursor = self.connection.execute(sql, [symbol_id])
         row = cursor.fetchone()
 
         if row:
@@ -83,8 +90,8 @@ class SystemRepository(BaseRepository[SystemSnapshot]):
         return f"""
         CREATE TABLE IF NOT EXISTS systems (
             id {dialect.getAutoincrementType()},
-            component {dialect.getTextType()} NOT NULL,
-            n_component {dialect.getIntegerType()} NOT NULL
+            label {dialect.getTextType()} NOT NULL,
+            n_component {dialect.getIntegerType()}
         )
         """
 
@@ -130,9 +137,11 @@ class PropertyRepository(BaseRepository[PropertySnapshot]):
         CREATE TABLE IF NOT EXISTS properties (
             id {dialect.getAutoincrementType()},
             name {dialect.getTextType()} NOT NULL UNIQUE,
-            symbol {dialect.getTextType()} NOT NULL,
-            unit {dialect.getTextType()} NOT NULL,
-            category {dialect.getTextType()}
+            symbol_id {dialect.getIntegerType()} NOT NULL,
+            unit_id {dialect.getIntegerType()} NOT NULL,
+            category {dialect.getTextType()},
+            FOREIGN KEY (symbol_id) REFERENCES symbols(id) ON DELETE RESTRICT,
+            FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE RESTRICT
         )
         """
 
@@ -199,8 +208,6 @@ class PropertyValueRepository(BaseRepository[PropertyValueSnapshot]):
             property_id {dialect.getIntegerType()} NOT NULL,
             method_id {dialect.getIntegerType()},
             value {dialect.getRealType()} NOT NULL,
-            temperature {dialect.getRealType()},
-            pressure {dialect.getRealType()},
             FOREIGN KEY (system_id) REFERENCES systems(id) ON DELETE CASCADE,
             FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE RESTRICT,
             FOREIGN KEY (method_id) REFERENCES methods(id) ON DELETE SET NULL
@@ -273,3 +280,126 @@ class MetaRepository(BaseRepository[MetaSnapshot]):
             f"Inserted/Updated record in {table} with value_id {entity.value_id}"
         )
         return entity.value_id
+
+class SymbolRepository(BaseRepository[SymbolSnapshot]):
+    def getTableName(self) -> str:
+        return "symbols"
+
+    def getEntityClass(self) -> type[SymbolSnapshot]:
+        return SymbolSnapshot
+
+    def _getCreateTableSql(self) -> str:
+        dialect = self.dialect
+        return f"""
+        CREATE TABLE IF NOT EXISTS symbols (
+            id {dialect.getAutoincrementType()},
+            symbol {dialect.getTextType()} NOT NULL,
+            name {dialect.getTextType()},
+            category {dialect.getTextType()}
+        )
+        """
+
+    def findBySymbol(self, symbol: str) -> Optional[SymbolSnapshot]:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT * FROM symbols WHERE symbol = {placeholder}"
+        cursor = self.connection.execute(sql, [symbol])
+        row = cursor.fetchone()
+
+        if row:
+            return SymbolSnapshot.fromRow(row)
+        return None
+
+
+class UnitRepository(BaseRepository[UnitSnapshot]):
+    def getTableName(self) -> str:
+        return "units"
+
+    def getEntityClass(self) -> type[UnitSnapshot]:
+        return UnitSnapshot
+
+    def _getCreateTableSql(self) -> str:
+        dialect = self.dialect
+        return f"""
+        CREATE TABLE IF NOT EXISTS units (
+            id {dialect.getAutoincrementType()},
+            symbol {dialect.getTextType()} NOT NULL
+        )
+        """
+
+    def findBySymbol(self, symbol: str) -> Optional[UnitSnapshot]:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT * FROM units WHERE symbol = {placeholder}"
+        cursor = self.connection.execute(sql, [symbol])
+        row = cursor.fetchone()
+
+        if row:
+            return UnitSnapshot.fromRow(row)
+        return None
+
+
+class ConditionRepository(BaseRepository[ConditionSnapshot]):
+    def getTableName(self) -> str:
+        return "conditions"
+
+    def getEntityClass(self) -> type[ConditionSnapshot]:
+        return ConditionSnapshot
+
+    def _getCreateTableSql(self) -> str:
+        dialect = self.dialect
+        return f"""
+        CREATE TABLE IF NOT EXISTS conditions (
+            id {dialect.getAutoincrementType()},
+            name {dialect.getTextType()} NOT NULL UNIQUE,
+            symbol_id {dialect.getIntegerType()},
+            unit_id {dialect.getIntegerType()} NOT NULL,
+            FOREIGN KEY (symbol_id) REFERENCES symbols(id) ON DELETE RESTRICT,
+            FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE RESTRICT
+        )
+        """
+
+    def findByName(self, name: str) -> Optional[ConditionSnapshot]:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT * FROM conditions WHERE name = {placeholder}"
+        cursor = self.connection.execute(sql, [name])
+        row = cursor.fetchone()
+
+        if row:
+            return ConditionSnapshot.fromRow(row)
+        return None
+
+
+class PropertyValueConditionRepository(BaseRepository[PropertyValueConditionSnapshot]):
+    def getTableName(self) -> str:
+        return "property_value_conditions"
+
+    def getEntityClass(self) -> type[PropertyValueConditionSnapshot]:
+        return PropertyValueConditionSnapshot
+
+    def _getCreateTableSql(self) -> str:
+        dialect = self.dialect
+        return f"""
+        CREATE TABLE IF NOT EXISTS property_value_conditions (
+            value_id {dialect.getIntegerType()} NOT NULL,
+            condition_id {dialect.getIntegerType()} NOT NULL,
+            value {dialect.getRealType()} NOT NULL,
+            PRIMARY KEY (value_id, condition_id),
+            FOREIGN KEY (value_id) REFERENCES property_values(id) ON DELETE CASCADE,
+            FOREIGN KEY (condition_id) REFERENCES conditions(id) ON DELETE RESTRICT
+        )
+        """
+
+    def findByValueId(self, value_id: int) -> List[PropertyValueConditionSnapshot]:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT * FROM property_value_conditions WHERE value_id = {placeholder}"
+        cursor = self.connection.execute(sql, [value_id])
+        rows = cursor.fetchall()
+        return [PropertyValueConditionSnapshot.fromRow(row) for row in rows]
+
+    def findByConditionId(
+        self, condition_id: int
+    ) -> List[PropertyValueConditionSnapshot]:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT * FROM property_value_conditions WHERE condition_id = {placeholder}"
+        cursor = self.connection.execute(sql, [condition_id])
+        rows = cursor.fetchall()
+        return [PropertyValueConditionSnapshot.fromRow(row) for row in rows]

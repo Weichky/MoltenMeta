@@ -1,6 +1,11 @@
 from typing import Dict, Any
+from pathlib import Path
+
+from catalog import DatabaseType
 
 from core.fio import _loadConfig
+
+from core.platform import getRuntimePath
 
 _config: Dict[str, Any] | None = None
 
@@ -21,7 +26,7 @@ def getConfig(key: str) -> Any:
     global _config
 
     if _config is None:
-        raise RuntimeError("Config system not initialized")
+        loadConfig()
     
     try:
         return _config[key]
@@ -53,3 +58,23 @@ def getThemeXML() -> str:
 
 def getScheme() -> str:
     return getConfig("locale")["scheme"]
+
+def getDatabaseType() -> DatabaseType:
+    _db_type = getConfig("database")["db_type"]
+
+    try:
+        return DatabaseType(_db_type.lower())
+    except ValueError:
+        raise RuntimeError(f"Invalid database type {_db_type}")
+    
+def getDatabaseTypeName() -> str:
+    return getDatabaseType().value
+
+def getDatabaseFileDir() -> Path:
+    return getRuntimePath() /  getConfig("database")["file_path"]
+
+def getDatabaseFileName() -> str:
+    return getConfig("database")["file_name"]
+
+def getDatabaseFilePath() -> Path:
+    return getDatabaseFileDir() / getDatabaseFileName()
