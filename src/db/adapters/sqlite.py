@@ -1,5 +1,5 @@
 import sqlite3
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 from pathlib import Path
 
 from ..abstraction import (
@@ -54,7 +54,7 @@ class SQLiteCursor(DatabaseCursor):
     def __init__(self, cursor: sqlite3.Cursor):
         self._cursor = cursor
 
-    def fetchone(self) -> Optional[Dict[str, Any]]:
+    def fetchone(self) -> Dict[str, Any] | None:
         row = self._cursor.fetchone()
         if row:
             return dict(row)
@@ -69,7 +69,7 @@ class SQLiteCursor(DatabaseCursor):
         return self._cursor.rowcount
 
     @property
-    def lastRowId(self) -> Optional[int]:
+    def lastRowId(self) -> int | None:
         return self._cursor.lastrowid
 
 
@@ -78,7 +78,7 @@ class SQLiteConnection(DatabaseConnection):
 
     def __init__(self, config: DatabaseConfig):
         self.config = config
-        self._connection: Optional[sqlite3.Connection] = None
+        self._connection: sqlite3.Connection | None = None
         self._dialect = SQLiteDialect()
         self._logger = getLogService().getLogger(__name__)
 
@@ -101,7 +101,7 @@ class SQLiteConnection(DatabaseConnection):
             self._connection = None
             self._logger.info("Closed SQLite connection")
 
-    def execute(self, sql: str, params: Optional[List[Any]] = None) -> DatabaseCursor:
+    def execute(self, sql: str, params: List[Any] | None = None) -> DatabaseCursor:
         if not self._connection:
             raise RuntimeError("Database connection not established")
 

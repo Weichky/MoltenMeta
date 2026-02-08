@@ -1,6 +1,8 @@
 [app]
+name = "MoltenMeta"
+version = "0.1.0209"
 stage = "dev" # dev, alpha, beta, rc, stable
-is_default_config = false
+is_default_config = true
 
 [runtime]
 python_version = "3.14.2"

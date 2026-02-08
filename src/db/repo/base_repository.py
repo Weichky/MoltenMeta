@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional, TypeVar, Generic, Any, Protocol
+from typing import List, TypeVar, Generic, Any, Protocol
 
 from core.log import getLogService
 from ..abstraction import DatabaseConnection
 from ..manager import getDatabaseManager
 
 class EntityProtocol(Protocol):
-    id: Optional[int]
+    id: int | None
 
     @classmethod
     def fromRow(cls, row) -> "EntityProtocol": ...
@@ -44,9 +44,17 @@ class BaseRepository(ABC, Generic[T]):
         self.connection.commit()
         self._logger.info(f"Created table {self.getTableName()}")
 
+    # TODO: Add initializate method
+    # def initialize(self) -> None:
+
     @abstractmethod
     def _getCreateTableSql(self) -> str:
         ...
+
+    # TODO: Add abstract method to get data for intialization
+    # @abstractmethod
+    # def _getInitializationSql(self) -> str:
+    #   ...
 
     def insert(self, entity: T) -> int:
         table = self.getTableName()
@@ -76,7 +84,7 @@ class BaseRepository(ABC, Generic[T]):
         self._logger.debug(f"Inserted record into {table} with id {entity.id}")
         return entity.id or 0
 
-    def findById(self, id: int) -> Optional[T]:
+    def findById(self, id: int) -> T | None:
         table = self.getTableName()
         placeholder = self.dialect.getPlaceholder()
         sql = f"SELECT * FROM {table} WHERE id = {placeholder}"

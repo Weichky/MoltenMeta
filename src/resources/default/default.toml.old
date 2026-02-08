@@ -10,13 +10,12 @@ profile = "debug"
 
 [database]
 db_type = "sqlite"
-file_path = "data"
-file_name = "moltenmeta.mmdb"
+sqlite_path = "data/db/moltenmeta.mmdb"
 
-[logging]
+[log]
 level = "info" # debug, info, warning, error, critical
-enable_file_logging = true
-enable_console = true
+enable_file_logging = false
+enable_console = false
 
 [locale]
 language = "en"

@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 from pathlib import Path
 
 class DatabaseType(Enum):
@@ -10,11 +9,11 @@ class DatabaseType(Enum):
 @dataclass
 class DatabaseConfig:
     db_type: DatabaseType
-    host: Optional[str] = None
-    port: Optional[int] = None
-    database: Optional[str] = None
-    username: Optional[str] = None
-    password: Optional[str] = field(default="password", repr=False)
-    file_path: Optional[Path] = None
+    host: str | None = None
+    port: int | None = None
+    database: str | None = None
+    username: str | None = None
+    password: str | None = field(default="password", repr=False)
+    file_path: Path | None = None
     # Use a field to store additional parameters to avoid directly modifying __init__
     extra_params: dict = field(default_factory=dict)

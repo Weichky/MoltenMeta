@@ -1,7 +1,7 @@
 # Manual rewriting is urgently needed
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 from enum import Enum
 
 from pathlib import Path
@@ -74,7 +74,7 @@ class DatabaseConnection(ABC):
         ...
 
     @abstractmethod
-    def execute(self, sql: str, params: Optional[List[Any]] = None) -> "DatabaseCursor":
+    def execute(self, sql: str, params: list[Any] | None = None) -> "DatabaseCursor":
         """Execute SQL query"""
         ...
 
@@ -98,7 +98,7 @@ class DatabaseCursor(ABC):
     """Abstract base class for database cursor"""
 
     @abstractmethod
-    def fetchone(self) -> Optional[Dict[str, Any]]:
+    def fetchone(self) -> Dict[str, Any] | None:
         """Fetch one row"""
         ...
 
@@ -115,6 +115,6 @@ class DatabaseCursor(ABC):
 
     @property
     @abstractmethod
-    def lastRowId(self) -> Optional[int]:
+    def lastRowId(self) -> int | None:
         """Get last inserted row ID"""
         ...

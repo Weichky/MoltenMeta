@@ -13,8 +13,12 @@ from domain import (
     PropertyValueConditionSnapshot,
     MetaSnapshot,
 )
-from typing import List, Optional
+from typing import List, Any
+from importlib.resources import files
+from pathlib import Path
+import tomllib
 
+DEFAULT_SETTINGS_PATH = files("resources.default") / "default_settings.toml"
 
 class SettingsRepository(BaseRepository[SettingsSnapshot]):
     def getTableName(self) -> str:
@@ -35,7 +39,26 @@ class SettingsRepository(BaseRepository[SettingsSnapshot]):
         )
         """
 
-    def findBySectionAndKey(self, section: str, key: str) -> Optional[SettingsSnapshot]:
+    # TODO: function initialize move to abstract base class
+    def initialize(self) -> None:
+        with open(DEFAULT_SETTINGS_PATH, "rb") as f:
+            config = tomllib.load(f)
+
+        sql = self.dialect.getUpsertSyntax(
+                table="settings",
+                columns=["section", "key", "value"],
+            )
+
+        for section, kv_pairs in config.items():
+            for key, value in kv_pairs.items():
+                self.connection.execute(sql, [section, key, self._serialize_value(value)])
+    
+        self.connection.commit()
+    def _serialize_value(self, val: Any) -> str:
+        if isinstance(val, bool):
+            return "true" if val else "false"
+        return str(val)
+    def findBySectionAndKey(self, section: str, key: str) -> SettingsSnapshot | None:
         placeholder = self.dialect.getPlaceholder()
         sql = f"SELECT * FROM settings WHERE section = {placeholder} AND key = {placeholder}"
         cursor = self.connection.execute(sql, [section, key])
@@ -57,7 +80,7 @@ class ElementRepository(BaseRepository[ElementSnapshot]):
         dialect = self.dialect
         return f"""
         CREATE TABLE IF NOT EXISTS elements (
-            id {dialect.getAutoincrementType()},
+            id {dialect.getIntegerType()},
             symbol_id {dialect.getIntegerType()} NOT NULL,
             atomic_mass {dialect.getRealType()},
             atomic_radius {dialect.getRealType()},
@@ -67,7 +90,7 @@ class ElementRepository(BaseRepository[ElementSnapshot]):
         )
         """
 
-    def findBySymbolId(self, symbol_id: int) -> Optional[ElementSnapshot]:
+    def findBySymbolId(self, symbol_id: int) -> ElementSnapshot | None:
         placeholder = self.dialect.getPlaceholder()
         sql = f"SELECT * FROM elements WHERE symbol_id = {placeholder}"
         cursor = self.connection.execute(sql, [symbol_id])
@@ -145,7 +168,7 @@ class PropertyRepository(BaseRepository[PropertySnapshot]):
         )
         """
 
-    def findByName(self, name: str) -> Optional[PropertySnapshot]:
+    def findByName(self, name: str) -> PropertySnapshot | None:
         placeholder = self.dialect.getPlaceholder()
         sql = f"SELECT * FROM properties WHERE name = {placeholder}"
         cursor = self.connection.execute(sql, [name])
@@ -181,7 +204,7 @@ class MethodRepository(BaseRepository[MethodSnapshot]):
         )
         """
 
-    def findByName(self, name: str) -> Optional[MethodSnapshot]:
+    def findByName(self, name: str) -> MethodSnapshot | None:
         placeholder = self.dialect.getPlaceholder()
         sql = f"SELECT * FROM methods WHERE name = {placeholder}"
         cursor = self.connection.execute(sql, [name])
@@ -299,7 +322,7 @@ class SymbolRepository(BaseRepository[SymbolSnapshot]):
         )
         """
 
-    def findBySymbol(self, symbol: str) -> Optional[SymbolSnapshot]:
+    def findBySymbol(self, symbol: str) -> SymbolSnapshot | None:
         placeholder = self.dialect.getPlaceholder()
         sql = f"SELECT * FROM symbols WHERE symbol = {placeholder}"
         cursor = self.connection.execute(sql, [symbol])
@@ -326,7 +349,7 @@ class UnitRepository(BaseRepository[UnitSnapshot]):
         )
         """
 
-    def findBySymbol(self, symbol: str) -> Optional[UnitSnapshot]:
+    def findBySymbol(self, symbol: str) -> UnitSnapshot | None:
         placeholder = self.dialect.getPlaceholder()
         sql = f"SELECT * FROM units WHERE symbol = {placeholder}"
         cursor = self.connection.execute(sql, [symbol])
@@ -357,7 +380,7 @@ class ConditionRepository(BaseRepository[ConditionSnapshot]):
         )
         """
 
-    def findByName(self, name: str) -> Optional[ConditionSnapshot]:
+    def findByName(self, name: str) -> ConditionSnapshot | None:
         placeholder = self.dialect.getPlaceholder()
         sql = f"SELECT * FROM conditions WHERE name = {placeholder}"
         cursor = self.connection.execute(sql, [name])

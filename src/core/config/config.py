@@ -41,6 +41,7 @@ def setConfig(key: str, value: Any):
     
     _config[key] = value
 
+# Waiting to be moved to the query module.
 def getLanguage() -> str:
     return getConfig("locale")["language"]
 
@@ -48,7 +49,7 @@ def setLanguage(language: str):
     setConfig("locale", {"language": language})
 
 def getLogLevel() -> str:
-    return getConfig("logging")["level"]
+    return getConfig("log")["level"]
 
 def getThemeName() -> str:
     return getConfig("locale")["scheme"] + "_" + getConfig("locale")["theme"]

@@ -1,6 +1,3 @@
-# import os
-from typing import Optional
-
 from core.log import getLogService
 
 from catalog import DatabaseType, DatabaseConfig
@@ -10,6 +7,9 @@ from core.config import getDatabaseType, getDatabaseFilePath
 from db import getDatabaseManager, DatabaseManager
 
 class DatabaseConfigManager:
+
+    _database_service: DatabaseService | None = None
+
     @classmethod
     def generateConfig(cls) -> DatabaseConfig:
         db_type = getDatabaseType()
@@ -28,16 +28,14 @@ class DatabaseConfigManager:
             return DatabaseConfig(
                 db_type=db_type,
                 file_path=getDatabaseFilePath(),
-            )
-        
-_database_service: Optional[DatabaseService] = None
+            )        
 def getDatabaseService() -> DatabaseService:
     global _database_service
     if _database_service is None:
         _database_service = DatabaseService()
     return _database_service
 
-def configureDatabase(config: Optional[DatabaseConfig] = None) -> None:
+def configureDatabase(config: DatabaseConfig | None = None) -> None:
     global _database_service
     if _database_service is None:
         raise RuntimeError("Database service not created")
@@ -58,12 +56,12 @@ class DatabaseService:
         self._logger = getLogService().getLogger(__name__)
         self._manager = getDatabaseManager()
 
-    def configureDatabase(self, config: Optional[DatabaseConfig] = None) -> None:
+    def configureDatabase(self, config: DatabaseConfig | None = None) -> None:
         if config is None:
             config = DatabaseConfigManager.generateConfig()
 
         self._manager.configure(config)
-        # 注意此处写法
+        # 注意此处写法问题
         # 类DatabaseService、类DatabaseManager和类DatabaseConfigManager写法耦合
 
     def getManager(self) -> DatabaseManager:

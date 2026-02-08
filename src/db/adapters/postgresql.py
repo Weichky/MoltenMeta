@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from ..abstraction import (
     DatabaseDialect,
@@ -70,7 +70,7 @@ class PostgreSQLCursor(DatabaseCursor):
     def __init__(self, cursor):
         self._cursor = cursor
 
-    def fetchone(self) -> Optional[Dict[str, Any]]:
+    def fetchone(self) -> Dict[str, Any] | None:
         row = self._cursor.fetchone()
         if row:
             return dict(row)
@@ -85,7 +85,7 @@ class PostgreSQLCursor(DatabaseCursor):
         return self._cursor.rowcount
 
     @property
-    def lastRowId(self) -> Optional[int]:
+    def lastRowId(self) -> int | None:
         # PostgreSQL doesn't have lastrowid, need to use RETURNING or lastval()
         return None
 
@@ -134,7 +134,7 @@ class PostgreSQLConnection(DatabaseConnection):
             self._connection = None
             self._logger.info("Closed PostgreSQL connection")
 
-    def execute(self, sql: str, params: Optional[List[Any]] = None) -> DatabaseCursor:
+    def execute(self, sql: str, params: List[Any] | None = None) -> DatabaseCursor:
         if not self._connection:
             raise RuntimeError("Database connection not established")
 
@@ -154,7 +154,7 @@ class PostgreSQLConnection(DatabaseConnection):
         return self._dialect
 
     def executeWithLastId(
-        self, sql: str, params: Optional[List[Any]] = None
+        self, sql: str, params: List[Any] | None = None
     ) -> DatabaseCursor:
         """Execute SQL and return cursor with ability to get last inserted ID"""
         if not self._connection:

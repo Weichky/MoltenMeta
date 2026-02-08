@@ -1,11 +1,9 @@
 import argparse
-from typing import Optional
 from pathlib import Path
 
 from core.log import LogLevel
 
-_args: Optional[argparse.Namespace] = None
-
+_args: argparse.Namespace | None = None
 def _initArgs(argv=None) -> argparse.Namespace:
     global _args
     if _args is None:

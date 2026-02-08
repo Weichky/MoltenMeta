@@ -1,4 +1,3 @@
-from typing import Optional
 from .abstraction import DatabaseConnection
 
 from catalog import DatabaseType, DatabaseConfig
@@ -8,7 +7,7 @@ from core.platform import getRuntimePath
 from .adapters.sqlite import SQLiteConnection
 from .adapters.postgresql import PostgreSQLConnection
 
-_database_manager: Optional[DatabaseManager] = None
+_database_manager: DatabaseManager | None = None
 
 def getDatabaseManager() -> DatabaseManager:
     global _database_manager
@@ -17,8 +16,8 @@ def getDatabaseManager() -> DatabaseManager:
     return _database_manager
 
 class DatabaseManager:
-    _connection: Optional[DatabaseConnection] = None
-    _config: Optional[DatabaseConfig] = None
+    _connection: DatabaseConnection | None = None
+    _config: DatabaseConfig | None = None
 
     def configure(self, config: DatabaseConfig) -> None:
         """Configure database connection"""

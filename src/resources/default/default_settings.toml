@@ -1,0 +1,11 @@
+[log]
+level = "info" # debug, info, warning, error, critical
+enable_file_logging = false
+enable_console = false
+
+[appearance]
+theme = "dark_blue"
+enable_auto_dark_mode = true
+
+[locale]
+language = "en"

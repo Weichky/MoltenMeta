@@ -1,12 +1,11 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
 from .snapshot_base import SnapshotBase
 
 
 @dataclass
 class SettingsSnapshot(SnapshotBase):
-    id: Optional[int] = field(default=None, init=False)
+    id: int | None = field(default=None, init=False)
     section: str
     key: str
     value: str
@@ -27,10 +26,10 @@ class SettingsSnapshot(SnapshotBase):
 
 @dataclass
 class SymbolSnapshot(SnapshotBase):
-    id: Optional[int] = field(default=None, init=False)
+    id: int | None = field(default=None, init=False)
     symbol: str
-    name: Optional[str] = None
-    category: Optional[str] = None
+    name: str | None = None
+    category: str | None = None
 
     @classmethod
     def fromRow(cls, row) -> "SymbolSnapshot":
@@ -52,7 +51,7 @@ class SymbolSnapshot(SnapshotBase):
 
 @dataclass
 class UnitSnapshot(SnapshotBase):
-    id: Optional[int] = field(default=None, init=False)
+    id: int | None = field(default=None, init=False)
     symbol: str
 
     @classmethod
@@ -71,12 +70,12 @@ class UnitSnapshot(SnapshotBase):
 
 @dataclass
 class ElementSnapshot(SnapshotBase):
-    id: Optional[int] = field(default=None, init=False)
+    id: int | None = field(default=None, init=False)
     symbol_id: int
-    atomic_mass: Optional[float] = None
-    atomic_radius: Optional[float] = None
-    melting_point: Optional[float] = None
-    melt_density: Optional[float] = None
+    atomic_mass: float | None = None
+    atomic_radius: float | None = None
+    melting_point: float | None = None
+    melt_density: float | None = None
 
     @classmethod
     def fromRow(cls, row) -> "ElementSnapshot":
@@ -102,9 +101,9 @@ class ElementSnapshot(SnapshotBase):
 
 @dataclass
 class SystemSnapshot(SnapshotBase):
-    id: Optional[int] = field(default=None, init=False)
+    id: int | None = field(default=None, init=False)
     label: str
-    n_component: Optional[int] = None
+    n_component: int | None = None
 
     @classmethod
     def fromRow(cls, row) -> "SystemSnapshot":
@@ -147,11 +146,11 @@ class SystemCompositionSnapshot(SnapshotBase):
 
 @dataclass
 class PropertySnapshot(SnapshotBase):
-    id: Optional[int] = field(default=None, init=False)
+    id: int | None = field(default=None, init=False)
     name: str
     symbol_id: int
     unit_id: int
-    category: Optional[str] = None
+    category: str | None = None
 
     @classmethod
     def fromRow(cls, row) -> "PropertySnapshot":
@@ -175,10 +174,10 @@ class PropertySnapshot(SnapshotBase):
 
 @dataclass
 class MethodSnapshot(SnapshotBase):
-    id: Optional[int] = field(default=None, init=False)
+    id: int | None = field(default=None, init=False)
     name: str
-    type: Optional[str] = None
-    detail: Optional[str] = None
+    type: str | None = None
+    detail: str | None = None
 
     @classmethod
     def fromRow(cls, row) -> "MethodSnapshot":
@@ -196,9 +195,9 @@ class MethodSnapshot(SnapshotBase):
 
 @dataclass
 class ConditionSnapshot(SnapshotBase):
-    id: Optional[int] = field(default=None, init=False)
+    id: int | None = field(default=None, init=False)
     name: str
-    symbol_id: Optional[int] = None
+    symbol_id: int | None = None
     unit_id: int
 
     @classmethod
@@ -221,10 +220,10 @@ class ConditionSnapshot(SnapshotBase):
 
 @dataclass
 class PropertyValueSnapshot(SnapshotBase):
-    id: Optional[int] = field(default=None, init=False)
+    id: int | None = field(default=None, init=False)
     system_id: int
     property_id: int
-    method_id: Optional[int] = None
+    method_id: int | None = None
     value: float
 
     @classmethod
@@ -272,11 +271,11 @@ class PropertyValueConditionSnapshot(SnapshotBase):
 
 @dataclass
 class MetaSnapshot(SnapshotBase):
-    id: Optional[int] = field(default=None, init=False)
+    id: int | None = field(default=None, init=False)
     value_id: int
-    created_at: Optional[datetime] = None
-    created_by: Optional[str] = None
-    source_file: Optional[str] = None
+    created_at: datetime | None = None
+    created_by: str | None = None
+    source_file: str | None = None
 
     @classmethod
     def fromRow(cls, row) -> "MetaSnapshot":
