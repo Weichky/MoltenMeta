@@ -18,8 +18,6 @@ from importlib.resources import files
 from pathlib import Path
 import tomllib
 
-DEFAULT_SETTINGS_PATH = files("resources.default") / "default_settings.toml"
-
 class SettingsRepository(BaseRepository[SettingsSnapshot]):
     def getTableName(self) -> str:
         return "settings"
@@ -38,26 +36,18 @@ class SettingsRepository(BaseRepository[SettingsSnapshot]):
             UNIQUE(section, key)
         )
         """
-
-    # TODO: function initialize move to abstract base class
-    def initialize(self) -> None:
-        with open(DEFAULT_SETTINGS_PATH, "rb") as f:
-            config = tomllib.load(f)
-
-        sql = self.dialect.getUpsertSyntax(
+    
+    def upsert(self, snapshots: List[SettingsSnapshot]) -> None:
+            sql = self.dialect.getUpsertSyntax(
                 table="settings",
                 columns=["section", "key", "value"],
             )
 
-        for section, kv_pairs in config.items():
-            for key, value in kv_pairs.items():
-                self.connection.execute(sql, [section, key, self._serialize_value(value)])
-    
-        self.connection.commit()
-    def _serialize_value(self, val: Any) -> str:
-        if isinstance(val, bool):
-            return "true" if val else "false"
-        return str(val)
+            for snap in snapshots:
+                self.connection.execute(sql, snap.toRecord())
+
+            self.connection.commit()
+
     def findBySectionAndKey(self, section: str, key: str) -> SettingsSnapshot | None:
         placeholder = self.dialect.getPlaceholder()
         sql = f"SELECT * FROM settings WHERE section = {placeholder} AND key = {placeholder}"
