@@ -8,7 +8,7 @@ from importlib.resources import files
 from core.platform import getRuntimePath
 
 # Traversable objects act the same as Path objects here.
-DEFAULT_CONFIG = files("resources.default") / "default.toml.old"
+DEFAULT_CONFIG = files("resources.default") / "default_config_file.toml"
 
 # Donot use a user config file anymore,
 # using sqlite database instead.
