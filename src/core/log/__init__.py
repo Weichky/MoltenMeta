@@ -4,6 +4,5 @@ from .log import (
 )
 
 from .log_service import (
-    createLogService,
-    getLogService,
+    LogService
 )

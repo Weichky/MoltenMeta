@@ -4,7 +4,8 @@ enable_file_logging = false
 enable_console = false
 
 [appearance]
-theme = "dark_blue"
+theme = "blue"
+scheme = "dark"
 enable_auto_dark_mode = true
 
 [locale]

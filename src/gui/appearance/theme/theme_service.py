@@ -1,4 +1,6 @@
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject, Signal, QApp
+
+from core.log import LogService
 
 from qt_material import (
     QtStyleTools,
@@ -12,15 +14,13 @@ import os
 
 from core.log import getLogService
 
-_theme_service: _ThemeService | None = None
-
-class _ThemeService(QObject, QtStyleTools):
+class ThemeService(QObject, QtStyleTools):
     theme_changed = Signal()
 
-    def __init__(self, app: 'QApplication'):
+    def __init__(self, app, log_service: LogService):
         super().__init__(app)
         self._app = app
-        self._logger = getLogService().getLogger(__name__)
+        self._logger = log_service.getLogger(__name__)
 
 
     def applyTheme(
@@ -52,16 +52,3 @@ class _ThemeService(QObject, QtStyleTools):
             )
     def getThemeList(self) -> list[str]:
         return list_themes()
-def getThemeService() -> _ThemeService:
-    if _theme_service:
-        return _theme_service
-    raise RuntimeError("Theme service not created")
-
-def createThemeService(app: 'QApplication') -> _ThemeService:
-    global _theme_service
-
-    if _theme_service:
-        raise RuntimeError("Theme service already created")
-
-    _theme_service = _ThemeService(app)
-    return _theme_service

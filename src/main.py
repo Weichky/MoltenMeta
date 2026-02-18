@@ -3,14 +3,12 @@ from PySide6.QtWidgets import QApplication
 
 from gui.main_window import MainWindow
 
-from application.service import init
+from application.service import bootstrap
 def main():
 
     app = QApplication(sys.argv)
-
-    init(app)
     
-    window = MainWindow()
+    window = MainWindow(bootstrap(app))
     window.show()
     
     sys.exit(app.exec())

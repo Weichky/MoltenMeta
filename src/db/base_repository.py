@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from typing import List, TypeVar, Generic, Any, Protocol
 
 from core.log import getLogService
-from ..abstraction import DatabaseConnection
-from ..manager import getDatabaseManager
+from .abstraction import DatabaseConnection
+from .core.core_manager import getCoreDatabaseManager
 
 class EntityProtocol(Protocol):
     id: int | None
@@ -18,7 +18,7 @@ T = TypeVar("T", bound=EntityProtocol)
 
 class BaseRepository(ABC, Generic[T]):
     def __init__(self):
-        self._db_manager = getDatabaseManager()
+        self._db_manager = getCoreDatabaseManager()
         self._logger = getLogService().getLogger(self.__class__.__name__)
 
     @property

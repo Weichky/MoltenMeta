@@ -2,13 +2,13 @@ import sqlite3
 from typing import Any, Dict, List
 from pathlib import Path
 
-from ..abstraction import (
+from db.abstraction import (
     DatabaseDialect,
     DatabaseConnection,
     DatabaseCursor,
 )
 
-from catalog import DatabaseConfig
+from catalog import DatabaseConnInfo
 
 from core.log import getLogService
 
@@ -73,10 +73,10 @@ class SQLiteCursor(DatabaseCursor):
         return self._cursor.lastrowid
 
 
-class SQLiteConnection(DatabaseConnection):
+class SQLiteConnection(DatabaseConnInfo):
     """SQLite connection implementation"""
 
-    def __init__(self, config: DatabaseConfig):
+    def __init__(self, config: DatabaseConnInfo):
         self.config = config
         self._connection: sqlite3.Connection | None = None
         self._dialect = SQLiteDialect()

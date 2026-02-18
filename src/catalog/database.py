@@ -7,7 +7,7 @@ class DatabaseType(Enum):
     POSTGRESQL = "postgresql"
 
 @dataclass
-class DatabaseConfig:
+class DatabaseConnInfo:
     db_type: DatabaseType
     host: str | None = None
     port: int | None = None
@@ -16,4 +16,4 @@ class DatabaseConfig:
     password: str | None = field(default="password", repr=False)
     file_path: Path | None = None
     # Use a field to store additional parameters to avoid directly modifying __init__
-    extra_params: dict = field(default_factory=dict)
+    connect_args: dict = field(default_factory=dict)

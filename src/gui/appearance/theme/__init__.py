@@ -1,4 +1,1 @@
-from .theme_service import (
-    createThemeService,
-    getThemeService,
-)
+from .theme_service import ThemeService

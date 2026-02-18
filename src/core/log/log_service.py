@@ -3,9 +3,8 @@ from PySide6.QtCore import QObject, Signal
 import logging
 
 from .log import getLogLevelMap
-_log_service: _LogService | None = None
 
-class _LogService(QObject):
+class LogService(QObject):
     log_level_changed = Signal()
 
     def __init__(self, app):
@@ -36,22 +35,3 @@ class _LogService(QObject):
             handler.setLevel(lvl)
 
         self.log_level_changed.emit()
-
-# Also see function getI18nService() in i18n_service.py
-def getLogService() -> _LogService:
-    if _log_service:
-        return _log_service
-    
-    raise RuntimeError("log service not created")
-
-# You cannot create service twice
-def createLogService(app) -> _LogService:
-    global _log_service
-
-    if _log_service:
-        raise RuntimeError("Log service already created")
-    
-    _log_service = _LogService(app)
-
-    getLogService().setupLogging()
-    return _log_service
