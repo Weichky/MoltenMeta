@@ -1,13 +1,16 @@
 from db.base_repository import BaseRepository
 from domain.snapshot import SettingsSnapshot
 from db.db_manager import DatabaseManager
+from core.log import LogService
 
 from typing import List
 
 
 class SettingsRepository(BaseRepository[SettingsSnapshot]):
-    def __init__(self, db_manager: DatabaseManager | None = None):
-        super().__init__(db_manager)
+    def __init__(
+        self, log_service: LogService, db_manager: DatabaseManager | None = None
+    ):
+        super().__init__(log_service, db_manager)
 
     def getTableName(self) -> str:
         return "settings"
@@ -34,7 +37,8 @@ class SettingsRepository(BaseRepository[SettingsSnapshot]):
         )
 
         for snap in snapshots:
-            self.connection.execute(sql, snap.toRecord())
+            record = snap.toRecord()
+            self.connection.execute(sql, list(record.values()))
 
         self.connection.commit()
 

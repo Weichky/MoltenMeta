@@ -1,1 +1,1 @@
-from ..app_startup import bootstrap
+from ..app_startup import initApp

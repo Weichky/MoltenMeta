@@ -88,6 +88,25 @@ self.sidebar.ui.homeButton.clicked.connect(
 5. **Single responsibility**: Each class/function should have one purpose
 6. **Dependency injection**: Pass dependencies via constructors
 7. **No comments unless requested**: Avoid adding explanatory comments
+8. **Preserve existing comments**: Do not modify or delete existing comments unless necessary
+9. **Minimize feature addition**: Do not add new features unless explicitly requested or required
+10. **Avoid coupling**: Minimize inter-module dependencies to maintain loose coupling
+11. **Preserve dependencies**: Do not break existing dependencies when making changes
+
+## Running the Application
+
+Use `uv` to run the application with required arguments:
+
+```bash
+uv run python src/main.py --runtime-path ./runtime
+```
+
+## Platform Notes
+
+### Linux
+- **X11 recommended**: Wayland sessions have known issues with Qt-Advanced-Docking-System
+- Dock dragging may be broken or unresponsive under Wayland
+- Switch to X11 session (e.g., "GNOME on Xorg") for stable behavior
 
 ## Import Conventions
 
@@ -117,7 +136,7 @@ Prefer importing from the module level (e.g., `from core.log import LogService`)
 ### Current Issues
 - **Dual System**: Config system (`core/config/`) reads from TOML files; Settings system (`domain/settings/`) should read from SQLite but isn't fully integrated
 - **Bootstrap Order Problem**: Database needs runtime path from args, but settings need database
-- **Duplicated Functions**: `getLanguage()`, `getLogLevel()` etc. exist in both config.py and need to use Settings
+- **Duplicated Functions**: `getLanguage()`, `getLogLevel()` etc.
 - **Repository Dependency Issue**: `SettingsRepository` creates its own `DatabaseManager` internally instead of accepting injected dependency
 
 ### Architecture Principles
@@ -131,71 +150,3 @@ Prefer importing from the module level (e.g., `from core.log import LogService`)
    - **Core database**: Stores app settings (`core.mmdb` in runtime path)
    - **User database**: Stores user data (separate file, path from settings)
 4. **No circular dependencies**: Database path for core db must come from args/defaults, not settings
-
-### Implementation Plan
-
-#### Phase 1: Fix Bootstrap & Database Initialization
-1. **Modify `application/app_startup.py`**:
-   - Accept runtime path as parameter (from args)
-   - Create core database connection first (use default path: `{runtime_path}/data/db/core.mmdb`)
-   - Initialize settings repository with the database manager
-   - Seed default settings if database is empty
-   - Pass settings to AppContext
-
-2. **Modify `db/core/repo/settings_repository.py`**:
-   - Accept `DatabaseManager` as constructor parameter (dependency injection)
-   - Remove internal `DatabaseManager` instantiation
-
-3. **Modify `db/base_repository.py`**:
-   - Accept `DatabaseManager` as constructor parameter
-
-#### Phase 2: Unify Config & Settings
-4. **Modify `core/config/config.py`**:
-   - Remove file-based config loading (`_loadConfig`)
-   - Replace with settings-based functions that read from a global `Settings` instance
-   - Keep function signatures the same for backward compatibility
-   - Add `initializeSettings(settings: Settings)` function to set the global settings instance
-
-5. **Modify `application/app_context.py`**:
-   - Add `settings: Settings` to AppContext
-   - Initialize config system with settings
-
-#### Phase 3: Cleanup
-6. **Remove or deprecate `core/fio/config_io.py`**:
-   - Keep for any non-settings config (if any)
-   - Or remove entirely if no longer needed
-
-7. **Update all consumers**:
-   - `gui/pages/settings_page/ui.py` - uses `core.config.getLanguage()`, `getLogLevel()`
-   - These will continue to work if config.py is updated to use settings
-
-### Key Files to Modify
-- `src/application/app_startup.py` - Bootstrap sequence
-- `src/application/app_context.py` - Add settings to context
-- `src/db/base_repository.py` - Accept DatabaseManager injection
-- `src/db/core/repo/settings_repository.py` - Accept DatabaseManager injection
-- `src/core/config/config.py` - Use Settings instead of TOML files
-- `src/core/fio/config_io.py` - Remove or deprecate
-- `src/gui/pages/settings_page/ui.py` - Will work if config.py updated
-
-### Database Paths
-- **Core database**: `{runtime_path}/data/db/core.mmdb` (hardcoded default)
-- **User database**: `{runtime_path}/data/db/{settings.database_file}` (from settings)
-
-### Additional Implementation Notes
-
-1. **Update `resources/default/default_settings.toml`**:
-   - Add missing settings that are currently in `default_config_file.toml` (database settings)
-   - The settings file should contain ALL runtime configuration
-
-2. **Settings serialization**:
-   - Use `domain.settings.serializeSettingValue()` to convert values to strings for storage
-   - Already implemented in `domain/settings/serialize.py`
-
-3. **Global Settings Instance**:
-   - Use a module-level global `_settings` variable in config.py
-   - Initialize via `initializeSettings(settings: Settings)` at app startup
-
-4. **Seed Default Settings**:
-   - Use `db/seeds/settings_seed.py` to load defaults from TOML
-   - Seed only if settings table is empty

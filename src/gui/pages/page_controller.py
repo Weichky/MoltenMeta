@@ -138,7 +138,13 @@ class PageController:
             # dock.setVisible(True)
             dock.toggleView()
     
-        dock.setAsCurrentTab()
+        # For unknown reasons, the following method does not work anymore
+        # This method used to work well when dock is floating
+        # dock.setAsCurrentTab()
+        
+        # For floating windows, try to bring them to front using available methods
+        if dock.isFloating():
+                dock.raise_()
 
         self.retranslateUi()
 

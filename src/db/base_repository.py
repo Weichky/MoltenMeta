@@ -19,17 +19,17 @@ T = TypeVar("T", bound=EntityProtocol)
 
 
 class BaseRepository(ABC, Generic[T]):
-    def __init__(self, db_manager: DatabaseManager | None = None):
+    def __init__(self, log_service: LogService, db_manager: DatabaseManager | None = None):
         self._db_manager = db_manager if db_manager else DatabaseManager()
-        self._logger = LogService.getLogger(self.__class__.__name__)
+        self._logger = log_service.getLogger(self.__class__.__name__)
 
     @property
     def connection(self) -> DatabaseConnection:
-        return self._db_manager.connection()
+        return self._db_manager.connection
 
     @property
     def dialect(self):
-        return self._db_manager.getDialect()
+        return self._db_manager.dialect
 
     @abstractmethod
     def getTableName(self) -> str: ...

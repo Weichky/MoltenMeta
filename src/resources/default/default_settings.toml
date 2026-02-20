@@ -1,6 +1,6 @@
 [log]
-level = "info" # debug, info, warning, error, critical
-enable_file_logging = false
+level = "info"
+file_logging = false
 enable_console = false
 
 [appearance]
@@ -10,3 +10,11 @@ enable_auto_dark_mode = true
 
 [locale]
 language = "en"
+
+[runtime]
+python_version = "3.14"
+
+[database]
+db_type = "sqlite"
+sqlite_path = "data/db/moltenmeta.mmdb"
+database_file = "moltenmeta.mmdb"

@@ -4,18 +4,20 @@ from catalog import DatabaseType, DatabaseConnInfo
 
 from db import DatabaseManager
 
+
 class DatabaseService:
-    def __init__(self, log_service: LogService):
+    def __init__(
+        self, log_service: LogService, db_manager: DatabaseManager | None = None
+    ):
         self._logger = log_service.getLogger(__name__)
-        self._manager = DatabaseManager()
+        self._manager = db_manager if db_manager else DatabaseManager()
 
     def configureDatabase(self, conn_info: DatabaseConnInfo) -> None:
-
         self._manager.applyConnection(conn_info)
 
     def getManager(self) -> DatabaseManager:
         return self._manager
-    
+
     def testConnection(self) -> bool:
         try:
             connection = self._manager.connection()
