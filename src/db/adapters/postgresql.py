@@ -105,7 +105,11 @@ class PostgreSQLConnection(DatabaseConnInfo):
         self._logger = log_service.getLogger(__name__)
 
     def connect(self) -> None:
-        if not all([self.config.host, self.config.database, self.config.username]):
+        if not all([
+            self.config.host, 
+            self.config.database, 
+            self.config.username
+        ]):
             raise ValueError(
                 "PostgreSQL requires host, database, and username in config"
             )

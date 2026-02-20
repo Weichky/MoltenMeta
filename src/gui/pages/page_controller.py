@@ -18,7 +18,12 @@ from typing import Callable
 
 class PageController:
 
-    def __init__(self, dock_manager: QtAds.CDockManager, background_layer: QtWidgets.QWidget, context: AppContext):
+    def __init__(
+        self, 
+        dock_manager: QtAds.CDockManager, 
+        background_layer: QtWidgets.QWidget, 
+        context: AppContext
+    ):
 
         self.logger = context.log.getLogger(__name__)
         self.i18n_service = context.i18n
@@ -47,8 +52,9 @@ class PageController:
         self._settings_spec = DockPageSpec(
             key = "settings",
             titleProvider=lambda: QCoreApplication.translate("DockPage", "Settings"),
-            # SettingsPage needs a lot
-            # A full context here can save words
+            # SettingsPage does not need an i18n_service to be injected
+            # Because controller takes over this job
+            # See more details in the comment of SettingsPage
             factory = lambda: SettingsPage(context)
         )
 
@@ -137,8 +143,6 @@ class PageController:
             # dock.setVisible(True)
             dock.toggleView()
     
-        # For unknown reasons, the following method does not work anymore
-        # This method used to work well when dock is floating
         # dock.setAsCurrentTab()
         
         # For floating windows, try to bring them to front using available methods

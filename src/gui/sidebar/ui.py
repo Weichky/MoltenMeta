@@ -68,7 +68,12 @@ class UiSidebar(QObject):
         self.sidebarLayout.addWidget(self.settingsButton)
         
         # Add vertical spacer
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.verticalSpacer = QSpacerItem(
+            20, 
+            40, 
+            QSizePolicy.Policy.Minimum, 
+            QSizePolicy.Policy.Expanding
+        )
         self.sidebarLayout.addItem(self.verticalSpacer)
         
         self.sidebarLayout.setStretch(0, 1)

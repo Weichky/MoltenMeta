@@ -50,7 +50,12 @@ def bootstrap(app) -> AppContext:
 def initApp(app) -> AppContext:
     context = bootstrap(app)
     db_manager = _createCoreDbManager()
-    core_db_service = CoreDbService(app, context.log, Settings(), db_manager)
+    core_db_service = CoreDbService(
+        app, 
+        context.log, 
+        Settings(), 
+        db_manager
+    )
     context.core_db = core_db_service
 
     context.log.setLogLevel(core_db_service.settings.log_level)

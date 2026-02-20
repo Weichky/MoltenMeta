@@ -12,7 +12,11 @@ class SettingsSnapshot(SnapshotBase):
 
     @classmethod
     def fromRow(cls, row) -> "SettingsSnapshot":
-        instance = cls(section=row["section"], key=row["key"], value=row["value"])
+        instance = cls(
+            section=row["section"], 
+            key=row["key"], 
+            value=row["value"]
+        )
         object.__setattr__(instance, "id", row.get("id"))
         return instance
 

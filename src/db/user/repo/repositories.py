@@ -41,7 +41,10 @@ class ElementRepository(BaseRepository[ElementSnapshot]):
     def findBySymbolId(self, symbol_id: int) -> ElementSnapshot | None:
         placeholder = self.dialect.getPlaceholder()
         sql = f"SELECT * FROM elements WHERE symbol_id = {placeholder}"
-        cursor = self.connection.execute(sql, [symbol_id])
+        cursor = self.connection.execute(
+            sql, 
+            [symbol_id]
+        )
         row = cursor.fetchone()
 
         if row:
@@ -119,7 +122,10 @@ class PropertyRepository(BaseRepository[PropertySnapshot]):
     def findByName(self, name: str) -> PropertySnapshot | None:
         placeholder = self.dialect.getPlaceholder()
         sql = f"SELECT * FROM properties WHERE name = {placeholder}"
-        cursor = self.connection.execute(sql, [name])
+        cursor = self.connection.execute(
+            sql, 
+            [name]
+        )
         row = cursor.fetchone()
 
         if row:
