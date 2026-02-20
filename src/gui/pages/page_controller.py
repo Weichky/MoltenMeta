@@ -47,9 +47,8 @@ class PageController:
         self._settings_spec = DockPageSpec(
             key = "settings",
             titleProvider=lambda: QCoreApplication.translate("DockPage", "Settings"),
-            # SettingsPage does not need an i18n_service to be injected
-            # Because controller takes over this job
-            # See more details in the comment of SettingsPage
+            # SettingsPage needs a lot
+            # A full context here can save words
             factory = lambda: SettingsPage(context)
         )
 
