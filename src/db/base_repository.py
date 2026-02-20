@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import List, TypeVar, Generic, Any, Protocol
 
-from core.log import getLogService
+from core.log import LogService
 from .abstraction import DatabaseConnection
-from .core.core_manager import getCoreDatabaseManager
+from .db_manager import DatabaseManager
 
 class EntityProtocol(Protocol):
     id: int | None
@@ -18,16 +18,15 @@ T = TypeVar("T", bound=EntityProtocol)
 
 class BaseRepository(ABC, Generic[T]):
     def __init__(self):
-        self._db_manager = getCoreDatabaseManager()
-        self._logger = getLogService().getLogger(self.__class__.__name__)
+        self._db_manager = DatabaseManager()
+        self._logger = LogService.getLogger(self.__class__.__name__)
 
     @property
     def connection(self) -> DatabaseConnection:
-        return self._db_manager.getConnection()
+        return self._db_manager.connection()
 
     @property
     def dialect(self):
-        """Get database dialect for SQL generation"""
         return self._db_manager.getDialect()
 
     @abstractmethod

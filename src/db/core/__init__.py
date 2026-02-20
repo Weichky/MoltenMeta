@@ -1,2 +1,2 @@
-from .repo.settings_repositories import SettingsRepository
-from .core_manager import CoreDatabaseManager
+from .repo.settings_repository import SettingsRepository
+from ..db_manager import DatabaseManager

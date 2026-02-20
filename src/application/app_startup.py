@@ -9,8 +9,7 @@ from core.config import (
     getScheme,
 )
 
-from db.core import CoreDatabaseManager
-from db.user import UserDatabaseManager
+from db.core import DatabaseManager
 
 from .app_context import AppContext
 
@@ -24,8 +23,8 @@ def bootstrap(app) -> AppContext:
     log_service = LogService(app)
 
     # loadConfig()
-    core_db_manager = CoreDatabaseManager()
-    user_db_manager = UserDatabaseManager()
+    core_db_manager = DatabaseManager()
+    user_db_manager = DatabaseManager()
 
     if getArgs().log_level:
         log_service.setLogLevel(getArgs().log_level)
@@ -39,6 +38,7 @@ def bootstrap(app) -> AppContext:
     i18n_service.setLanguage(getLanguage())
 
     # Necessary evil
+    # Inject the log service
     theme_service = ThemeService(app, log_service)
 
     theme_service.applyTheme(getThemeXML(), getScheme(), default_extra)

@@ -1,75 +1,26 @@
-from core.log import getLogService
+from core.log import LogService
 
 from catalog import DatabaseType, DatabaseConnInfo
 
 from core.config import getDatabaseType, getDatabaseFilePath
 
-from db import getCoreDatabaseManager, CoreDatabaseManager
-
-class DatabaseConfigManager:
-
-    _database_service: DatabaseService | None = None
-
-    @classmethod
-    def getConnInfo(cls) -> DatabaseConnInfo:
-        db_type = getDatabaseType()
-
-        # postgresql is not our goal for now
-        if db_type == DatabaseType.POSTGRESQL:
-            return DatabaseConnInfo(
-                db_type=db_type,
-                    # host=os.getenv("MOLTENMETA_DB_HOST", "localhost"),
-                    # port=int(os.getenv("MOLTENMETA_DB_PORT", "5432")),
-                    # database=os.getenv("MOLTENMETA_DB_NAME", "moltenmeta"),
-                    # username=os.getenv("MOLTENMETA_DB_USER", "moltenmeta"),
-                    # password=os.getenv("MOLTENMETA_DB_PASSWORD"),
-            )
-        elif db_type == DatabaseType.SQLITE:
-            return DatabaseConnInfo(
-                db_type=db_type,
-                file_path=getDatabaseFilePath(),
-            )        
-def getDatabaseService() -> DatabaseService:
-    global _database_service
-    if _database_service is None:
-        _database_service = DatabaseService()
-    return _database_service
-
-def configureDatabase(conn_info: DatabaseConnInfo | None = None) -> None:
-    global _database_service
-    if _database_service is None:
-        raise RuntimeError("Database service not created")
-
-    _database_service.configureDatabase(conn_info)
-
-    if not _database_service.testConnection():
-        raise RuntimeError("Failed to connect to database")
-    
-def closeDatabase() -> None:
-    global _database_service
-    if _database_service:
-        _database_service.close()
-        _database_service = None
+from db import DatabaseManager
 
 class DatabaseService:
-    def __init__(self):
-        self._logger = getLogService().getLogger(__name__)
-        self._manager = getCoreDatabaseManager()
+    def __init__(self, log_service: LogService):
+        self._logger = log_service.getLogger(__name__)
+        self._manager = DatabaseManager()
 
-    def configureDatabase(self, conn_info: DatabaseConnInfo | None = None) -> None:
-        if conn_info is None:
-            conn_info = DatabaseConfigManager.getConnInfo()
+    def configureDatabase(self, conn_info: DatabaseConnInfo) -> None:
 
         self._manager.applyConnection(conn_info)
-        # 注意此处写法问题
-        # 类DatabaseService、类DatabaseManager和类DatabaseConfigManager写法耦合
 
-    def getManager(self) -> CoreDatabaseManager:
+    def getManager(self) -> DatabaseManager:
         return self._manager
     
     def testConnection(self) -> bool:
         try:
-            connection = self._manager.getConnection()
+            connection = self._manager.connection()
             cursor = connection.execute("SELECT 1")
             result = cursor.fetchone()
             return result is not None
@@ -78,4 +29,4 @@ class DatabaseService:
             return False
 
     def close(self) -> None:
-        self._manager.close()
+        self._manager.closeConnection()

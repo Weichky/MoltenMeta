@@ -2,8 +2,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from .snapshot_base import SnapshotBase
 
-
-@dataclass
+@dataclass(frozen=True)
 class SettingsSnapshot(SnapshotBase):
     id: int | None = field(default=None, init=False)
     section: str
@@ -24,7 +23,7 @@ class SettingsSnapshot(SnapshotBase):
         }
 
 
-@dataclass
+@dataclass(frozen=True)
 class SymbolSnapshot(SnapshotBase):
     id: int | None = field(default=None, init=False)
     symbol: str
@@ -49,7 +48,7 @@ class SymbolSnapshot(SnapshotBase):
         }
 
 
-@dataclass
+@dataclass(frozen=True)
 class UnitSnapshot(SnapshotBase):
     id: int | None = field(default=None, init=False)
     symbol: str
@@ -68,7 +67,7 @@ class UnitSnapshot(SnapshotBase):
         }
 
 
-@dataclass
+@dataclass(frozen=True)
 class ElementSnapshot(SnapshotBase):
     id: int | None = field(default=None, init=False)
     symbol_id: int
@@ -99,7 +98,7 @@ class ElementSnapshot(SnapshotBase):
         }
 
 
-@dataclass
+@dataclass(frozen=True)
 class SystemSnapshot(SnapshotBase):
     id: int | None = field(default=None, init=False)
     label: str
@@ -121,7 +120,7 @@ class SystemSnapshot(SnapshotBase):
         }
 
 
-@dataclass
+@dataclass(frozen=True)
 class SystemCompositionSnapshot(SnapshotBase):
     system_id: int
     element_id: int
@@ -144,7 +143,7 @@ class SystemCompositionSnapshot(SnapshotBase):
         }
 
 
-@dataclass
+@dataclass(frozen=True)
 class PropertySnapshot(SnapshotBase):
     id: int | None = field(default=None, init=False)
     name: str
@@ -172,7 +171,7 @@ class PropertySnapshot(SnapshotBase):
         }
 
 
-@dataclass
+@dataclass(frozen=True)
 class MethodSnapshot(SnapshotBase):
     id: int | None = field(default=None, init=False)
     name: str
@@ -193,7 +192,7 @@ class MethodSnapshot(SnapshotBase):
         return {"name": self.name, "type": self.type, "detail": self.detail}
 
 
-@dataclass
+@dataclass(frozen=True)
 class ConditionSnapshot(SnapshotBase):
     id: int | None = field(default=None, init=False)
     name: str
@@ -218,7 +217,7 @@ class ConditionSnapshot(SnapshotBase):
         }
 
 
-@dataclass
+@dataclass(frozen=True)
 class PropertyValueSnapshot(SnapshotBase):
     id: int | None = field(default=None, init=False)
     system_id: int
@@ -246,7 +245,7 @@ class PropertyValueSnapshot(SnapshotBase):
         }
 
 
-@dataclass
+@dataclass(frozen=True)
 class PropertyValueConditionSnapshot(SnapshotBase):
     value_id: int
     condition_id: int
@@ -269,7 +268,7 @@ class PropertyValueConditionSnapshot(SnapshotBase):
         }
 
 
-@dataclass
+@dataclass(frozen=True)
 class MetaSnapshot(SnapshotBase):
     id: int | None = field(default=None, init=False)
     value_id: int
