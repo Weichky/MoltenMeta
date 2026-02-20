@@ -1,7 +1,7 @@
 from PySide6 import QtWidgets
 from PySide6.QtCore import Signal
 
-from i18n import getI18nService
+from i18n import I18nService
 
 from .ui import UiHomePage
 
@@ -13,8 +13,9 @@ class HomePage(QtWidgets.QWidget):
     simulationButtonClicked = Signal()
     settingsButtonClicked = Signal()
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self, i18n_service: I18nService):
+        super().__init__(parent=None)
+        self.i18n_service = i18n_service
         
         self.ui = UiHomePage()
         self.ui.setupUi(self)
@@ -35,7 +36,7 @@ class HomePage(QtWidgets.QWidget):
         self.ui.tiles[SETTINGS_INDEX].clicked.connect(self.settingsButtonClicked.emit)
 
         # i18n
-        getI18nService().language_changed.connect(self.retranslateUi)
+        self.i18n_service.language_changed.connect(self.retranslateUi)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)

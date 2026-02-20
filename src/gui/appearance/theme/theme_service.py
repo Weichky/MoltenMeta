@@ -1,4 +1,4 @@
-from PySide6.QtCore import QObject, Signal, QApp
+from PySide6.QtCore import QObject, Signal
 
 from core.log import LogService
 
@@ -12,7 +12,7 @@ from importlib.resources import files
 from pathlib import Path
 import os
 
-from core.log import getLogService
+from core.log import LogService
 
 class ThemeService(QObject, QtStyleTools):
     theme_changed = Signal()

@@ -18,3 +18,7 @@ class CoreDbService(QObject):
 
     def _loadSettings(self) -> None:
         self._settings = self._settings_repo.findAll()
+
+    @property
+    def settings(self) -> Settings:
+        return self._settings

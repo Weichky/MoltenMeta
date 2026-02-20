@@ -10,7 +10,7 @@ from db.abstraction import (
 
 from catalog import DatabaseConnInfo
 
-from core.log import getLogService
+from core.log import LogService
 
 
 class SQLiteDialect(DatabaseDialect):
@@ -76,12 +76,11 @@ class SQLiteCursor(DatabaseCursor):
 class SQLiteConnection(DatabaseConnInfo):
     """SQLite connection implementation"""
 
-    def __init__(self, config: DatabaseConnInfo):
+    def __init__(self, config: DatabaseConnInfo, log_service: LogService):
         self.config = config
         self._connection: sqlite3.Connection | None = None
         self._dialect = SQLiteDialect()
-        self._logger = getLogService().getLogger(__name__)
-
+        self._logger = log_service.getLogger(__name__)
     def connect(self) -> None:
         if self.config.file_path is None:
             raise ValueError("SQLite requires file_path in config")

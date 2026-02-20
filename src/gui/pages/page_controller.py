@@ -5,9 +5,7 @@ import PySide6QtAds as QtAds
 from gui.pages.home_page import HomePage
 from gui.pages.settings_page import SettingsPage
 
-from core.log import getLogService
-
-from i18n import getI18nService
+from application import AppContext
 
 from dataclasses import dataclass
 from typing import Callable
@@ -20,15 +18,16 @@ from typing import Callable
 
 class PageController:
 
-    def __init__(self, dock_manager: QtAds.CDockManager, background_layer: QtWidgets.QWidget):
+    def __init__(self, dock_manager: QtAds.CDockManager, background_layer: QtWidgets.QWidget, context: AppContext):
 
-        self.logger = getLogService().getLogger(__name__)
+        self.logger = context.log.getLogger(__name__)
+        self.i18n_service = context.i18n
 
         # page_spec
         self._home_spec = DockPageSpec(
             key = "home",
             # NOTE:
-            # The following titleProvider must appear *here* (line 41, and the next is line 48),
+            # The following titleProvider must appear *here* (line 44, and the next is line 51),
             # otherwise Qt's translation scanner will fail to pick it up.
             #
             # This is a known limitation of Qt's i18n tooling rather than a logic issue.
@@ -41,14 +40,17 @@ class PageController:
             # This might be fixed someday, but not today.
             # It is damning, but currently the least fragile approach.
             titleProvider=lambda: QCoreApplication.translate("DockPage", "Home Page"),
-            factory = HomePage,
+            factory = lambda: HomePage(self.i18n_service),
             onCreate = self._connectHomeSignals
         )
 
         self._settings_spec = DockPageSpec(
             key = "settings",
             titleProvider=lambda: QCoreApplication.translate("DockPage", "Settings"),
-            factory = SettingsPage
+            # SettingsPage does not need an i18n_service to be injected
+            # Because controller takes over this job
+            # See more details in the comment of SettingsPage
+            factory = lambda: SettingsPage(context)
         )
 
         self.dock_manager = dock_manager
@@ -168,7 +170,7 @@ class PageController:
         page.settingsButtonClicked.connect(self.showSettings)
 
         # i18n
-        getI18nService().language_changed.connect(self.retranslateUi)
+        self.i18n_service.language_changed.connect(self.retranslateUi)
 
     def retranslateUi(self):
 

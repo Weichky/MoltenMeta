@@ -1,15 +1,19 @@
 from PySide6 import QtWidgets
 from PySide6.QtCore import QObject
 
+from application import AppContext
+
 from .ui import UiSettingsPage
 
-from i18n import getI18nService
-from core.log import getLogService
+from i18n import I18nService
+from core.log import LogService
 
 class SettingsController(QObject):
-    def __init__(self, ui: UiSettingsPage):
+    def __init__(self, ui: UiSettingsPage, context: AppContext):
         super().__init__()
+        self.i18n_service = context.i18n
         self.ui = ui
+        self._log_service = context.log
         self._setupNavigation()
 
     def _setupNavigation(self):
@@ -29,13 +33,12 @@ class SettingsController(QObject):
 
         # i18n
         # Connect to self.ui instead of self.
-        getI18nService().language_changed.connect(self.ui.retranslateUi)
+        self.i18n_service.language_changed.connect(self.ui.retranslateUi)
 
     def _onLanguageChanged(self, index: int):
         language = self.ui.lang_combo.itemData(index)
-        getI18nService().setLanguage(language)
-
+        self.i18n_service.setLanguage(language)
     def _onLogLevelChanged(self, index: int):
         level = self.ui.log_level_combo.itemData(index)
-        getLogService().setLogLevel(level)
-        getLogService().getLogger(__name__).debug(f"Log level changed to {level}")
+        self._log_service.setLogLevel(level)
+        self._log_service.getLogger(__name__).debug(f"Log level changed to {level}")

@@ -1,2 +1,1 @@
-from .config_io import _loadConfig
 from .language_package_loader import getLanguagePackagePath

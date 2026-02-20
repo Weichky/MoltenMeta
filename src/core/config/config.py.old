@@ -3,8 +3,6 @@ from pathlib import Path
 
 from catalog import DatabaseType
 
-from core.fio import _loadConfig
-
 from core.platform import getRuntimePath
 
 _config: Dict[str, Any] | None = None

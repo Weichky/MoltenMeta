@@ -8,10 +8,10 @@ class I18nService(QObject):
     language_changed = Signal()
 
     def __init__(self, app):
-         super().__init__(app)
+        super().__init__(app)
 
-         self.app = app
-         self.translator = None
+        self.app = app
+        self.translator = None
 
     def setLanguage(self, language: str):
         if not isSupportedLanguage(language):
@@ -24,7 +24,7 @@ class I18nService(QObject):
             self.translator = None
             self.language_changed.emit()
             return
-        
+
         self.translator = QTranslator(self.app)
         self.translator.load(getLanguagePackagePath(language))
         self.app.installTranslator(self.translator)

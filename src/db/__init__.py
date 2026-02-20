@@ -1,2 +1,2 @@
-from .db_manager import getCoreDatabaseManager, DatabaseManager
-from .user.user_manager import getCoreDatabaseManager, UserDatabaseManager
+from .db_manager import DatabaseManager
+from .core import SettingsRepository

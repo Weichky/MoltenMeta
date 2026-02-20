@@ -4,5 +4,5 @@ from .log import (
 )
 
 from .log_service import (
-    LogService
+    LogService,
 )

@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from .snapshot_base import SnapshotBase
 
+
 @dataclass(frozen=True)
 class SettingsSnapshot(SnapshotBase):
     id: int | None = field(default=None, init=False)
@@ -196,8 +197,8 @@ class MethodSnapshot(SnapshotBase):
 class ConditionSnapshot(SnapshotBase):
     id: int | None = field(default=None, init=False)
     name: str
-    symbol_id: int | None = None
     unit_id: int
+    symbol_id: int | None = None
 
     @classmethod
     def fromRow(cls, row) -> "ConditionSnapshot":
@@ -222,8 +223,8 @@ class PropertyValueSnapshot(SnapshotBase):
     id: int | None = field(default=None, init=False)
     system_id: int
     property_id: int
-    method_id: int | None = None
     value: float
+    method_id: int | None = None
 
     @classmethod
     def fromRow(cls, row) -> "PropertyValueSnapshot":

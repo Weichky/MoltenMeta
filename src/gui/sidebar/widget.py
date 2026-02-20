@@ -3,7 +3,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import QEvent, Qt, QObject
 
-from i18n import getI18nService
+from i18n import I18nService
 
 from .ui import UiSidebar
 
@@ -18,8 +18,9 @@ class ResizeEventFilter(QObject):
         return False
 
 class SidebarWidget(QDockWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, i18n_service: I18nService):
         super().__init__(parent)
+        self.i18n_service = i18n_service
         self.ui = UiSidebar()
         self.ui.setupUi(self)
         self.ui.retranslateUi(self)
@@ -32,7 +33,7 @@ class SidebarWidget(QDockWidget):
         self._adjustSidebarSize()
 
         # i18n
-        getI18nService().language_changed.connect(self.retranslateUi)
+        self.i18n_service.language_changed.connect(self.retranslateUi)
 
     def _adjustSidebarSize(self):
         self.ui.adjustSidebarSize(self)

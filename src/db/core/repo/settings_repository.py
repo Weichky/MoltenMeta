@@ -1,9 +1,14 @@
 from db.base_repository import BaseRepository
 from domain.snapshot import SettingsSnapshot
+from db.db_manager import DatabaseManager
 
 from typing import List
 
+
 class SettingsRepository(BaseRepository[SettingsSnapshot]):
+    def __init__(self, db_manager: DatabaseManager | None = None):
+        super().__init__(db_manager)
+
     def getTableName(self) -> str:
         return "settings"
 
@@ -21,17 +26,17 @@ class SettingsRepository(BaseRepository[SettingsSnapshot]):
             UNIQUE(section, key)
         )
         """
-    
+
     def upsert(self, snapshots: List[SettingsSnapshot]) -> None:
-            sql = self.dialect.getUpsertSyntax(
-                table="settings",
-                columns=["section", "key", "value"],
-            )
+        sql = self.dialect.getUpsertSyntax(
+            table="settings",
+            columns=["section", "key", "value"],
+        )
 
-            for snap in snapshots:
-                self.connection.execute(sql, snap.toRecord())
+        for snap in snapshots:
+            self.connection.execute(sql, snap.toRecord())
 
-            self.connection.commit()
+        self.connection.commit()
 
     def findBySectionAndKey(self, section: str, key: str) -> SettingsSnapshot | None:
         placeholder = self.dialect.getPlaceholder()

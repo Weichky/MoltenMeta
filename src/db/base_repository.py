@@ -5,6 +5,7 @@ from core.log import LogService
 from .abstraction import DatabaseConnection
 from .db_manager import DatabaseManager
 
+
 class EntityProtocol(Protocol):
     id: int | None
 
@@ -16,9 +17,10 @@ class EntityProtocol(Protocol):
 
 T = TypeVar("T", bound=EntityProtocol)
 
+
 class BaseRepository(ABC, Generic[T]):
-    def __init__(self):
-        self._db_manager = DatabaseManager()
+    def __init__(self, db_manager: DatabaseManager | None = None):
+        self._db_manager = db_manager if db_manager else DatabaseManager()
         self._logger = LogService.getLogger(self.__class__.__name__)
 
     @property
@@ -30,12 +32,10 @@ class BaseRepository(ABC, Generic[T]):
         return self._db_manager.getDialect()
 
     @abstractmethod
-    def getTableName(self) -> str:
-        ...
+    def getTableName(self) -> str: ...
 
     @abstractmethod
-    def getEntityClass(self) -> type[T]:
-        ...
+    def getEntityClass(self) -> type[T]: ...
 
     def createTable(self) -> None:
         create_sql = self._getCreateTableSql()
@@ -47,8 +47,7 @@ class BaseRepository(ABC, Generic[T]):
     # def initialize(self) -> None:
 
     @abstractmethod
-    def _getCreateTableSql(self) -> str:
-        ...
+    def _getCreateTableSql(self) -> str: ...
 
     # TODO: Add abstract method to get data for intialization
     # @abstractmethod

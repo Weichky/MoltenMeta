@@ -8,7 +8,7 @@ from ..abstraction import (
 
 from catalog import DatabaseConnInfo
 
-from core.log import getLogService
+from core.log import LogService
 
 # PostgreSQL imports - these will be needed only when PostgreSQL is used
 try:
@@ -93,7 +93,7 @@ class PostgreSQLCursor(DatabaseCursor):
 class PostgreSQLConnection(DatabaseConnInfo):
     """PostgreSQL connection implementation"""
 
-    def __init__(self, config: DatabaseConnInfo):
+    def __init__(self, config: DatabaseConnInfo, log_service: LogService):
         if not PSYCOPG2_AVAILABLE:
             raise ImportError(
                 "psycopg2 is required for PostgreSQL support. Install with: pip install psycopg2-binary"
@@ -102,7 +102,7 @@ class PostgreSQLConnection(DatabaseConnInfo):
         self.config = config
         self._connection = None
         self._dialect = PostgreSQLDialect()
-        self._logger = getLogService().getLogger(__name__)
+        self._logger = log_service.getLogger(__name__)
 
     def connect(self) -> None:
         if not all([self.config.host, self.config.database, self.config.username]):

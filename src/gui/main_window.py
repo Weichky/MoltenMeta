@@ -19,7 +19,7 @@ class MainWindow(QMainWindow):
 
         super().__init__(parent)
 
-        self.log = context.log(__name__)
+        self.log = context.log.getLogger(__name__)
 
         self.ui = UiMainWindow()
         self.ui.setupUi(self)
@@ -43,15 +43,15 @@ class MainWindow(QMainWindow):
         # if you use the library."
 
         # Set menubar
-        self.menubar = MenubarWidget(self)
+        self.menubar = MenubarWidget(self, context.i18n)
         self.setMenuBar(self.menubar)
 
         # Set sidebar
-        self.sidebar = SidebarWidget(self)
+        self.sidebar = SidebarWidget(self, context.i18n)
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.sidebar)
 
         # Set workspace
-        self.workspace = Workspace(self)
+        self.workspace = Workspace(self, context)
         self.setCentralWidget(self.workspace)
 
         # Connect signals

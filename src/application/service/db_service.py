@@ -2,8 +2,6 @@ from core.log import LogService
 
 from catalog import DatabaseType, DatabaseConnInfo
 
-from core.config import getDatabaseType, getDatabaseFilePath
-
 from db import DatabaseManager
 
 class DatabaseService:
