@@ -133,20 +133,29 @@ Prefer importing from the module level (e.g., `from core.log import LogService`)
 
 ## Settings & Database Architecture
 
-### Current Issues
-- **Dual System**: Config system (`core/config/`) reads from TOML files; Settings system (`domain/settings/`) should read from SQLite but isn't fully integrated
-- **Bootstrap Order Problem**: Database needs runtime path from args, but settings need database
-- **Duplicated Functions**: `getLanguage()`, `getLogLevel()` etc.
-- **Repository Dependency Issue**: `SettingsRepository` creates its own `DatabaseManager` internally instead of accepting injected dependency
-
 ### Architecture Principles
 1. **Settings is the single source of truth** for all runtime configuration
-2. **Bootstrap sequence**:
-   - Step 1: Parse args, set up logging (needs runtime path)
-   - Step 2: Set up core database connection (using hardcoded/default SQLite path for core db)
-   - Step 3: Load settings from core database (seed default if empty)
-   - Step 4: Use settings for all subsequent configuration
+2. **Two-phase initialization**:
+   - **bootstrap()**: Creates core services (LogService, I18nService, ThemeService) without Settings
+   - **initApp()**: Creates CoreDbService, loads settings from core database, then updates AppContext
 3. **Two SQLite databases**:
    - **Core database**: Stores app settings (`core.mmdb` in runtime path)
    - **User database**: Stores user data (separate file, path from settings)
 4. **No circular dependencies**: Database path for core db must come from args/defaults, not settings
+5. **AppContext should not be mutated after init**: Settings are set once during initApp(), not passed as class
+
+### Bootstrap Flow
+```python
+# bootstrap(): Creates services, Settings NOT passed to AppContext
+context = bootstrap(app)  # AppContext has settings=None
+
+# initApp(): Load settings, update context
+db_manager = _createCoreDbManager()
+core_db_service = CoreDbService(app, context.log, db_manager)
+context.core_db = core_db_service
+context.settings = core_db_service.settings  # Update with real instance
+```
+
+### Repository Pattern
+- Repositories accept injected `DatabaseManager` via constructor
+- If no manager is provided, they create a default one (for backwards compatibility)

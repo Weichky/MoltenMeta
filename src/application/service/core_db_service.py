@@ -15,7 +15,6 @@ class CoreDbService(QObject):
         self,
         app,
         log_service: LogService,
-        settings: Settings,
         db_manager: DatabaseManager | None = None,
     ):
         super().__init__(app)
@@ -24,7 +23,7 @@ class CoreDbService(QObject):
             log_service=log_service, db_manager=self._db_service.getManager()
         )
         self._logger = log_service.getLogger(__name__)
-        self._settings = settings
+        self._settings = Settings()
         self._initSettings()
 
     @property

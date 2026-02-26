@@ -43,7 +43,10 @@ def bootstrap(app) -> AppContext:
     theme_service = ThemeService(app, log_service)
 
     return AppContext(
-        log=log_service, i18n=i18n_service, theme=theme_service, settings=Settings
+        log=log_service,
+        i18n=i18n_service,
+        theme=theme_service,
+        settings=None
     )
 
 
@@ -53,10 +56,10 @@ def initApp(app) -> AppContext:
     core_db_service = CoreDbService(
         app, 
         context.log, 
-        Settings(), 
         db_manager
     )
     context.core_db = core_db_service
+    context.settings = core_db_service.settings
 
     context.log.setLogLevel(core_db_service.settings.log_level)
     context.i18n.setLanguage(core_db_service.settings.language)
