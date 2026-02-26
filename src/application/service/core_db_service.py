@@ -27,6 +27,10 @@ class CoreDbService(QObject):
         self._settings = settings
         self._initSettings()
 
+    @property
+    def settings_repo(self) -> SettingsRepository:
+        return self._settings_repo
+
     def _initSettings(self) -> None:
         self._settings_repo.createTable()
         if self._settings_repo.count() == 0:

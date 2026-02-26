@@ -5,8 +5,8 @@ from application import AppContext
 
 from .ui import UiSettingsPage
 
-from i18n import I18nService
-from core.log import LogService
+from domain.snapshot import SettingsSnapshot
+
 
 class SettingsController(QObject):
     def __init__(self, ui: UiSettingsPage, context: AppContext):
@@ -14,6 +14,7 @@ class SettingsController(QObject):
         self.i18n_service = context.i18n
         self.ui = ui
         self._log_service = context.log
+        self._settings_repo = context.core_db.settings_repo
         self._setupNavigation()
 
     def _setupNavigation(self):
@@ -22,10 +23,14 @@ class SettingsController(QObject):
         self.button_group.addButton(self.ui.general_button)
         self.button_group.addButton(self.ui.log_button)
         self.button_group.setExclusive(True)
-        
+
         # Connect button clicks to page switching
-        self.ui.general_button.clicked.connect(lambda: self.ui.content_area.setCurrentIndex(0))
-        self.ui.log_button.clicked.connect(lambda: self.ui.content_area.setCurrentIndex(1))
+        self.ui.general_button.clicked.connect(
+            lambda: self.ui.content_area.setCurrentIndex(0)
+        )
+        self.ui.log_button.clicked.connect(
+            lambda: self.ui.content_area.setCurrentIndex(1)
+        )
 
     def connectSignals(self):
         self.ui.lang_combo.currentIndexChanged.connect(self._onLanguageChanged)
@@ -38,7 +43,10 @@ class SettingsController(QObject):
     def _onLanguageChanged(self, index: int):
         language = self.ui.lang_combo.itemData(index)
         self.i18n_service.setLanguage(language)
+        self._settings_repo.upsert([SettingsSnapshot("locale", "language", language)])
+
     def _onLogLevelChanged(self, index: int):
         level = self.ui.log_level_combo.itemData(index)
         self._log_service.setLogLevel(level)
+        self._settings_repo.upsert([SettingsSnapshot("log", "level", level)])
         self._log_service.getLogger(__name__).debug(f"Log level changed to {level}")
