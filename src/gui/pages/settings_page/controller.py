@@ -7,14 +7,19 @@ from .ui import UiSettingsPage
 
 from domain.snapshot import SettingsSnapshot
 
+from gui.appearance.theme import ThemeService
+
 
 class SettingsController(QObject):
-    def __init__(self, ui: UiSettingsPage, context: AppContext):
+    def __init__(
+        self, ui: UiSettingsPage, context: AppContext, theme_service: ThemeService
+    ):
         super().__init__()
         self.i18n_service = context.i18n
         self.ui = ui
         self._log_service = context.log
         self._settings_repo = context.core_db.settings_repo
+        self._theme_service = theme_service
         self._setupNavigation()
 
     def _setupNavigation(self):
@@ -35,6 +40,8 @@ class SettingsController(QObject):
     def connectSignals(self):
         self.ui.lang_combo.currentIndexChanged.connect(self._onLanguageChanged)
         self.ui.log_level_combo.currentIndexChanged.connect(self._onLogLevelChanged)
+        self.ui.theme_mode_combo.currentIndexChanged.connect(self._onThemeModeChanged)
+        self.ui.theme_color_combo.currentIndexChanged.connect(self._onThemeColorChanged)
 
         # i18n
         # Connect to self.ui instead of self.
@@ -50,3 +57,16 @@ class SettingsController(QObject):
         self._log_service.setLogLevel(level)
         self._settings_repo.upsert([SettingsSnapshot("log", "level", level)])
         self._log_service.getLogger(__name__).debug(f"Log level changed to {level}")
+
+    def _onThemeModeChanged(self, index: int):
+        mode = self.ui.theme_mode_combo.itemData(index)
+        self._theme_service.setThemeMode(mode)
+        snapshots = [SettingsSnapshot("appearance", "theme_mode", mode)]
+        if mode != "system":
+            snapshots.append(SettingsSnapshot("appearance", "scheme", mode))
+        self._settings_repo.upsert(snapshots)
+
+    def _onThemeColorChanged(self, index: int):
+        color = self.ui.theme_color_combo.itemData(index)
+        self._theme_service.setTheme(color)
+        self._settings_repo.upsert([SettingsSnapshot("appearance", "theme", color)])

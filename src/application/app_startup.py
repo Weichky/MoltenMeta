@@ -63,10 +63,10 @@ def initApp(app) -> AppContext:
 
     context.log.setLogLevel(core_db_service.settings.log_level)
     context.i18n.setLanguage(core_db_service.settings.language)
-    context.theme.applyTheme(
-        core_db_service.settings.theme_XML,
+    context.theme.initialize(
+        core_db_service.settings.theme,
         core_db_service.settings.scheme,
-        default_extra,
+        core_db_service.settings.theme_mode,
     )
 
     return context

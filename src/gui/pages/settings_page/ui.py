@@ -6,10 +6,28 @@ from catalog import getSupportedLanguagesNameMap
 
 from domain.settings import Settings
 
+
 class UiSettingsPage(QObject):
     def __init__(self, settings: Settings):
         super().__init__()
         self._settings = settings
+
+        self.display_mode_translations = {
+            "light": self.tr("Light"),
+            "dark": self.tr("Dark"),
+            "system": self.tr("System"),
+        }
+
+        self.color_translations = {
+            "blue": self.tr("Blue"),
+            "teal": self.tr("Teal"),
+            "amber": self.tr("Amber"),
+            "cyan": self.tr("Cyan"),
+            "pink": self.tr("Pink"),
+            "purple": self.tr("Purple"),
+            "red": self.tr("Red"),
+            "orange": self.tr("Orange"),
+        }
 
     def setupUi(self, settingsPage: QtWidgets.QWidget):
         if not settingsPage.objectName():
@@ -22,30 +40,32 @@ class UiSettingsPage(QObject):
         # Create resizable splitter
         self.splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
         self.splitter.setObjectName("settingsSplitter")
-        self.splitter.setChildrenCollapsible(False)  # Prevent child widgets from being completely collapsed
-        
+        self.splitter.setChildrenCollapsible(
+            False
+        )  # Prevent child widgets from being completely collapsed
+
         # ===== Left Navigation Panel =====
         self.nav_panel = QtWidgets.QWidget()
         self.nav_panel.setObjectName("settingsNavPanel")
         # Set size constraints using relative units
         self._setupNavPanelConstraints(settingsPage)
-        
+
         self.nav_layout = QtWidgets.QVBoxLayout(self.nav_panel)
         self.nav_layout.setContentsMargins(0, 0, 0, 0)
-        
+
         # Create scroll area for sidebar buttons
         self.nav_scroll = QtWidgets.QScrollArea()
         self.nav_scroll.setWidgetResizable(True)
         self.nav_scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.nav_scroll.setObjectName("navScrollArea")
-        
+
         # Create container widget with buttons
         self.nav_buttons_widget = QtWidgets.QWidget()
         self.nav_buttons_layout = QtWidgets.QVBoxLayout(self.nav_buttons_widget)
         self.nav_buttons_layout.setContentsMargins(0, 0, 0, 0)
         self.nav_buttons_layout.setSpacing(5)  # Add spacing between navigation buttons
         self.nav_buttons_layout.setAlignment(QtCore.Qt.AlignTop)  # Align to top
-        
+
         # Add navigation items
         self.general_button = QtWidgets.QPushButton()
         self.log_button = QtWidgets.QPushButton()
@@ -57,21 +77,21 @@ class UiSettingsPage(QObject):
 
         self.nav_buttons_layout.addWidget(self.general_button)
         self.nav_buttons_layout.addWidget(self.log_button)
-        
+
         # Set button container as scroll area widget
         self.nav_scroll.setWidget(self.nav_buttons_widget)
-        
+
         # Add scroll area to navigation panel layout
         self.nav_layout.addWidget(self.nav_scroll)
-        
+
         # ===== Middle Main Content Area =====
         self.content_area = QtWidgets.QStackedWidget()
         self.content_area.setObjectName("settingsContentArea")
-        
+
         # Create general settings page
         self.general_page = self._createGeneralPage()
         self.content_area.addWidget(self.general_page)
-        
+
         # Create log settings page
         self.log_page = self._createLogPage()
         self.content_area.addWidget(self.log_page)
@@ -79,42 +99,42 @@ class UiSettingsPage(QObject):
         # Add to splitter
         self.splitter.addWidget(self.nav_panel)
         self.splitter.addWidget(self.content_area)
-        
+
         # Set initial size ratio (relative values)
         self._setupSplitterSizes(settingsPage)
-        
+
         # Add splitter to main layout
         self.root_layout.addWidget(self.splitter)
-        
+
         # Connect window resize signal
         settingsPage.installEventFilter(self._createResizeEventFilter(settingsPage))
-        
+
     def _setupNavPanelConstraints(self, parent):
         # Get parent window dimensions
         parent_width = parent.width()
-        
+
         # Set navigation panel min/max width based on parent window width
         # Minimum width is 1/12 of parent window width, but no less than 100 pixels
         min_width = max(int(parent_width / 12), 100)
         # Maximum width is 1/4 of parent window width, but no more than 300 pixels
         max_width = min(int(parent_width / 4), 300)
-        
+
         self.nav_panel.setMinimumWidth(min_width)
         self.nav_panel.setMaximumWidth(max_width)
-        
+
     def _setupSplitterSizes(self, parent):
         # Get parent window dimensions
         parent_width = parent.width()
-        
+
         # Set initial sizes based on parent window width
         nav_width = max(int(parent_width / 8), 150)
         content_width = parent_width - nav_width
-        
+
         self.splitter.setSizes([nav_width, content_width])
-        
+
     def _createResizeEventFilter(self, parent):
         ui_self = self
-        
+
         class ResizeEventFilter(QtCore.QObject):
             def eventFilter(self, obj, event):
                 if event.type() == QtCore.QEvent.Resize:
@@ -122,29 +142,29 @@ class UiSettingsPage(QObject):
                     ui_self._setupNavPanelConstraints(parent)
                     ui_self._setupSplitterSizes(parent)
                 return False
-                
+
         return ResizeEventFilter()
-        
+
     def _createGeneralPage(self) -> QtWidgets.QWidget:
         page = QtWidgets.QWidget()
         page.setObjectName("generalPage")
         page_layout = QtWidgets.QVBoxLayout(page)
         page_layout.setSpacing(10)
         page_layout.setContentsMargins(10, 10, 10, 10)
-        
+
         # Language settings
         lang_group = QtWidgets.QGroupBox()
         lang_group.setObjectName("languageGroup")
         lang_layout = QtWidgets.QVBoxLayout(lang_group)
-        
+
         self.lang_label = QtWidgets.QLabel()
         lang_layout.addWidget(self.lang_label)
-        
+
         self.lang_combo = QtWidgets.QComboBox()
         self.lang_combo.setObjectName("languageCombo")
 
         lang_layout.addWidget(self.lang_combo)
-        
+
         lang_layout.addStretch()
         page_layout.addWidget(lang_group)
 
@@ -155,10 +175,48 @@ class UiSettingsPage(QObject):
 
         self.lang_combo.setCurrentIndex(self.lang_combo.findData(language))
 
+        # Appearance settings
+        appearance_group = QtWidgets.QGroupBox()
+        appearance_group.setObjectName("appearanceGroup")
+        appearance_layout = QtWidgets.QVBoxLayout(appearance_group)
+
+        self.theme_color_label = QtWidgets.QLabel()
+        appearance_layout.addWidget(self.theme_color_label)
+
+        self.theme_color_combo = QtWidgets.QComboBox()
+        self.theme_color_combo.setObjectName("themeColorCombo")
+        appearance_layout.addWidget(self.theme_color_combo)
+
+        for value, translated_text in self.color_translations.items():
+            self.theme_color_combo.addItem(translated_text, value)
+
+        theme_color = self._settings.theme
+        self.theme_color_combo.setCurrentIndex(
+            self.theme_color_combo.findData(theme_color)
+        )
+
+        self.theme_mode_label = QtWidgets.QLabel()
+        appearance_layout.addWidget(self.theme_mode_label)
+
+        self.theme_mode_combo = QtWidgets.QComboBox()
+        self.theme_mode_combo.setObjectName("themeModeCombo")
+        appearance_layout.addWidget(self.theme_mode_combo)
+
+        for key, translated_text in self.display_mode_translations.items():
+            self.theme_mode_combo.addItem(translated_text, key)
+
+        theme_mode = self._settings.theme_mode
+        self.theme_mode_combo.setCurrentIndex(
+            self.theme_mode_combo.findData(theme_mode)
+        )
+
+        appearance_layout.addStretch()
+        page_layout.addWidget(appearance_group)
+
         page_layout.addStretch()
-        
+
         return page
-        
+
     def _createLogPage(self) -> QtWidgets.QWidget:
         page = QtWidgets.QWidget()
         page.setObjectName("loggingPage")
@@ -191,15 +249,16 @@ class UiSettingsPage(QObject):
 
         return page
 
-
     def retranslateUi(self):
         # Navigation buttons
         self.general_button.setText(self.tr("General"))
         self.log_button.setText(self.tr("Log"))
-        
+
         # General settings page
         self.lang_label.setText(self.tr("Language:"))
-        
+        self.theme_mode_label.setText(self.tr("Display Mode:"))
+        self.theme_color_label.setText(self.tr("Theme Color:"))
+
         # Log settings page
         self.log_level_label.setText(self.tr("Log level:"))
 
@@ -210,7 +269,20 @@ class UiSettingsPage(QObject):
                 group = widget.findChild(QtWidgets.QGroupBox, "languageGroup")
                 if group:
                     group.setTitle(self.tr("Language Settings"))
+                group = widget.findChild(QtWidgets.QGroupBox, "appearanceGroup")
+                if group:
+                    group.setTitle(self.tr("Appearance Settings"))
             if widget.objectName() == "loggingPage":
                 group = widget.findChild(QtWidgets.QGroupBox, "logLevelGroup")
                 if group:
                     group.setTitle(self.tr("Logging Settings"))
+
+        for i in range(self.theme_mode_combo.count()):
+            data = self.theme_mode_combo.itemData(i)
+            new_text = self.display_mode_translations[data]
+            self.theme_mode_combo.setItemText(i, new_text)
+
+        for i in range(self.theme_color_combo.count()):
+            data = self.theme_color_combo.itemData(i)
+            new_text = self.color_translations[data]
+            self.theme_color_combo.setItemText(i, new_text)

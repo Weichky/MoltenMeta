@@ -8,6 +8,7 @@ class Settings:
         if records is not None:
             for r in records:
                 self._data[(r.section, r.key)] = r.value
+
     def get(self, section: str, key: str, default=None):
         return self._data.get((section, key), default)
 
@@ -62,8 +63,22 @@ class Settings:
     @property
     def enable_auto_dark_mode(self) -> bool:
         return self.get("appearance", "enable_auto_dark_mode") == "true"
-    
+
+    @property
+    def theme_mode(self) -> str:
+        return self.get("appearance", "theme_mode")
+
+    @property
+    def is_system_theme_mode(self) -> bool:
+        return self.get("appearance", "theme_mode") == "system"
+
     # Combined Methods
     @property
     def theme_XML(self) -> str:
-        return self.get("appearance", "scheme") + "_" + self.get("appearance", "theme") + ".xml"
+        scheme = self._resolve_scheme()
+        return f"{scheme}_{self.get('appearance', 'theme')}.xml"
+
+    def _resolve_scheme(self) -> str:
+        if self.get("appearance", "theme_mode") == "system":
+            return "light"
+        return self.get("appearance", "scheme")

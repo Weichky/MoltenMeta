@@ -5,7 +5,8 @@ enable_console = false
 
 [appearance]
 theme = "blue"
-scheme = "dark"
+scheme = "light"
+theme_mode = "system"
 enable_auto_dark_mode = true
 
 [locale]
