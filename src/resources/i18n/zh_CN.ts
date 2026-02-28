@@ -318,66 +318,51 @@
     </message>
     <message>
         <location filename="../../gui/pages/settings_page/ui.py" line="26"/>
-        <source>Pink</source>
-        <translation>粉色</translation>
-    </message>
-    <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="27"/>
-        <source>Purple</source>
-        <translation>紫色</translation>
-    </message>
-    <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="28"/>
         <source>Red</source>
         <translation>红色</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="29"/>
-        <source>Orange</source>
-        <translation>橙色</translation>
-    </message>
-    <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="254"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="251"/>
         <source>General</source>
         <translation>通用</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="255"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="252"/>
         <source>Log</source>
         <translation>日志</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="258"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="255"/>
         <source>Language:</source>
         <translation>语言:</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="259"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="256"/>
         <source>Display Mode:</source>
         <translation>外观：</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="260"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="257"/>
         <source>Theme Color:</source>
         <translation>主题色：</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="263"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="260"/>
         <source>Log level:</source>
         <translation>日志级别:</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="271"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="268"/>
         <source>Language Settings</source>
         <translation>语言设置</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="274"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="271"/>
         <source>Appearance Settings</source>
         <translation>外观设置</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="278"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="275"/>
         <source>Logging Settings</source>
         <translation>日志设置</translation>
     </message>

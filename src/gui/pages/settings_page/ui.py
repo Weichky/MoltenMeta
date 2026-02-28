@@ -23,10 +23,7 @@ class UiSettingsPage(QObject):
             "teal": self.tr("Teal"),
             "amber": self.tr("Amber"),
             "cyan": self.tr("Cyan"),
-            "pink": self.tr("Pink"),
-            "purple": self.tr("Purple"),
             "red": self.tr("Red"),
-            "orange": self.tr("Orange"),
         }
 
     def setupUi(self, settingsPage: QtWidgets.QWidget):
