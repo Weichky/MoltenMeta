@@ -29,7 +29,7 @@ find "$project_root" \
   -path "*/__pycache__" -prune -o \
   -type f -name "*.py" -print |
 while read -r file; do
-  if grep -q "self\.tr(" "$file"; then
+  if grep -q -E "(self\.tr\(|_translate\()" "$file"; then
     echo "$file" >> "$tmp_list"
   fi
 done

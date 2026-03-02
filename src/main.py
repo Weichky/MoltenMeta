@@ -3,15 +3,17 @@ from PySide6.QtWidgets import QApplication
 
 from gui.main_window import MainWindow
 
-from application.service import initApp
-def main():
+from application.app_startup import initApp
 
+
+def main():
     app = QApplication(sys.argv)
-    
+
     window = MainWindow(initApp(app))
     window.show()
-    
+
     sys.exit(app.exec())
-    
+
+
 if __name__ == "__main__":
     main()

@@ -70,6 +70,43 @@ self.sidebar.ui.homeButton.clicked.connect(
 )
 ```
 
+### Internationalization (i18n)
+Qt's translation scanner only recognizes string literals, not variables. This is a known limitation.
+
+**Correct:**
+```python
+self.title.setText(self.tr("Welcome"))
+self.save_button.setText(self.tr("Save"))
+```
+
+**Incorrect (will NOT be detected by lupdate):**
+```python
+msg = "Save"
+self.save_button.setText(self.tr(msg))
+```
+
+**For dynamic text**, use static strings concatenated at runtime:
+```python
+ok_text = self.tr("OK")
+cancel_text = self.tr("Cancel")
+self.message_box.setText(ok_text + " " + cancel_text)
+```
+
+**Using QCoreApplication.translate in controller** (requires lupdate script support):
+```python
+def _translate(context: str, text: str) -> str:
+    return QCoreApplication.translate(context, text)
+
+# Correct - static string literal
+msg = _translate("Context", "Error")
+
+# Incorrect - won't be detected
+error_text = "Error"
+msg = _translate("Context", error_text)
+```
+
+Note: If using `_translate()`, also update `scripts/lupdate.sh` to detect the pattern.
+
 ### Repository Pattern
 - Repository classes in `db/user/repo/`
 - Methods: `findAll()`, `findById()`, `save()`, `delete()`

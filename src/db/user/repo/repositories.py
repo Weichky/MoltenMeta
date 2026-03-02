@@ -17,6 +17,7 @@ from importlib.resources import files
 from pathlib import Path
 import tomllib
 
+
 class ElementRepository(BaseRepository[ElementSnapshot]):
     def getTableName(self) -> str:
         return "elements"
@@ -41,10 +42,7 @@ class ElementRepository(BaseRepository[ElementSnapshot]):
     def findBySymbolId(self, symbol_id: int) -> ElementSnapshot | None:
         placeholder = self.dialect.getPlaceholder()
         sql = f"SELECT * FROM elements WHERE symbol_id = {placeholder}"
-        cursor = self.connection.execute(
-            sql, 
-            [symbol_id]
-        )
+        cursor = self.connection.execute(sql, [symbol_id])
         row = cursor.fetchone()
 
         if row:
@@ -122,10 +120,7 @@ class PropertyRepository(BaseRepository[PropertySnapshot]):
     def findByName(self, name: str) -> PropertySnapshot | None:
         placeholder = self.dialect.getPlaceholder()
         sql = f"SELECT * FROM properties WHERE name = {placeholder}"
-        cursor = self.connection.execute(
-            sql, 
-            [name]
-        )
+        cursor = self.connection.execute(sql, [name])
         row = cursor.fetchone()
 
         if row:
@@ -258,6 +253,7 @@ class MetaRepository(BaseRepository[MetaSnapshot]):
         )
         return entity.value_id
 
+
 class SymbolRepository(BaseRepository[SymbolSnapshot]):
     def getTableName(self) -> str:
         return "symbols"
@@ -285,6 +281,18 @@ class SymbolRepository(BaseRepository[SymbolSnapshot]):
         if row:
             return SymbolSnapshot.fromRow(row)
         return None
+
+    def upsert(self, snapshots: list[SymbolSnapshot]) -> None:
+        sql = self.dialect.getUpsertSyntax(
+            table="symbols",
+            columns=["symbol", "name", "category"],
+        )
+
+        for snap in snapshots:
+            record = snap.toRecord()
+            self.connection.execute(sql, list(record.values()))
+
+        self.connection.commit()
 
 
 class UnitRepository(BaseRepository[UnitSnapshot]):

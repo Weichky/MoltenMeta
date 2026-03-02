@@ -1,1 +1,1 @@
-from .user_manager import UserDatabaseManager
+# User database module

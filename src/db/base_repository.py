@@ -19,7 +19,9 @@ T = TypeVar("T", bound=EntityProtocol)
 
 
 class BaseRepository(ABC, Generic[T]):
-    def __init__(self, log_service: LogService, db_manager: DatabaseManager | None = None):
+    def __init__(
+        self, log_service: LogService, db_manager: DatabaseManager | None = None
+    ):
         self._db_manager = db_manager if db_manager else DatabaseManager()
         self._logger = log_service.getLogger(self.__class__.__name__)
 
@@ -71,13 +73,17 @@ class BaseRepository(ABC, Generic[T]):
         # Handle last ID differently for different databases
         if hasattr(entity, "id"):
             if cursor.lastRowId:
-                entity.id = cursor.lastRowId
+                object.__setattr__(entity, "id", cursor.lastRowId)
             elif dialect.getLastIdSyntax():
                 # For databases that don't have lastrowid (like PostgreSQL)
                 last_id_cursor = self.connection.execute(dialect.getLastIdSyntax())
                 last_id_row = last_id_cursor.fetchone()
                 if last_id_row:
-                    entity.id = last_id_row.get("id") or last_id_row.get("lastval")
+                    object.__setattr__(
+                        entity,
+                        "id",
+                        last_id_row.get("id") or last_id_row.get("lastval"),
+                    )
 
         self._logger.debug(f"Inserted record into {table} with id {entity.id}")
         return entity.id or 0

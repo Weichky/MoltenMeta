@@ -12,11 +12,7 @@ class SettingsSnapshot(SnapshotBase):
 
     @classmethod
     def fromRow(cls, row) -> "SettingsSnapshot":
-        instance = cls(
-            section=row["section"], 
-            key=row["key"], 
-            value=row["value"]
-        )
+        instance = cls(section=row["section"], key=row["key"], value=row["value"])
         object.__setattr__(instance, "id", row.get("id"))
         return instance
 
@@ -42,7 +38,7 @@ class SymbolSnapshot(SnapshotBase):
             name=row.get("name"),
             category=row.get("category"),
         )
-        instance.id = row.get("id")
+        object.__setattr__(instance, "id", row.get("id"))
         return instance
 
     def toRecord(self) -> dict:
@@ -63,7 +59,7 @@ class UnitSnapshot(SnapshotBase):
         instance = cls(
             symbol=row["symbol"],
         )
-        instance.id = row.get("id")
+        object.__setattr__(instance, "id", row.get("id"))
         return instance
 
     def toRecord(self) -> dict:
@@ -90,7 +86,7 @@ class ElementSnapshot(SnapshotBase):
             melting_point=row.get("melting_point"),
             melt_density=row.get("melt_density"),
         )
-        instance.id = row.get("id")
+        object.__setattr__(instance, "id", row.get("id"))
         return instance
 
     def toRecord(self) -> dict:
@@ -115,7 +111,7 @@ class SystemSnapshot(SnapshotBase):
             label=row["label"],
             n_component=row.get("n_component"),
         )
-        instance.id = row.get("id")
+        object.__setattr__(instance, "id", row.get("id"))
         return instance
 
     def toRecord(self) -> dict:
@@ -164,7 +160,7 @@ class PropertySnapshot(SnapshotBase):
             unit_id=row["unit_id"],
             category=row.get("category"),
         )
-        instance.id = row.get("id")
+        object.__setattr__(instance, "id", row.get("id"))
         return instance
 
     def toRecord(self) -> dict:
@@ -190,7 +186,7 @@ class MethodSnapshot(SnapshotBase):
             type=row.get("type"),
             detail=row.get("detail"),
         )
-        instance.id = row.get("id")
+        object.__setattr__(instance, "id", row.get("id"))
         return instance
 
     def toRecord(self) -> dict:
@@ -211,7 +207,7 @@ class ConditionSnapshot(SnapshotBase):
             symbol_id=row.get("symbol_id"),
             unit_id=row["unit_id"],
         )
-        instance.id = row.get("id")
+        object.__setattr__(instance, "id", row.get("id"))
         return instance
 
     def toRecord(self) -> dict:
@@ -238,7 +234,7 @@ class PropertyValueSnapshot(SnapshotBase):
             method_id=row.get("method_id"),
             value=row["value"],
         )
-        instance.id = row.get("id")
+        object.__setattr__(instance, "id", row.get("id"))
         return instance
 
     def toRecord(self) -> dict:
@@ -295,7 +291,7 @@ class MetaSnapshot(SnapshotBase):
             created_by=row.get("created_by"),
             source_file=row.get("source_file"),
         )
-        instance.id = row.get("id")
+        object.__setattr__(instance, "id", row.get("id"))
         return instance
 
     def toRecord(self) -> dict:

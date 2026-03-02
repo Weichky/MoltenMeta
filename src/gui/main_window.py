@@ -1,9 +1,10 @@
 # This Python file uses the following encoding: utf-8
-import sys
 
 from PySide6.QtCore import Qt, QEvent
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, 
+    QApplication,
+    QMainWindow,
+    QWidget,
 )
 import PySide6QtAds as QtAds
 
@@ -14,28 +15,40 @@ from gui.sidebar import SidebarWidget
 from gui.menubar import MenubarWidget
 from gui.pages.workspace import Workspace
 
+
 class MainWindow(QMainWindow):
     def __init__(self, context: AppContext, parent=None):
-
         super().__init__(parent)
 
         self.log = context.log.getLogger(__name__)
 
         self.ui = UiMainWindow()
         self.ui.setupUi(self)
-            
+
         # Init CDockManager Configuration Flags
         QtAds.CDockManager.setConfigFlag(QtAds.CDockManager.OpaqueSplitterResize, True)
 
-        QtAds.CDockManager.setConfigFlag(QtAds.CDockManager.DockAreaHasCloseButton, False)
-        QtAds.CDockManager.setConfigFlag(QtAds.CDockManager.AllTabsHaveCloseButton, False)
-        QtAds.CDockManager.setConfigFlag(QtAds.CDockManager.DockAreaHasUndockButton, False)
-        QtAds.CDockManager.setConfigFlag(QtAds.CDockManager.DockAreaHasTabsMenuButton, False)
-        
+        QtAds.CDockManager.setConfigFlag(
+            QtAds.CDockManager.DockAreaHasCloseButton, False
+        )
+        QtAds.CDockManager.setConfigFlag(
+            QtAds.CDockManager.AllTabsHaveCloseButton, False
+        )
+        QtAds.CDockManager.setConfigFlag(
+            QtAds.CDockManager.DockAreaHasUndockButton, False
+        )
+        QtAds.CDockManager.setConfigFlag(
+            QtAds.CDockManager.DockAreaHasTabsMenuButton, False
+        )
+
         QtAds.CDockManager.setConfigFlag(QtAds.CDockManager.FocusHighlighting, False)
 
-        QtAds.CDockManager.setAutoHideConfigFlag(QtAds.CDockManager.AutoHideFeatureEnabled, True)
-        QtAds.CDockManager.setAutoHideConfigFlag(QtAds.CDockManager.DockAreaHasAutoHideButton, True)
+        QtAds.CDockManager.setAutoHideConfigFlag(
+            QtAds.CDockManager.AutoHideFeatureEnabled, True
+        )
+        QtAds.CDockManager.setAutoHideConfigFlag(
+            QtAds.CDockManager.DockAreaHasAutoHideButton, True
+        )
 
         # SITE: "You must set the configuration flags before creating the dock manager instance
         # otherwise the manager will not be created correctly and will crash upon being created.
@@ -55,23 +68,25 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.workspace)
 
         # Connect signals
-        self.sidebar.ui.homeButton.clicked.connect(
-            self.workspace.controller.showHome
-        )
+        self.sidebar.ui.homeButton.clicked.connect(self.workspace.controller.showHome)
         self.sidebar.ui.settingsButton.clicked.connect(
             self.workspace.controller.showSettings
         )
-        
+        self.sidebar.ui.databaseButton.clicked.connect(
+            self.workspace.controller.showDatabase
+        )
+
         # Connect menubar settings action
         self.menubar.ui.action_settings.triggered.connect(
             self.workspace.controller.showSettings
         )
-        
+
         # i18n
         context.i18n.language_changed.connect(self.retranslateUi)
 
         # Automatically show home page on startup
         self.workspace.controller.showHome()
+
     def changeEvent(self, event):
         if event.type() == QEvent.Type.ThemeChange:
             # Update application palette when system theme changes
@@ -79,12 +94,12 @@ class MainWindow(QMainWindow):
             # Force update all child widgets
             self.updateTheme()
         super().changeEvent(event)
-    
+
     def updateTheme(self):
         # Recursively update all child widgets
         self.setStyleSheet("")
         self.updateStylesRecursive(self)
-    
+
     def updateStylesRecursive(self, widget):
         widget.setStyle(widget.style())
         for child in widget.children():

@@ -4,6 +4,7 @@ import PySide6QtAds as QtAds
 
 from gui.pages.home_page import HomePage
 from gui.pages.settings_page import SettingsPage
+from gui.pages.database_page import DatabasePage
 
 from application import AppContext
 
@@ -16,21 +17,20 @@ from typing import Callable
 # src/DockManager.h
 # src/DockWidget.h
 
+
 class PageController:
-
     def __init__(
-        self, 
-        dock_manager: QtAds.CDockManager, 
-        background_layer: QtWidgets.QWidget, 
-        context: AppContext
+        self,
+        dock_manager: QtAds.CDockManager,
+        background_layer: QtWidgets.QWidget,
+        context: AppContext,
     ):
-
         self.logger = context.log.getLogger(__name__)
         self.i18n_service = context.i18n
 
         # page_spec
         self._home_spec = DockPageSpec(
-            key = "home",
+            key="home",
             # NOTE:
             # The following titleProvider must appear *here* (line 44, and the next is line 51),
             # otherwise Qt's translation scanner will fail to pick it up.
@@ -45,17 +45,23 @@ class PageController:
             # This might be fixed someday, but not today.
             # It is damning, but currently the least fragile approach.
             titleProvider=lambda: QCoreApplication.translate("DockPage", "Home Page"),
-            factory = lambda: HomePage(self.i18n_service),
-            onCreate = self._connectHomeSignals
+            factory=lambda: HomePage(self.i18n_service),
+            onCreate=self._connectHomeSignals,
         )
 
         self._settings_spec = DockPageSpec(
-            key = "settings",
+            key="settings",
             titleProvider=lambda: QCoreApplication.translate("DockPage", "Settings"),
             # SettingsPage does not need an i18n_service to be injected
             # Because controller takes over this job
             # See more details in the comment of SettingsPage
-            factory = lambda: SettingsPage(context)
+            factory=lambda: SettingsPage(context),
+        )
+
+        self._database_spec = DockPageSpec(
+            key="database",
+            titleProvider=lambda: QCoreApplication.translate("DockPage", "Database"),
+            factory=lambda: DatabasePage(context),
         )
 
         self.dock_manager = dock_manager
@@ -64,7 +70,8 @@ class PageController:
 
         self.pageSpecs = {
             self._home_spec.key: self._home_spec,
-            self._settings_spec.key: self._settings_spec
+            self._settings_spec.key: self._settings_spec,
+            self._database_spec.key: self._database_spec,
         }
 
     def showHome(self):
@@ -77,11 +84,10 @@ class PageController:
         self.logger.debug("Project page not implemented yet")
 
     def showDatabase(self):
-        self.logger.debug("Database page not implemented yet")
+        self._showPage(self._database_spec)
 
     def showSimulation(self):
         self.logger.debug("Simulation page not implemented yet")
-
 
     # A dock is visible if it is not floating or hidden
     def _hasVisibleDock(self) -> bool:
@@ -111,7 +117,7 @@ class PageController:
                 area = areas[0]
 
         return area
-    
+
     def _showPage(self, spec: DockPageSpec):
         dock = self.pages.get(spec.key)
 
@@ -126,28 +132,24 @@ class PageController:
             # 3) QtAds.CDockAreaWidget     — explicit target area (rarely used)
 
             self.dock_manager.addDockWidget(
-                QtAds.DockWidgetArea.CenterDockWidgetArea,
-                dock,
-                self._getArea()
+                QtAds.DockWidgetArea.CenterDockWidgetArea, dock, self._getArea()
             )
 
             self.retranslateUi()
 
             return
-        
 
         if not dock.isVisible():
-            
-            # Notice that QtAds.CDockWidget has a method called setAsCurrentTab        
+            # Notice that QtAds.CDockWidget has a method called setAsCurrentTab
             # dock.raise_()
             # dock.setVisible(True)
             dock.toggleView()
-    
+
         # dock.setAsCurrentTab()
-        
+
         # For floating windows, try to bring them to front using available methods
         if dock.isFloating():
-                dock.raise_()
+            dock.raise_()
 
         self.retranslateUi()
 
@@ -182,12 +184,13 @@ class PageController:
         self.i18n_service.language_changed.connect(self.retranslateUi)
 
     def retranslateUi(self):
-
         for key, dock in self.pages.items():
             spec = self.pageSpecs[key]
             dock.setWindowTitle(spec.titleProvider())
-            
+
+
 ###############################################################################
+
 
 @dataclass
 class DockPageSpec:
@@ -195,4 +198,3 @@ class DockPageSpec:
     titleProvider: Callable[[], str]
     factory: Callable[[], QtWidgets.QWidget]
     onCreate: Callable[[QtWidgets.QWidget], None] | None = None
-
