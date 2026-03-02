@@ -18,4 +18,3 @@ python_version = "3.14"
 [database]
 db_type = "sqlite"
 sqlite_path = "data/db/moltenmeta.mmdb"
-database_file = "moltenmeta.mmdb"

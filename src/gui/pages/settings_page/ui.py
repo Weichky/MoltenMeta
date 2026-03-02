@@ -12,6 +12,8 @@ class UiSettingsPage(QObject):
         super().__init__()
         self._settings = settings
 
+    def setupUi(self, settingsPage: QtWidgets.QWidget):
+        # Prepare translations for combo box items
         self.display_mode_translations = {
             "light": self.tr("Light"),
             "dark": self.tr("Dark"),
@@ -25,8 +27,7 @@ class UiSettingsPage(QObject):
             "cyan": self.tr("Cyan"),
             "red": self.tr("Red"),
         }
-
-    def setupUi(self, settingsPage: QtWidgets.QWidget):
+        
         if not settingsPage.objectName():
             settingsPage.setObjectName("settingsPage")
 
@@ -247,6 +248,20 @@ class UiSettingsPage(QObject):
         return page
 
     def retranslateUi(self):
+        self.display_mode_translations = {
+            "light": self.tr("Light"),
+            "dark": self.tr("Dark"),
+            "system": self.tr("System"),
+        }
+
+        self.color_translations = {
+            "blue": self.tr("Blue"),
+            "teal": self.tr("Teal"),
+            "amber": self.tr("Amber"),
+            "cyan": self.tr("Cyan"),
+            "red": self.tr("Red"),
+        }
+        
         # Navigation buttons
         self.general_button.setText(self.tr("General"))
         self.log_button.setText(self.tr("Log"))
@@ -259,20 +274,20 @@ class UiSettingsPage(QObject):
         # Log settings page
         self.log_level_label.setText(self.tr("Log level:"))
 
-        # Group box titles
-        for i in range(self.content_area.count()):
-            widget = self.content_area.widget(i)
-            if widget.objectName() == "generalPage":
-                group = widget.findChild(QtWidgets.QGroupBox, "languageGroup")
-                if group:
-                    group.setTitle(self.tr("Language Settings"))
-                group = widget.findChild(QtWidgets.QGroupBox, "appearanceGroup")
-                if group:
-                    group.setTitle(self.tr("Appearance Settings"))
-            if widget.objectName() == "loggingPage":
-                group = widget.findChild(QtWidgets.QGroupBox, "logLevelGroup")
-                if group:
-                    group.setTitle(self.tr("Logging Settings"))
+        # # Group box titles
+        # for i in range(self.content_area.count()):
+        #     widget = self.content_area.widget(i)
+        #     if widget.objectName() == "generalPage":
+        #         group = widget.findChild(QtWidgets.QGroupBox, "languageGroup")
+        #         if group:
+        #             group.setTitle(self.tr("Language Settings"))
+        #         group = widget.findChild(QtWidgets.QGroupBox, "appearanceGroup")
+        #         if group:
+        #             group.setTitle(self.tr("Appearance Settings"))
+        #     if widget.objectName() == "loggingPage":
+        #         group = widget.findChild(QtWidgets.QGroupBox, "logLevelGroup")
+        #         if group:
+        #             group.setTitle(self.tr("Logging Settings"))
 
         for i in range(self.theme_mode_combo.count()):
             data = self.theme_mode_combo.itemData(i)
