@@ -1,4 +1,5 @@
 from importlib.resources import files
+from pathlib import Path
 
 from resources import qtads
 
@@ -23,17 +24,17 @@ ads--CDockWidgetTab[focused="true"] #dockWidgetTabLabel {{
 }}
 
 #tabsMenuButton {{
-    qproperty-icon: url({resources_path}/tabs-menu-button.svg);
+    qproperty-icon: url({resources_url}/tabs-menu-button.svg);
     qproperty-iconSize: 16px;
 }}
 
 #dockAreaCloseButton {{
-    qproperty-icon: url({resources_path}/close-button.svg);
+    qproperty-icon: url({resources_url}/close-button.svg);
     qproperty-iconSize: 16px;
 }}
 
 #detachGroupButton {{
-    qproperty-icon: url({resources_path}/detach-button.svg);
+    qproperty-icon: url({resources_url}/detach-button.svg);
     qproperty-iconSize: 16px;
 }}
 
@@ -42,7 +43,7 @@ ads--CDockWidgetTab[focused="true"] #dockWidgetTabLabel {{
     background: none;
     border: none;
     padding: 0px -2px;
-    qproperty-icon: url({resources_path}/close-button.svg);
+    qproperty-icon: url({resources_url}/close-button.svg);
     qproperty-iconSize: 16px;
 }}
 
@@ -61,17 +62,17 @@ ads--CDockWidgetTab[focused="true"] #dockWidgetTabLabel {{
 }}
 
 #dockAreaAutoHideButton {{
-    qproperty-icon: url({resources_path}/vs-pin-button.svg);
+    qproperty-icon: url({resources_url}/vs-pin-button.svg);
     qproperty-iconSize: 16px;
 }}
 
 #dockAreaMinimizeButton {{
-    qproperty-icon: url({resources_path}/minimize-button.svg);
+    qproperty-icon: url({resources_url}/minimize-button.svg);
     qproperty-iconSize: 16px;
 }}
 
 #dockAreaFloatButton {{
-    qproperty-icon: url({resources_path}/maximize-button.svg);
+    qproperty-icon: url({resources_url}/maximize-button.svg);
     qproperty-iconSize: 16px;
 }}
 
@@ -98,5 +99,6 @@ ads--CResizeHandle {{
 
 
 def get_ads_stylesheet() -> str:
-    images_dir = files(qtads).joinpath("images")
-    return ADS_STYLESHEET_TEMPLATE.format(resources_path=str(images_dir))
+    images_dir = Path(files(qtads).joinpath("images"))
+    resources_url = images_dir.as_posix()
+    return ADS_STYLESHEET_TEMPLATE.format(resources_url=resources_url)
