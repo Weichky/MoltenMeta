@@ -41,7 +41,7 @@ class MainWindow(QMainWindow):
             QtAds.CDockManager.DockAreaHasTabsMenuButton, False
         )
 
-        QtAds.CDockManager.setConfigFlag(QtAds.CDockManager.FocusHighlighting, False)
+        QtAds.CDockManager.setConfigFlag(QtAds.CDockManager.FocusHighlighting, True)
 
         QtAds.CDockManager.setAutoHideConfigFlag(
             QtAds.CDockManager.AutoHideFeatureEnabled, True
