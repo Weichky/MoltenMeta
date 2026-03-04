@@ -76,6 +76,40 @@ class ThemeService(QObject, QtStyleTools):
             self._start_system_theme_watcher()
         else:
             self._apply_theme()
+        
+        # Apply ADS (Qt Advanced Docking System) custom stylesheet
+        self._applyADSStylesheet(scheme)
+
+    def _applyADSStylesheet(self, scheme: str) -> None:
+        """
+        Apply custom ADS stylesheet based on current theme scheme.
+        
+        This method applies a custom QSS stylesheet to the Qt Advanced Docking System
+        components to ensure consistent styling with the application theme.
+        
+        Args:
+            scheme: Color scheme ('light' or 'dark')
+        """
+        # Define ADS custom stylesheet
+        # Uses palette colors for automatic theme adaptation
+        ads_stylesheet = """
+ads--CDockWidgetTab QLabel {
+    color: palette(Text) !important;
+}
+ads--CDockWidgetTab[activeTab="true"] QLabel,
+ads--CDockWidgetTab[focused="true"] QLabel {
+    color: palette(HighlightedText) !important;
+}
+ads--CDockWidgetTab #dockWidgetTabLabel {
+    color: palette(Text) !important;
+}
+ads--CDockWidgetTab[activeTab="true"] #dockWidgetTabLabel,
+ads--CDockWidgetTab[focused="true"] #dockWidgetTabLabel {
+    color: palette(HighlightedText) !important;
+}
+"""
+        
+        self.setADSStylesheet(ads_stylesheet)
 
     def _start_system_theme_watcher(self) -> None:
         self._style_hints = self._app.styleHints()
@@ -167,6 +201,44 @@ class ThemeService(QObject, QtStyleTools):
         stylesheet = self._app.styleSheet()
         with open(css, "r", encoding="utf-8") as f:
             self._app.setStyleSheet(stylesheet + f.read().format(**os.environ))
+
+    def setADSStylesheet(self, css: str) -> None:
+        """
+        Set custom stylesheet for Qt Advanced Docking System components.
+        
+        This method allows you to override or extend the default ADS styles.
+        The stylesheet will be applied to the CDockManager and affects all
+        dock widgets managed by it.
+        
+        Args:
+            css: QSS stylesheet string for ADS components
+        
+        Example:
+            >>> ads_css = '''
+            ... ads--CDockWidgetTab QLabel {
+            ...     color: palette(Text) !important;
+            ... }
+            ... '''
+            >>> theme_service.setADSStylesheet(ads_css)
+        """
+        self._logger.debug("Setting ADS stylesheet")
+        
+        # Apply ADS stylesheet through the dock manager
+        # This requires importing PySide6QtAds where this is called
+        try:
+            import PySide6QtAds as QtAds
+            
+            # Get current ADS stylesheet and append custom styles
+            current_stylesheet = QtAds.CDockManager.stylesheet()
+            new_stylesheet = current_stylesheet + "\n" + css if current_stylesheet else css
+            
+            QtAds.CDockManager.setStyleSheet(new_stylesheet)
+            
+            self._logger.debug("ADS stylesheet applied successfully")
+        except ImportError:
+            self._logger.warning("PySide6QtAds not available, skipping ADS stylesheet")
+        except Exception as e:
+            self._logger.error("Failed to apply ADS stylesheet: %s", e)
 
     def getThemeList(self) -> list[str]:
         return list_themes()
