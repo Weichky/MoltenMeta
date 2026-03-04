@@ -8,7 +8,7 @@ from application import AppContext
 from gui.pages.page_controller import PageController
 
 from gui.background_layer import BackgroundLayer
-from resources.styles import ADS_STYLESHEET
+from resources.styles import get_ads_stylesheet
 
 
 class Workspace(QtWidgets.QWidget):
@@ -19,7 +19,7 @@ class Workspace(QtWidgets.QWidget):
 
         # Dock manager
         self.dock_manager = QtAds.CDockManager(self)
-        self.dock_manager.setStyleSheet(ADS_STYLESHEET)
+        self.dock_manager.setStyleSheet(get_ads_stylesheet())
 
         self.layout().addWidget(self.dock_manager)
 
@@ -40,4 +40,4 @@ class Workspace(QtWidgets.QWidget):
         )
 
     def _on_theme_changed(self):
-        self.dock_manager.setStyleSheet(ADS_STYLESHEET)
+        self.dock_manager.setStyleSheet(get_ads_stylesheet())

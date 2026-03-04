@@ -1,1 +1,1 @@
-from .ads_theme import ADS_STYLESHEET
+from .ads_theme import get_ads_stylesheet
