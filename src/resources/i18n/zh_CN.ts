@@ -11,6 +11,10 @@
         <source>Settings</source>
         <translation>设置</translation>
     </message>
+    <message>
+        <source>Database</source>
+        <translation>数据库</translation>
+    </message>
 </context>
 <context>
     <name>UiBackgroundLayer</name>
@@ -18,6 +22,39 @@
         <location filename="../../gui/background_layer/ui.py" line="17"/>
         <source>Background Page</source>
         <translation></translation>
+    </message>
+</context>
+<context>
+    <name>UiDatabasePage</name>
+    <message>
+        <location filename="../../gui/pages/database_page/ui.py" line="80"/>
+        <source>Table:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/pages/database_page/ui.py" line="81"/>
+        <source>Edit</source>
+        <translation>编辑</translation>
+    </message>
+    <message>
+        <location filename="../../gui/pages/database_page/ui.py" line="82"/>
+        <source>Save</source>
+        <translation>保存</translation>
+    </message>
+    <message>
+        <location filename="../../gui/pages/database_page/ui.py" line="83"/>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../../gui/pages/database_page/ui.py" line="84"/>
+        <source>Rows: 0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/pages/database_page/ui.py" line="85"/>
+        <source>Loading...</source>
+        <translation>加载中...</translation>
     </message>
 </context>
 <context>
@@ -282,102 +319,112 @@
 <context>
     <name>UiSettingsPage</name>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="16"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="18"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="252"/>
         <source>Light</source>
         <translation>浅色模式</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="17"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="19"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="253"/>
         <source>Dark</source>
         <translation>深色模式</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="18"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="20"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="254"/>
         <source>System</source>
         <translation>跟随系统</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="22"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="24"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="258"/>
         <source>Blue</source>
         <translation>蓝色</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="23"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="25"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="259"/>
         <source>Teal</source>
         <translation>蓝绿色</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="24"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="26"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="260"/>
         <source>Amber</source>
         <translation>琥珀色</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="25"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="27"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="261"/>
         <source>Cyan</source>
         <translation>青色</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="26"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="28"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="262"/>
         <source>Red</source>
         <translation>红色</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="251"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="266"/>
         <source>General</source>
         <translation>通用</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="252"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="267"/>
         <source>Log</source>
         <translation>日志</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="255"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="270"/>
         <source>Language:</source>
         <translation>语言:</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="256"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="271"/>
         <source>Display Mode:</source>
         <translation>外观：</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="257"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="272"/>
         <source>Theme Color:</source>
         <translation>主题色：</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="260"/>
+        <location filename="../../gui/pages/settings_page/ui.py" line="275"/>
         <source>Log level:</source>
         <translation>日志级别:</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="268"/>
         <source>Language Settings</source>
-        <translation>语言设置</translation>
+        <translation type="vanished">语言设置</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="271"/>
         <source>Appearance Settings</source>
-        <translation>外观设置</translation>
+        <translation type="vanished">外观设置</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/settings_page/ui.py" line="275"/>
         <source>Logging Settings</source>
-        <translation>日志设置</translation>
+        <translation type="vanished">日志设置</translation>
     </message>
 </context>
 <context>
     <name>UiSidebar</name>
     <message>
-        <location filename="../../gui/sidebar/ui.py" line="88"/>
+        <location filename="../../gui/sidebar/ui.py" line="108"/>
         <source>Home</source>
         <translation>首页</translation>
     </message>
     <message>
-        <location filename="../../gui/sidebar/ui.py" line="89"/>
+        <location filename="../../gui/sidebar/ui.py" line="109"/>
         <source>Settings</source>
         <translation>设置</translation>
+    </message>
+    <message>
+        <location filename="../../gui/sidebar/ui.py" line="110"/>
+        <source>Database</source>
+        <translation>数据库</translation>
     </message>
 </context>
 </TS>
