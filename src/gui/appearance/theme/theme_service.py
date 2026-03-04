@@ -1,5 +1,5 @@
 from PySide6.QtCore import QObject, Signal
-from PySide6.QtGui import QStyleHints
+from PySide6.QtGui import QPalette, QColor, QStyleHints
 from PySide6.QtCore import Qt
 
 from core.log import LogService
@@ -21,6 +21,51 @@ class ThemeService(QObject, QtStyleTools):
         self._scheme = "light"
         self._theme_mode = "system"
         self._style_hints: QStyleHints | None = None
+
+    def _create_palette(self, scheme: str) -> QPalette:
+        if scheme == "dark":
+            return self._create_dark_palette()
+        return self._create_light_palette()
+
+    def _create_light_palette(self) -> QPalette:
+        palette = QPalette()
+        palette.setColor(QPalette.Window, QColor(255, 255, 255))
+        palette.setColor(QPalette.WindowText, QColor(50, 50, 50))
+        palette.setColor(QPalette.Base, QColor(250, 250, 250))
+        palette.setColor(QPalette.AlternateBase, QColor(245, 245, 245))
+        palette.setColor(QPalette.ToolTipBase, QColor(255, 255, 255))
+        palette.setColor(QPalette.ToolTipText, QColor(50, 50, 50))
+        palette.setColor(QPalette.Text, QColor(50, 50, 50))
+        palette.setColor(QPalette.Button, QColor(240, 240, 240))
+        palette.setColor(QPalette.ButtonText, QColor(50, 50, 50))
+        palette.setColor(QPalette.BrightText, QColor(255, 255, 255))
+        palette.setColor(QPalette.Highlight, QColor(0, 120, 215))
+        palette.setColor(QPalette.HighlightedText, QColor(255, 255, 255))
+        palette.setColor(QPalette.Link, QColor(0, 100, 200))
+        palette.setColor(QPalette.PlaceholderText, QColor(150, 150, 150))
+        return palette
+
+    def _create_dark_palette(self) -> QPalette:
+        palette = QPalette()
+        palette.setColor(QPalette.Window, QColor(35, 35, 35))
+        palette.setColor(QPalette.WindowText, QColor(255, 255, 255))
+        palette.setColor(QPalette.Base, QColor(25, 25, 25))
+        palette.setColor(QPalette.AlternateBase, QColor(40, 40, 40))
+        palette.setColor(QPalette.ToolTipBase, QColor(50, 50, 50))
+        palette.setColor(QPalette.ToolTipText, QColor(255, 255, 255))
+        palette.setColor(QPalette.Text, QColor(255, 255, 255))
+        palette.setColor(QPalette.Button, QColor(55, 55, 55))
+        palette.setColor(QPalette.ButtonText, QColor(255, 255, 255))
+        palette.setColor(QPalette.BrightText, QColor(255, 255, 255))
+        palette.setColor(QPalette.Highlight, QColor(0, 120, 215))
+        palette.setColor(QPalette.HighlightedText, QColor(255, 255, 255))
+        palette.setColor(QPalette.Link, QColor(100, 180, 255))
+        palette.setColor(QPalette.PlaceholderText, QColor(160, 160, 160))
+        return palette
+
+    def _apply_native_palette(self, scheme: str) -> None:
+        palette = self._create_palette(scheme)
+        self._app.setPalette(palette)
 
     def initialize(self, theme: str, scheme: str, theme_mode: str) -> None:
         self._theme = theme
@@ -53,6 +98,8 @@ class ThemeService(QObject, QtStyleTools):
             scheme = "dark" if self._is_system_dark() else "light"
         else:
             scheme = self._scheme
+
+        self._apply_native_palette(scheme)
 
         theme_xml = f"{scheme}_{self._theme}.xml"
         self.applyTheme(theme_xml, scheme)
