@@ -15,7 +15,7 @@ class UiDatabasePage(QObject):
         self.root_layout.setSpacing(8)
 
         self._setupToolbar(databasePage)
-        self.root_layout.addStretch()
+        # self.root_layout.addStretch()
         self._setupTableView(databasePage)
         self.root_layout.addStretch()
         self._setupStatusBar(databasePage)
@@ -34,10 +34,6 @@ class UiDatabasePage(QObject):
         self.toolbar_layout.addWidget(self.table_combo)
 
         self.toolbar_layout.addStretch()
-
-        self.edit_button = QtWidgets.QPushButton()
-        self.edit_button.setCheckable(True)
-        self.toolbar_layout.addWidget(self.edit_button)
 
         self.save_button = QtWidgets.QPushButton()
         self.save_button.setEnabled(False)
@@ -78,8 +74,6 @@ class UiDatabasePage(QObject):
 
     def retranslateUi(self):
         self.table_label.setText(self.tr("Table:"))
-        self.edit_button.setText(self.tr("Edit"))
         self.save_button.setText(self.tr("Save"))
         self.cancel_button.setText(self.tr("Cancel"))
-        self.row_count_label.setText(self.tr("Rows: 0"))
         self.loading_label.setText(self.tr("Loading..."))

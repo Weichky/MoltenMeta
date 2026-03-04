@@ -11,9 +11,10 @@ from core.log import LogService
 
 
 class DatabaseManager:
-    _active_conn: DatabaseConnection | None = None
-    _conn_info: DatabaseConnInfo | None = None
-    _log_service: LogService | None = None
+    def __init__(self):
+        self._active_conn: DatabaseConnection | None = None
+        self._conn_info: DatabaseConnInfo | None = None
+        self._log_service: LogService | None = None
 
     def applyConnection(
         self, config: DatabaseConnInfo, log_service: LogService | None = None

@@ -64,6 +64,9 @@ class DatabaseTableModel(QtCore.QAbstractTableModel):
 
         self._columns = [row["name"] for row in rows]
 
+        if self._table_name == "elements":
+            self._columns.insert(self._columns.index("symbol_id") + 1, "symbol")
+
         cursor = conn.execute(f"PRAGMA index_list({self._table_name})")
         indexes = cursor.fetchall()
 
@@ -83,9 +86,17 @@ class DatabaseTableModel(QtCore.QAbstractTableModel):
         if not conn:
             return
 
-        cursor = conn.execute(
-            f"SELECT * FROM {self._table_name} LIMIT {limit} OFFSET {offset}"
-        )
+        if self._table_name == "elements":
+            cursor = conn.execute(
+                f"""SELECT e.*, s.symbol 
+                    FROM elements e 
+                    LEFT JOIN symbols s ON e.symbol_id = s.id 
+                    LIMIT {limit} OFFSET {offset}"""
+            )
+        else:
+            cursor = conn.execute(
+                f"SELECT * FROM {self._table_name} LIMIT {limit} OFFSET {offset}"
+            )
         rows = cursor.fetchall()
 
         cursor = conn.execute(f"SELECT COUNT(*) as cnt FROM {self._table_name}")
@@ -149,6 +160,11 @@ class DatabaseTableModel(QtCore.QAbstractTableModel):
     def flags(self, index: QtCore.QModelIndex) -> Qt.ItemFlag:
         if not index.isValid():
             return Qt.ItemFlag.NoItemFlags
+
+        column_name = self._columns[index.column()]
+
+        if column_name == "symbol":
+            return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
 
         return (
             Qt.ItemFlag.ItemIsEnabled
@@ -237,6 +253,18 @@ class DatabaseTableModel(QtCore.QAbstractTableModel):
     def getTableName(self) -> str | None:
         return self._table_name
 
+    def refreshAll(self) -> None:
+        """Refresh all data from database."""
+        self.beginResetModel()
+        self._data.clear()
+        self._original_data.clear()
+        self._loadData(0, self._page_size)
+        self.endResetModel()
+
+    # TODO: Consider implementing table-specific refresh methods for better performance.
+    # For example, refreshRow(row_index, pk_value) for granular updates.
+    # Depends on each table's specific requirements.
+
 
 class DatabaseController(QObject):
     def __init__(self, ui: UiDatabasePage, context: AppContext):
@@ -247,14 +275,17 @@ class DatabaseController(QObject):
         self._logger = context.log.getLogger(__name__)
 
         self._model: DatabaseTableModel | None = None
-        self._is_edit_mode = False
-        self._original_edit_enabled = False
+
+        self.ui.table_view.setEditTriggers(
+            QtWidgets.QAbstractItemView.EditTrigger.DoubleClicked
+            | QtWidgets.QAbstractItemView.EditTrigger.EditKeyPressed
+            | QtWidgets.QAbstractItemView.EditTrigger.AnyKeyPressed
+        )
 
     def connectSignals(self):
         self._loadTableList()
 
         self.ui.table_combo.currentIndexChanged.connect(self._onTableSelected)
-        self.ui.edit_button.toggled.connect(self._onEditModeToggled)
         self.ui.save_button.clicked.connect(self._onSaveClicked)
         self.ui.cancel_button.clicked.connect(self._onCancelClicked)
 
@@ -286,72 +317,17 @@ class DatabaseController(QObject):
         if not table_name:
             return
 
-        if self._is_edit_mode:
-            self._exitEditMode()
+        if self._model:
+            self._model.dataChanged.disconnect(self._onDataChanged)
 
         self._model = DatabaseTableModel(self._db_manager)
         self._model.setTable(table_name)
+        self._model.dataChanged.connect(self._onDataChanged)
 
         self.ui.table_view.setModel(self._model)
         self.ui.table_view.resizeColumnsToContents()
 
         self._updateRowCountLabel()
-        self.ui.save_button.setEnabled(False)
-        self.ui.cancel_button.setEnabled(False)
-
-    def _onEditModeToggled(self, checked: bool) -> None:
-        if checked:
-            self._enterEditMode()
-        else:
-            if self._model and self._model.hasPendingChanges():
-                reply = QtWidgets.QMessageBox.question(
-                    self.ui.table_view,
-                    _translate("DatabaseController", "Discard changes?"),
-                    _translate(
-                        "DatabaseController",
-                        "You have unsaved changes. Are you sure you want to exit edit mode?",
-                    ),
-                    QtWidgets.QMessageBox.StandardButton.Save
-                    | QtWidgets.QMessageBox.StandardButton.Discard
-                    | QtWidgets.QMessageBox.StandardButton.Cancel,
-                )
-
-                if reply == QtWidgets.QMessageBox.StandardButton.Save:
-                    self._onSaveClicked()
-                    self.ui.edit_button.setChecked(True)
-                    return
-                elif reply == QtWidgets.QMessageBox.StandardButton.Cancel:
-                    self.ui.edit_button.setChecked(True)
-                    return
-                else:
-                    self._model.discardChanges()
-
-            self._exitEditMode()
-
-    def _enterEditMode(self) -> None:
-        self._is_edit_mode = True
-
-        self._original_edit_triggers = self.ui.table_view.editTriggers()
-        self.ui.table_view.setEditTriggers(
-            QtWidgets.QAbstractItemView.EditTrigger.DoubleClicked
-            | QtWidgets.QAbstractItemView.EditTrigger.EditKeyPressed
-            | QtWidgets.QAbstractItemView.EditTrigger.AnyKeyPressed
-        )
-
-        self.ui.save_button.setEnabled(False)
-        self.ui.cancel_button.setEnabled(False)
-
-        if self._model:
-            self._model.dataChanged.connect(self._onDataChanged)
-
-    def _exitEditMode(self) -> None:
-        self._is_edit_mode = False
-
-        self.ui.table_view.setEditTriggers(self._original_edit_triggers)
-
-        if self._model:
-            self._model.dataChanged.disconnect(self._onDataChanged)
-
         self.ui.save_button.setEnabled(False)
         self.ui.cancel_button.setEnabled(False)
 
@@ -413,10 +389,7 @@ class DatabaseController(QObject):
 
             conn.commit()
 
-            self._model._original_data.clear()
-            for i, row in enumerate(self._model._data):
-                self._model._original_data[i] = dict(row)
-            self._model.layoutChanged.emit()
+            self._model.refreshAll()
 
             self._model._pending_changes.clear()
 

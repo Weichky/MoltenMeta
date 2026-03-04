@@ -29,7 +29,7 @@ class ElementRepository(BaseRepository[ElementSnapshot]):
         dialect = self.dialect
         return f"""
         CREATE TABLE IF NOT EXISTS elements (
-            id {dialect.getIntegerType()},
+            id {dialect.getIntegerType()} PRIMARY KEY,
             symbol_id {dialect.getIntegerType()} NOT NULL,
             atomic_mass {dialect.getRealType()},
             atomic_radius {dialect.getRealType()},
