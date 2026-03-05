@@ -27,32 +27,26 @@
 <context>
     <name>UiDatabasePage</name>
     <message>
-        <location filename="../../gui/pages/database_page/ui.py" line="80"/>
+        <location filename="../../gui/pages/database_page/ui.py" line="76"/>
         <source>Table:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/pages/database_page/ui.py" line="81"/>
         <source>Edit</source>
-        <translation>编辑</translation>
+        <translation type="vanished">编辑</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/database_page/ui.py" line="82"/>
+        <location filename="../../gui/pages/database_page/ui.py" line="77"/>
         <source>Save</source>
         <translation>保存</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/database_page/ui.py" line="83"/>
+        <location filename="../../gui/pages/database_page/ui.py" line="78"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/database_page/ui.py" line="84"/>
-        <source>Rows: 0</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../gui/pages/database_page/ui.py" line="85"/>
+        <location filename="../../gui/pages/database_page/ui.py" line="79"/>
         <source>Loading...</source>
         <translation>加载中...</translation>
     </message>
@@ -61,47 +55,49 @@
     <name>UiHomePage</name>
     <message>
         <location filename="../../gui/pages/home_page/ui.py" line="40"/>
-        <location filename="../../gui/pages/home_page/ui.py" line="75"/>
+        <location filename="../../gui/pages/home_page/ui.py" line="77"/>
         <source>Project</source>
         <translation>项目</translation>
     </message>
     <message>
         <location filename="../../gui/pages/home_page/ui.py" line="40"/>
-        <location filename="../../gui/pages/home_page/ui.py" line="75"/>
+        <location filename="../../gui/pages/home_page/ui.py" line="77"/>
         <source>Database</source>
         <translation>数据库</translation>
     </message>
     <message>
         <location filename="../../gui/pages/home_page/ui.py" line="40"/>
-        <location filename="../../gui/pages/home_page/ui.py" line="75"/>
+        <location filename="../../gui/pages/home_page/ui.py" line="77"/>
         <source>Simulation</source>
         <translation>模拟</translation>
     </message>
     <message>
         <location filename="../../gui/pages/home_page/ui.py" line="41"/>
-        <location filename="../../gui/pages/home_page/ui.py" line="76"/>
+        <location filename="../../gui/pages/home_page/ui.py" line="78"/>
         <source>Settings</source>
         <translation>设置</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/home_page/ui.py" line="64"/>
+        <location filename="../../gui/pages/home_page/ui.py" line="68"/>
         <source>Welcome</source>
         <translation>欢迎</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/home_page/ui.py" line="68"/>
+        <location filename="../../gui/pages/home_page/ui.py" line="72"/>
+        <source>Molten Meta provides an integrated environment for the input, management, prediction, and analysis of thermodynamic data for liquid alloys, offering excellent compatibility and scalability.&lt;br&gt;&lt;br&gt;Project Repository: &lt;a href=&quot;https://github.com/Weichky/MoltenMeta&quot;&gt;https://github.com/Weichky/MoltenMeta&lt;/a&gt;</source>
+        <translation>Molten Meta 为液态合金的热力学数据输入、管理、预测和分析提供了一个集成环境，具有出色的兼容性和可扩展性。&lt;br&gt;&lt;br&gt;项目仓库：&lt;a href=&quot;https://github.com/Weichky/MoltenMeta&quot;&gt;https://github.com/Weichky/MoltenMeta&lt;/a&gt;</translation>
+    </message>
+    <message>
         <source>This software provides an integrated environment for </source>
-        <translation>此软件提供了一个集成环境用于</translation>
+        <translation type="vanished">此软件提供了一个集成环境用于</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/home_page/ui.py" line="69"/>
         <source>data management, simulation, and analysis. </source>
-        <translation>数据管理、模拟和分析。</translation>
+        <translation type="vanished">数据管理、模拟和分析。</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/home_page/ui.py" line="70"/>
         <source>All modules are designed to be extensible and reproducible.</source>
-        <translation>模块设计考虑拓展性和可重现性。</translation>
+        <translation type="vanished">模块设计考虑拓展性和可重现性。</translation>
     </message>
 </context>
 <context>

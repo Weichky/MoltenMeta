@@ -223,7 +223,7 @@ CREATE TABLE symbols (
 
 CREATE TABLE units (
     id        INTEGER PRIMARY KEY,
-    symbol    TEXT NOT NULL
+    symbol_id     INTEGER NOT NULL,  -- Reference to language-layer symbol (v T, ρ, Cp, ...)
 );
 ```
 

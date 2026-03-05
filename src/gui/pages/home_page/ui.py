@@ -55,7 +55,11 @@ class UiHomePage(QObject):
         self.description.setWordWrap(True)
         self.description.setAlignment(QtCore.Qt.AlignCenter)
 
+        # self.website_link = QtWidgets.QLabel('<a href="https://github.com/Weichky/MoltenMeta">https://github.com/Weichky/MoltenMeta</a>')
+        # self.website_link.setOpenExternalLinks(True)
+
         self.root_layout.addWidget(self.description)
+        # self.root_layout.addWidget(self.website_link)
 
         self.root_layout.addStretch()
 
@@ -63,11 +67,9 @@ class UiHomePage(QObject):
         welcome_text = self.tr("Welcome")
         self.title.setText("<h1>"+welcome_text+"</h1>")
 
-        software_description = (
-            self.tr("This software provides an integrated environment for ")
-            + self.tr("data management, simulation, and analysis. ")
-            + self.tr("All modules are designed to be extensible and reproducible.")
-        )
+        software_description = (self.tr(
+            'Molten Meta provides an integrated environment for the input, management, prediction, and analysis of thermodynamic data for liquid alloys, offering excellent compatibility and scalability.<br><br>Project Repository: <a href="https://github.com/Weichky/MoltenMeta">https://github.com/Weichky/MoltenMeta</a>'
+        ))
 
         self.description.setText("<h6>"+software_description+"</h6>")
             

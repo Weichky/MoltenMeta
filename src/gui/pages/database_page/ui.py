@@ -51,8 +51,9 @@ class UiDatabasePage(QObject):
         self.table_view.setAlternatingRowColors(True)
         self.table_view.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.table_view.setSortingEnabled(True)
+        self.table_view.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
-        self.root_layout.addWidget(self.table_view)
+        self.root_layout.addWidget(self.table_view, stretch=1)
 
     def _setupStatusBar(self, parent: QtWidgets.QWidget):
         self.status_bar = QtWidgets.QWidget()

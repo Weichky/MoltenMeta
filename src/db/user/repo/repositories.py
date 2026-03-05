@@ -307,7 +307,10 @@ class UnitRepository(BaseRepository[UnitSnapshot]):
         return f"""
         CREATE TABLE IF NOT EXISTS units (
             id {dialect.getAutoincrementType()},
-            symbol {dialect.getTextType()} NOT NULL
+            symbol_id {dialect.getIntegerType()} NOT NULL,
+
+            PRIMARY KEY (id),
+            FOREIGN KEY (symbol_id) REFERENCES symbols(id) ON DELETE RESTRICT
         )
         """
 
