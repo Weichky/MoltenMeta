@@ -98,7 +98,7 @@ ads--CResizeHandle {{
 """
 
 
-def get_ads_stylesheet() -> str:
+def getAdsStylesheet() -> str:
     images_dir = Path(files(qtads).joinpath("images"))
     resources_url = images_dir.as_posix()
     return ADS_STYLESHEET_TEMPLATE.format(resources_url=resources_url)

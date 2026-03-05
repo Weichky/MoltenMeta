@@ -1,6 +1,7 @@
 from PySide6.QtCore import (
     Qt,
     QObject,
+    QSize,
 )
 from PySide6.QtWidgets import (
     QDockWidget,
@@ -11,9 +12,15 @@ from PySide6.QtWidgets import (
     QSpacerItem,
     QLayout,
 )
+from PySide6.QtGui import QFont
 
 
 class UiSidebar(QObject):
+    COLLAPSED_WIDTH = 75
+    EXPANDED_WIDTH = 0  # 0 means dynamic
+    BUTTON_HEIGHT = 48
+    ICON_SIZE = 32
+
     def setupUi(self, dock: QDockWidget):
         # Set dock widget properties
         if not dock.objectName():
@@ -45,7 +52,7 @@ class UiSidebar(QObject):
 
         # Create sidebar layout
         self.sidebarLayout = QVBoxLayout()
-        self.sidebarLayout.setSpacing(0)
+        self.sidebarLayout.setSpacing(2)
         self.sidebarLayout.setObjectName("sidebarLayout")
         self.sidebarLayout.setSizeConstraint(QLayout.SizeConstraint.SetMaximumSize)
 
@@ -95,13 +102,46 @@ class UiSidebar(QObject):
         )
         self.sidebarLayout.addItem(self.verticalSpacer)
 
+        # Create toggle button
+        self.toggleButton = QPushButton(self.contents)
+        self.toggleButton.setObjectName("toggleButton")
+        self.toggleButton.setCheckable(True)
+
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        self.toggleButton.setSizePolicy(sizePolicy)
+
+        self.sidebarLayout.addWidget(self.toggleButton)
+
         self.sidebarLayout.setStretch(0, 1)
         self.sidebarLayout.setStretch(1, 1)
         self.sidebarLayout.setStretch(2, 1)
         self.sidebarLayout.setStretch(3, 1)
+        self.sidebarLayout.setStretch(4, 1)
+        self.sidebarLayout.setStretch(5, 0)
 
         self.verticalLayout.addLayout(self.sidebarLayout)
         dock.setWidget(self.contents)
+
+        self._applyButtonStyle()
+
+    def _applyButtonStyle(self):
+        font = QFont()
+        font.setPointSize(14)
+        font.setBold(True)
+
+        buttons = [
+            self.homeButton,
+            self.settingsButton,
+            self.databaseButton,
+            self.toggleButton,
+        ]
+        for btn in buttons:
+            btn.setFont(font)
+            btn.setMinimumHeight(self.BUTTON_HEIGHT)
+            btn.setIconSize(QSize(self.ICON_SIZE, self.ICON_SIZE))
+            btn.setStyleSheet("text-align: left; padding-left: 12px;")
 
     def retranslateUi(self, dock: QDockWidget):
         # Set button texts
@@ -109,7 +149,12 @@ class UiSidebar(QObject):
         self.settingsButton.setText(self.tr("Settings"))
         self.databaseButton.setText(self.tr("Database"))
 
-    def adjustSidebarSize(self, sidebar):
+    def adjustSidebarSize(self, sidebar, is_collapsed: bool = False):
+        if is_collapsed:
+            sidebar.setMinimumWidth(self.COLLAPSED_WIDTH)
+            sidebar.setMaximumWidth(self.COLLAPSED_WIDTH)
+            return
+
         # Get parent window dimensions
         parent_width = sidebar.parent().width()
 
