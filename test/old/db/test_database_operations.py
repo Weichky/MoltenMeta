@@ -5,7 +5,6 @@ Tests basic database operations without GUI or other dependencies
 """
 
 import sys
-import os
 import tempfile
 import logging
 from pathlib import Path
@@ -47,7 +46,7 @@ def test_database_operations():
 
         try:
             # Import after setting up path
-            from db.db_service import getDatabaseService, DatabaseService
+            from db.db_service import DatabaseService
             from db.repo.repositories import (
                 ElementRepository,
                 SystemRepository,

@@ -1,9 +1,7 @@
 from PySide6.QtCore import (
-    Qt,
     QObject
 )
 from PySide6.QtWidgets import (
-    QMainWindow,
     QStatusBar,
     QWidget
     )

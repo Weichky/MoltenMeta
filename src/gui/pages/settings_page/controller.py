@@ -1,5 +1,8 @@
+import logging
+
 from PySide6 import QtWidgets
-from PySide6.QtCore import QObject
+from PySide6.QtCore import QObject, Signal
+from PySide6.QtGui import QTextCursor
 
 from application import AppContext
 
@@ -8,6 +11,39 @@ from .ui import UiSettingsPage
 from domain.snapshot import SettingsSnapshot
 
 from gui.appearance.theme import ThemeService
+
+
+class QtLogHandler(logging.Handler):
+    class SignalEmitter(QObject):
+        log_message = Signal(str, int)
+
+        def __init__(self):
+            super().__init__()
+            self.log_message.connect(self._appendLog)
+
+        def _appendLog(self, message: str, level: int):
+            self._text_edit.append(message)
+            self._text_edit.moveCursor(QTextCursor.MoveOperation.End)
+
+        def setTextEdit(self, text_edit: QtWidgets.QTextEdit):
+            self._text_edit = text_edit
+
+    def __init__(self):
+        super().__init__()
+        self._emitter = self.SignalEmitter()
+        self.setFormatter(
+            logging.Formatter("[%(levelname)s](%(name)s)|%(asctime)s|%(message)s")
+        )
+
+    def setTextEdit(self, text_edit: QtWidgets.QTextEdit):
+        self._emitter.setTextEdit(text_edit)
+
+    def emit(self, record: logging.LogRecord):
+        try:
+            msg = self.format(record)
+            self._emitter.log_message.emit(msg, record.levelno)
+        except Exception:
+            self.handleError(record)
 
 
 class SettingsController(QObject):
@@ -21,6 +57,12 @@ class SettingsController(QObject):
         self._settings_repo = context.core_db.settings_repo
         self._theme_service = theme_service
         self._setupNavigation()
+        self._setupLogHandler()
+
+    def _setupLogHandler(self):
+        self._log_handler = QtLogHandler()
+        self._log_handler.setTextEdit(self.ui.log_display)
+        logging.getLogger().addHandler(self._log_handler)
 
     def _setupNavigation(self):
         # Use exclusive button group to ensure only one button is checked

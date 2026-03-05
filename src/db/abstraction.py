@@ -2,9 +2,7 @@
 
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
-from enum import Enum
 
-from pathlib import Path
 
 class DatabaseDialect(ABC):
     """Abstract base class for database-specific SQL dialects"""

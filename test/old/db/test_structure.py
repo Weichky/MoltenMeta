@@ -5,7 +5,6 @@ Tests that the new code style and structure works
 """
 
 import sys
-import tempfile
 from pathlib import Path
 
 # Add src to path so we can import modules
@@ -18,7 +17,7 @@ def testCodeStyle():
 
     # Test that functions use snake_case
     try:
-        from db.abstraction import DatabaseDialect, DatabaseConnection
+        from db.abstraction import DatabaseDialect
 
         dialect_methods = [
             "getPlaceholder",
@@ -69,7 +68,6 @@ def testFileOrganization():
     print("Testing file organization...")
 
     try:
-        import os
 
         # Check that adapters are in the adapters folder
         adapters_dir = Path(__file__).parent.parent.parent / "src" / "db" / "adapters"
@@ -113,7 +111,7 @@ def testBasicImports():
 
     try:
         # Test abstraction imports
-        from db.abstraction import DatabaseConfig, DatabaseType, DatabaseDialect
+        from db.abstraction import DatabaseConfig, DatabaseType
 
         # Test that enum values are lowercase strings
         assert DatabaseType.SQLITE.value == "sqlite"

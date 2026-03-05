@@ -1,6 +1,5 @@
 from core.log import LogService
 from i18n import I18nService
-from db.core import DatabaseManager
 from gui.appearance.theme import ThemeService
 from domain.settings import Settings
 from application.service.core_db_service import CoreDbService

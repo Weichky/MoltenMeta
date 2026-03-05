@@ -190,7 +190,7 @@ def test_database_configuration():
     print("Testing database configuration system...")
 
     try:
-        from db.abstraction import DatabaseConfig, DatabaseType
+        from db.abstraction import DatabaseType
         from db.db_service import DatabaseConfigManager
 
         # Test environment config loading

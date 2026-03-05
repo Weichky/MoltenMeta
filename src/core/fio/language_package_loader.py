@@ -1,4 +1,3 @@
-from pathlib import Path
 
 from importlib.resources import files
 

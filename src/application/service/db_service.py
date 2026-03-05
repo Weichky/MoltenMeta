@@ -1,6 +1,6 @@
 from core.log import LogService
 
-from catalog import DatabaseType, DatabaseConnInfo
+from catalog import DatabaseConnInfo
 
 from db import DatabaseManager
 

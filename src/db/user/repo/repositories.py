@@ -12,10 +12,7 @@ from domain import (
     PropertyValueConditionSnapshot,
     MetaSnapshot,
 )
-from typing import List, Any
-from importlib.resources import files
-from pathlib import Path
-import tomllib
+from typing import List
 
 
 class ElementRepository(BaseRepository[ElementSnapshot]):

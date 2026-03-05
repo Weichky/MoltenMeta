@@ -27,7 +27,7 @@ class UiSettingsPage(QObject):
             "cyan": self.tr("Cyan"),
             "red": self.tr("Red"),
         }
-        
+
         if not settingsPage.objectName():
             settingsPage.setObjectName("settingsPage")
 
@@ -243,7 +243,16 @@ class UiSettingsPage(QObject):
         log_level = self._settings.log_level
         self.log_level_combo.setCurrentIndex(self.log_level_combo.findData(log_level))
 
-        page_layout.addStretch()
+        log_display_group = QtWidgets.QGroupBox()
+        log_display_group.setObjectName("logDisplayGroup")
+        log_display_layout = QtWidgets.QVBoxLayout(log_display_group)
+
+        self.log_display = QtWidgets.QTextEdit()
+        self.log_display.setObjectName("logDisplay")
+        self.log_display.setReadOnly(True)
+        log_display_layout.addWidget(self.log_display)
+
+        page_layout.addWidget(log_display_group)
 
         return page
 
@@ -261,7 +270,7 @@ class UiSettingsPage(QObject):
             "cyan": self.tr("Cyan"),
             "red": self.tr("Red"),
         }
-        
+
         # Navigation buttons
         self.general_button.setText(self.tr("General"))
         self.log_button.setText(self.tr("Log"))
@@ -273,6 +282,11 @@ class UiSettingsPage(QObject):
 
         # Log settings page
         self.log_level_label.setText(self.tr("Log level:"))
+        log_display_group = self.log_page.findChild(
+            QtWidgets.QWidget, "logDisplayGroup"
+        )
+        if log_display_group:
+            log_display_group.setTitle(self.tr("Log Output"))
 
         # # Group box titles
         # for i in range(self.content_area.count()):

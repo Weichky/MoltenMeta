@@ -1,8 +1,6 @@
 from PySide6 import QtWidgets
 import PySide6QtAds as QtAds
 
-from i18n import I18nService
-
 from application import AppContext
 
 from gui.pages.page_controller import PageController
@@ -24,7 +22,7 @@ class Workspace(QtWidgets.QWidget):
         self.layout().addWidget(self.dock_manager)
 
         # Listen for theme changes
-        context.theme.theme_changed.connect(self._on_theme_changed)
+        context.theme.theme_changed.connect(self._onThemeChanged)
 
         # Background layer (NOT inside dock_manager)
         self.background = BackgroundLayer(self, context.i18n)
@@ -39,5 +37,5 @@ class Workspace(QtWidgets.QWidget):
             context=context,
         )
 
-    def _on_theme_changed(self):
+    def _onThemeChanged(self):
         self.dock_manager.setStyleSheet(getAdsStylesheet())

@@ -1,6 +1,5 @@
 import tomllib
 from importlib.resources import files
-from typing import Any
 
 from domain.snapshot import SettingsSnapshot
 from domain.settings import serializeSettingValue

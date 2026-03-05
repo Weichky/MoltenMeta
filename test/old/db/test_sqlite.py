@@ -5,7 +5,6 @@ Tests basic database operations without GUI or other dependencies
 """
 
 import sys
-import os
 import tempfile
 import logging
 from pathlib import Path

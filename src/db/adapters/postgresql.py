@@ -2,7 +2,6 @@ from typing import Any, Dict, List
 
 from ..abstraction import (
     DatabaseDialect,
-    DatabaseConnection,
     DatabaseCursor,
 )
 

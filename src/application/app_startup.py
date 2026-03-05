@@ -1,6 +1,5 @@
 from core.log import LogService
 from core.platform import getArgs, getRuntimePath
-from pathlib import Path
 
 from db.core import DatabaseManager
 from catalog import DatabaseType, DatabaseConnInfo
@@ -15,7 +14,6 @@ from i18n import I18nService
 
 from gui.appearance.theme import ThemeService
 
-from resources.qt_material import default_extra
 
 
 def _createCoreDbManager() -> DatabaseManager:

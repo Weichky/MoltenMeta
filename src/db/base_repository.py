@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, TypeVar, Generic, Any, Protocol
+from typing import List, TypeVar, Generic, Protocol
 
 from core.log import LogService
 from .abstraction import DatabaseConnection
