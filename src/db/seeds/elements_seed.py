@@ -17,23 +17,23 @@ def loadElementsFromCsv(csv_path) -> list[ElementSnapshot]:
         reader = csv.DictReader(f)
         for row in reader:
             atomic_mass = float(row["atomic_mass"]) if row.get("atomic_mass") else None
-            atomic_radius = (
-                float(row["atomic_radius"]) if row.get("atomic_radius") else None
-            )
             melting_point = (
                 float(row["melting_point"]) if row.get("melting_point") else None
             )
-            melt_density = (
-                float(row["melt_density"]) if row.get("melt_density") else None
+            boiling_point = (
+                float(row["boiling_point"]) if row.get("boiling_point") else None
+            )
+            liquid_range = (
+                float(row["liquid_range"]) if row.get("liquid_range") else None
             )
 
             snapshots.append(
                 ElementSnapshot(
                     symbol_id=int(row["symbol_id"]),
                     atomic_mass=atomic_mass,
-                    atomic_radius=atomic_radius,
                     melting_point=melting_point,
-                    melt_density=melt_density,
+                    boiling_point=boiling_point,
+                    liquid_range=liquid_range,
                 )
             )
 

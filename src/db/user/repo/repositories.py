@@ -29,9 +29,9 @@ class ElementRepository(BaseRepository[ElementSnapshot]):
             id {dialect.getIntegerType()} PRIMARY KEY,
             symbol_id {dialect.getIntegerType()} NOT NULL,
             atomic_mass {dialect.getRealType()},
-            atomic_radius {dialect.getRealType()},
             melting_point {dialect.getRealType()},
-            melt_density {dialect.getRealType()},
+            boiling_point {dialect.getRealType()},
+            liquid_range {dialect.getRealType()},
             FOREIGN KEY (symbol_id) REFERENCES symbols(id) ON DELETE RESTRICT
         )
         """
@@ -305,8 +305,6 @@ class UnitRepository(BaseRepository[UnitSnapshot]):
         CREATE TABLE IF NOT EXISTS units (
             id {dialect.getAutoincrementType()},
             symbol_id {dialect.getIntegerType()} NOT NULL,
-
-            PRIMARY KEY (id),
             FOREIGN KEY (symbol_id) REFERENCES symbols(id) ON DELETE RESTRICT
         )
         """
@@ -372,19 +370,3 @@ class PropertyValueConditionRepository(BaseRepository[PropertyValueConditionSnap
             FOREIGN KEY (condition_id) REFERENCES conditions(id) ON DELETE RESTRICT
         )
         """
-
-    def findByValueId(self, value_id: int) -> List[PropertyValueConditionSnapshot]:
-        placeholder = self.dialect.getPlaceholder()
-        sql = f"SELECT * FROM property_value_conditions WHERE value_id = {placeholder}"
-        cursor = self.connection.execute(sql, [value_id])
-        rows = cursor.fetchall()
-        return [PropertyValueConditionSnapshot.fromRow(row) for row in rows]
-
-    def findByConditionId(
-        self, condition_id: int
-    ) -> List[PropertyValueConditionSnapshot]:
-        placeholder = self.dialect.getPlaceholder()
-        sql = f"SELECT * FROM property_value_conditions WHERE condition_id = {placeholder}"
-        cursor = self.connection.execute(sql, [condition_id])
-        rows = cursor.fetchall()
-        return [PropertyValueConditionSnapshot.fromRow(row) for row in rows]

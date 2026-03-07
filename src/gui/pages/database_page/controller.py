@@ -64,8 +64,15 @@ class DatabaseTableModel(QtCore.QAbstractTableModel):
 
         self._columns = [row["name"] for row in rows]
 
+        # TODO: Refactor to use a registry-based or configuration-driven approach 
+        # for table-specific column handling instead of hardcoding table names.
+        # Current implementation violates open/closed principle and will lead to 
+        # code bloat as more tables require special handling.
         if self._table_name == "elements":
-            self._columns.insert(self._columns.index("symbol_id") + 1, "symbol")
+            # Remove symbol_id column and insert symbol column
+            if "symbol_id" in self._columns:
+                self._columns.remove("symbol_id")
+            self._columns.insert(1, "symbol")
 
         cursor = conn.execute(f"PRAGMA index_list({self._table_name})")
         indexes = cursor.fetchall()
@@ -86,6 +93,7 @@ class DatabaseTableModel(QtCore.QAbstractTableModel):
         if not conn:
             return
 
+        # TODO: Refactor to use a registry-based or configuration-driven approach.
         if self._table_name == "elements":
             cursor = conn.execute(
                 f"""SELECT e.*, s.symbol 
@@ -163,6 +171,7 @@ class DatabaseTableModel(QtCore.QAbstractTableModel):
 
         column_name = self._columns[index.column()]
 
+        # TODO: Refactor to use a registry-based or configuration-driven approach.
         if column_name == "symbol":
             return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
 

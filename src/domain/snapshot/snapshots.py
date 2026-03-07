@@ -73,18 +73,18 @@ class ElementSnapshot(SnapshotBase):
     id: int | None = field(default=None, init=False)
     symbol_id: int
     atomic_mass: float | None = None
-    atomic_radius: float | None = None
     melting_point: float | None = None
-    melt_density: float | None = None
+    boiling_point: float | None = None
+    liquid_range: float | None = None
 
     @classmethod
     def fromRow(cls, row) -> "ElementSnapshot":
         instance = cls(
             symbol_id=row["symbol_id"],
             atomic_mass=row.get("atomic_mass"),
-            atomic_radius=row.get("atomic_radius"),
             melting_point=row.get("melting_point"),
-            melt_density=row.get("melt_density"),
+            boiling_point=row.get("boiling_point"),
+            liquid_range=row.get("liquid_range"),
         )
         object.__setattr__(instance, "id", row.get("id"))
         return instance
@@ -93,9 +93,9 @@ class ElementSnapshot(SnapshotBase):
         return {
             "symbol_id": self.symbol_id,
             "atomic_mass": self.atomic_mass,
-            "atomic_radius": self.atomic_radius,
             "melting_point": self.melting_point,
-            "melt_density": self.melt_density,
+            "boiling_point": self.boiling_point,
+            "liquid_range": self.liquid_range,
         }
 
 
