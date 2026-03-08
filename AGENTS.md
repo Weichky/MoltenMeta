@@ -3,14 +3,33 @@
 ## Project Overview
 
 - **Name**: MoltenMeta
-- **Type**: Desktop application (PySide6/Qt for Python)
-- **Language**: Python 3.14+
+- **Language**: Python 3.14+, C++ (algorithm)
 - **Architecture**: Clean Architecture with layered structure
+
+### Implementation Status
+
+**Completed:**
+- Core application shell with PySide6 + Qt-Advanced-Docking-System
+- Two-phase initialization (bootstrap → initApp)
+- Dual SQLite databases (core settings + user data)
+- Repository pattern with multi-dialect support (SQLite/PostgreSQL)
+- Domain snapshots (frozen dataclasses)
+- Theme system with light/dark mode support
+- Internationalization (i18n) framework
+- Home page, Settings page, Database page
+- Data import (CSV)
+- Settings persistence and hot-reload
+
+**In Progress:**
+- Analysis and simulation pages
+- C++ algorithm engine integration
 
 ## Directory Structure
 
 ```
 src/
+├── algorithm/       # Algorithm engine (C++ / Python)
+│   └── python/       # Python bindings
 ├── application/    # Application services and use cases
 ├── core/          # Core utilities (config, logging)
 ├── db/            # Database layer (adapters, repositories)
