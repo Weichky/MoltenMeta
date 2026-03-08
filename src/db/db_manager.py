@@ -1,6 +1,3 @@
-# Temporarily copied from user_manager.py
-# TODO: Implement a proper database manager(inculding proper path)
-
 from catalog import DatabaseType, DatabaseConnInfo
 
 from db.adapters.sqlite import SQLiteConnection
