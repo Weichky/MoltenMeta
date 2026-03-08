@@ -8,6 +8,7 @@ theme = "blue"
 scheme = "light"
 theme_mode = "system"
 enable_auto_dark_mode = true
+density_scale = -3
 
 [locale]
 language = "en"

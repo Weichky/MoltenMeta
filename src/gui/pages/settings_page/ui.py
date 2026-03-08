@@ -207,6 +207,16 @@ class UiSettingsPage(QObject):
         self.theme_mode_combo.setCurrentIndex(
             self.theme_mode_combo.findData(theme_mode)
         )
+        
+        self.density_scale_label = QtWidgets.QLabel()
+        appearance_layout.addWidget(self.density_scale_label)
+
+        self.density_scale_spin = QtWidgets.QSpinBox()
+        self.density_scale_spin.setObjectName("densityScaleSpin")
+        self.density_scale_spin.setRange(-4, 4)
+        self.density_scale_spin.setValue(self._settings.density_scale)
+        appearance_layout.addWidget(self.density_scale_spin)
+
 
         appearance_layout.addStretch()
         page_layout.addWidget(appearance_group)
@@ -279,6 +289,7 @@ class UiSettingsPage(QObject):
         self.lang_label.setText(self.tr("Language:"))
         self.theme_mode_label.setText(self.tr("Display Mode:"))
         self.theme_color_label.setText(self.tr("Theme Color:"))
+        self.density_scale_label.setText(self.tr("Density Scale:"))
 
         # Log settings page
         self.log_level_label.setText(self.tr("Log level:"))

@@ -84,6 +84,7 @@ class SettingsController(QObject):
         self.ui.log_level_combo.currentIndexChanged.connect(self._onLogLevelChanged)
         self.ui.theme_mode_combo.currentIndexChanged.connect(self._onThemeModeChanged)
         self.ui.theme_color_combo.currentIndexChanged.connect(self._onThemeColorChanged)
+        self.ui.density_scale_spin.valueChanged.connect(self._onDensityScaleChanged)
 
         # i18n
         # Connect to self.ui instead of self.
@@ -112,3 +113,9 @@ class SettingsController(QObject):
         color = self.ui.theme_color_combo.itemData(index)
         self._theme_service.setTheme(color)
         self._settings_repo.upsert([SettingsSnapshot("appearance", "theme", color)])
+
+    def _onDensityScaleChanged(self, value: int):
+        self._theme_service.updateDensityScale(value)
+        self._settings_repo.upsert(
+            [SettingsSnapshot("appearance", "density_scale", str(value))]
+        )

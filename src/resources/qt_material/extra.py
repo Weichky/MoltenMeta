@@ -6,7 +6,7 @@ default_extra = {
     "warning": "#ffc107",
     "success": "#17a2b8",
     # Density Scale
-    "density_scale": "-2",
+    "density_scale": "-3",
     # environ
     "pyside6": True,
     "linux": system() == "Linux",

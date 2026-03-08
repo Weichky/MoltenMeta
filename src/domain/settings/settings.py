@@ -69,6 +69,10 @@ class Settings:
         return self.get("appearance", "theme_mode")
 
     @property
+    def density_scale(self) -> int:
+        return int(self.get("appearance", "density_scale", "-3"))
+
+    @property
     def is_system_theme_mode(self) -> bool:
         return self.get("appearance", "theme_mode") == "system"
 

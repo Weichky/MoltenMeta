@@ -15,7 +15,6 @@ from i18n import I18nService
 from gui.appearance.theme import ThemeService
 
 
-
 def _createCoreDbManager() -> DatabaseManager:
     db_manager = DatabaseManager()
     runtime_path = getRuntimePath()
@@ -78,6 +77,7 @@ def initApp(app) -> AppContext:
         core_db_service.settings.theme,
         core_db_service.settings.scheme,
         core_db_service.settings.theme_mode,
+        core_db_service.settings.density_scale,
     )
 
     return context
