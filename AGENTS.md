@@ -309,7 +309,7 @@ CREATE TABLE systems (
 );
 
 -- Composition
-CREATE TABLE system_composition (
+CREATE TABLE system_compositions (
     system_id   INTEGER NOT NULL,
     element_id  INTEGER NOT NULL,
     fraction    REAL    NOT NULL,
@@ -351,21 +351,6 @@ CREATE TABLE methods (
     type     TEXT,
     detail   TEXT
 );
-
-CREATE TABLE conditions (
-    id        INTEGER PRIMARY KEY,
-    name      TEXT NOT NULL UNIQUE,
-    symbol_id INTEGER,
-    unit_id   INTEGER NOT NULL,
-
-    FOREIGN KEY (symbol_id)
-        REFERENCES symbols(id)
-        ON DELETE RESTRICT,
-
-    FOREIGN KEY (unit_id)
-        REFERENCES units(id)
-        ON DELETE RESTRICT
-);
 ```
 
 ### Fact Layer
@@ -392,18 +377,23 @@ CREATE TABLE property_values (
 );
 
 CREATE TABLE property_value_conditions (
-    value_id     INTEGER NOT NULL,
-    condition_id INTEGER NOT NULL,
-    value        REAL    NOT NULL,
+    id                  INTEGER PRIMARY KEY,
+    property_value_id   INTEGER NOT NULL,
+    symbol_id           INTEGER NOT NULL,
+    unit_id             INTEGER NOT NULL,
+    value               REAL    NOT NULL,
+    name                TEXT,
 
-    PRIMARY KEY (value_id, condition_id),
-
-    FOREIGN KEY (value_id)
+    FOREIGN KEY (property_value_id)
         REFERENCES property_values(id)
         ON DELETE CASCADE,
 
-    FOREIGN KEY (condition_id)
-        REFERENCES conditions(id)
+    FOREIGN KEY (symbol_id)
+        REFERENCES symbols(id)
+        ON DELETE RESTRICT,
+
+    FOREIGN KEY (unit_id)
+        REFERENCES units(id)
         ON DELETE RESTRICT
 );
 ```

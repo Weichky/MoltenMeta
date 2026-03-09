@@ -1,17 +1,16 @@
 from PySide6.QtCore import QObject, Signal
 
 from db.user.repo import (
-    ElementRepository,
-    SymbolRepository,
-    SystemRepository,
-    SystemCompositionRepository,
-    PropertyRepository,
-    MethodRepository,
-    PropertyValueRepository,
+    ElementsRepository,
+    SymbolsRepository,
+    SystemsRepository,
+    SystemCompositionsRepository,
+    PropertiesRepository,
+    MethodsRepository,
+    PropertyValuesRepository,
     MetaRepository,
-    UnitRepository,
-    ConditionRepository,
-    PropertyValueConditionRepository,
+    UnitsRepository,
+    PropertyValueConditionsRepository,
 )
 
 from db import DatabaseManager
@@ -36,19 +35,18 @@ class UserDbService(QObject):
         self._logger = log_service.getLogger(__name__)
         self._db_manager = db_manager
 
-        self._symbol_repo = SymbolRepository(log_service, db_manager)
-        self._unit_repo = UnitRepository(log_service, db_manager)
-        self._element_repo = ElementRepository(log_service, db_manager)
-        self._system_repo = SystemRepository(log_service, db_manager)
-        self._system_composition_repo = SystemCompositionRepository(
+        self._symbol_repo = SymbolsRepository(log_service, db_manager)
+        self._unit_repo = UnitsRepository(log_service, db_manager)
+        self._element_repo = ElementsRepository(log_service, db_manager)
+        self._system_repo = SystemsRepository(log_service, db_manager)
+        self._system_composition_repo = SystemCompositionsRepository(
             log_service, db_manager
         )
-        self._property_repo = PropertyRepository(log_service, db_manager)
-        self._method_repo = MethodRepository(log_service, db_manager)
-        self._property_value_repo = PropertyValueRepository(log_service, db_manager)
+        self._property_repo = PropertiesRepository(log_service, db_manager)
+        self._method_repo = MethodsRepository(log_service, db_manager)
+        self._property_value_repo = PropertyValuesRepository(log_service, db_manager)
         self._meta_repo = MetaRepository(log_service, db_manager)
-        self._condition_repo = ConditionRepository(log_service, db_manager)
-        self._property_value_condition_repo = PropertyValueConditionRepository(
+        self._property_value_condition_repo = PropertyValueConditionsRepository(
             log_service, db_manager
         )
 
@@ -64,7 +62,6 @@ class UserDbService(QObject):
         self._method_repo.createTable()
         self._property_value_repo.createTable()
         self._meta_repo.createTable()
-        self._condition_repo.createTable()
         self._property_value_condition_repo.createTable()
 
         if self._symbol_repo.count() == 0:
@@ -94,35 +91,35 @@ class UserDbService(QObject):
         return count
 
     @property
-    def element_repo(self) -> ElementRepository:
+    def element_repo(self) -> ElementsRepository:
         return self._element_repo
 
     @property
-    def symbol_repo(self) -> SymbolRepository:
+    def symbol_repo(self) -> SymbolsRepository:
         return self._symbol_repo
 
     @property
-    def unit_repo(self) -> UnitRepository:
+    def unit_repo(self) -> UnitsRepository:
         return self._unit_repo
 
     @property
-    def system_repo(self) -> SystemRepository:
+    def system_repo(self) -> SystemsRepository:
         return self._system_repo
 
     @property
-    def system_composition_repo(self) -> SystemCompositionRepository:
+    def system_composition_repo(self) -> SystemCompositionsRepository:
         return self._system_composition_repo
 
     @property
-    def property_repo(self) -> PropertyRepository:
+    def property_repo(self) -> PropertiesRepository:
         return self._property_repo
 
     @property
-    def method_repo(self) -> MethodRepository:
+    def method_repo(self) -> MethodsRepository:
         return self._method_repo
 
     @property
-    def property_value_repo(self) -> PropertyValueRepository:
+    def property_value_repo(self) -> PropertyValuesRepository:
         return self._property_value_repo
 
     @property
@@ -130,9 +127,5 @@ class UserDbService(QObject):
         return self._meta_repo
 
     @property
-    def condition_repo(self) -> ConditionRepository:
-        return self._condition_repo
-
-    @property
-    def property_value_condition_repo(self) -> PropertyValueConditionRepository:
+    def property_value_condition_repo(self) -> PropertyValueConditionsRepository:
         return self._property_value_condition_repo

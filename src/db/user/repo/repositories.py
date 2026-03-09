@@ -7,7 +7,6 @@ from domain import (
     SystemCompositionSnapshot,
     PropertySnapshot,
     MethodSnapshot,
-    ConditionSnapshot,
     PropertyValueSnapshot,
     PropertyValueConditionSnapshot,
     MetaSnapshot,
@@ -15,7 +14,7 @@ from domain import (
 from typing import List
 
 
-class ElementRepository(BaseRepository[ElementSnapshot]):
+class ElementsRepository(BaseRepository[ElementSnapshot]):
     def getTableName(self) -> str:
         return "elements"
 
@@ -47,7 +46,7 @@ class ElementRepository(BaseRepository[ElementSnapshot]):
         return None
 
 
-class SystemRepository(BaseRepository[SystemSnapshot]):
+class SystemsRepository(BaseRepository[SystemSnapshot]):
     def getTableName(self) -> str:
         return "systems"
 
@@ -65,9 +64,9 @@ class SystemRepository(BaseRepository[SystemSnapshot]):
         """
 
 
-class SystemCompositionRepository(BaseRepository[SystemCompositionSnapshot]):
+class SystemCompositionsRepository(BaseRepository[SystemCompositionSnapshot]):
     def getTableName(self) -> str:
-        return "system_composition"
+        return "system_compositions"
 
     def getEntityClass(self) -> type[SystemCompositionSnapshot]:
         return SystemCompositionSnapshot
@@ -75,7 +74,7 @@ class SystemCompositionRepository(BaseRepository[SystemCompositionSnapshot]):
     def _getCreateTableSql(self) -> str:
         dialect = self.dialect
         return f"""
-        CREATE TABLE IF NOT EXISTS system_composition (
+        CREATE TABLE IF NOT EXISTS system_compositions (
             system_id {dialect.getIntegerType()} NOT NULL,
             element_id {dialect.getIntegerType()} NOT NULL,
             fraction {dialect.getRealType()} NOT NULL,
@@ -87,13 +86,13 @@ class SystemCompositionRepository(BaseRepository[SystemCompositionSnapshot]):
 
     def findBySystemId(self, system_id: int) -> List[SystemCompositionSnapshot]:
         placeholder = self.dialect.getPlaceholder()
-        sql = f"SELECT * FROM system_composition WHERE system_id = {placeholder}"
+        sql = f"SELECT * FROM system_compositions WHERE system_id = {placeholder}"
         cursor = self.connection.execute(sql, [system_id])
         rows = cursor.fetchall()
         return [SystemCompositionSnapshot.fromRow(row) for row in rows]
 
 
-class PropertyRepository(BaseRepository[PropertySnapshot]):
+class PropertiesRepository(BaseRepository[PropertySnapshot]):
     def getTableName(self) -> str:
         return "properties"
 
@@ -132,7 +131,7 @@ class PropertyRepository(BaseRepository[PropertySnapshot]):
         return [PropertySnapshot.fromRow(row) for row in rows]
 
 
-class MethodRepository(BaseRepository[MethodSnapshot]):
+class MethodsRepository(BaseRepository[MethodSnapshot]):
     def getTableName(self) -> str:
         return "methods"
 
@@ -161,7 +160,7 @@ class MethodRepository(BaseRepository[MethodSnapshot]):
         return None
 
 
-class PropertyValueRepository(BaseRepository[PropertyValueSnapshot]):
+class PropertyValuesRepository(BaseRepository[PropertyValueSnapshot]):
     def getTableName(self) -> str:
         return "property_values"
 
@@ -251,7 +250,7 @@ class MetaRepository(BaseRepository[MetaSnapshot]):
         return entity.value_id
 
 
-class SymbolRepository(BaseRepository[SymbolSnapshot]):
+class SymbolsRepository(BaseRepository[SymbolSnapshot]):
     def getTableName(self) -> str:
         return "symbols"
 
@@ -292,7 +291,7 @@ class SymbolRepository(BaseRepository[SymbolSnapshot]):
         self.connection.commit()
 
 
-class UnitRepository(BaseRepository[UnitSnapshot]):
+class UnitsRepository(BaseRepository[UnitSnapshot]):
     def getTableName(self) -> str:
         return "units"
 
@@ -320,38 +319,7 @@ class UnitRepository(BaseRepository[UnitSnapshot]):
         return None
 
 
-class ConditionRepository(BaseRepository[ConditionSnapshot]):
-    def getTableName(self) -> str:
-        return "conditions"
-
-    def getEntityClass(self) -> type[ConditionSnapshot]:
-        return ConditionSnapshot
-
-    def _getCreateTableSql(self) -> str:
-        dialect = self.dialect
-        return f"""
-        CREATE TABLE IF NOT EXISTS conditions (
-            id {dialect.getAutoincrementType()},
-            name {dialect.getTextType()} NOT NULL UNIQUE,
-            symbol_id {dialect.getIntegerType()},
-            unit_id {dialect.getIntegerType()} NOT NULL,
-            FOREIGN KEY (symbol_id) REFERENCES symbols(id) ON DELETE RESTRICT,
-            FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE RESTRICT
-        )
-        """
-
-    def findByName(self, name: str) -> ConditionSnapshot | None:
-        placeholder = self.dialect.getPlaceholder()
-        sql = f"SELECT * FROM conditions WHERE name = {placeholder}"
-        cursor = self.connection.execute(sql, [name])
-        row = cursor.fetchone()
-
-        if row:
-            return ConditionSnapshot.fromRow(row)
-        return None
-
-
-class PropertyValueConditionRepository(BaseRepository[PropertyValueConditionSnapshot]):
+class PropertyValueConditionsRepository(BaseRepository[PropertyValueConditionSnapshot]):
     def getTableName(self) -> str:
         return "property_value_conditions"
 
@@ -362,11 +330,14 @@ class PropertyValueConditionRepository(BaseRepository[PropertyValueConditionSnap
         dialect = self.dialect
         return f"""
         CREATE TABLE IF NOT EXISTS property_value_conditions (
-            value_id {dialect.getIntegerType()} NOT NULL,
-            condition_id {dialect.getIntegerType()} NOT NULL,
+            id {dialect.getAutoincrementType()},
+            property_value_id {dialect.getIntegerType()} NOT NULL,
+            symbol_id {dialect.getIntegerType()} NOT NULL,
+            unit_id {dialect.getIntegerType()} NOT NULL,
             value {dialect.getRealType()} NOT NULL,
-            PRIMARY KEY (value_id, condition_id),
-            FOREIGN KEY (value_id) REFERENCES property_values(id) ON DELETE CASCADE,
-            FOREIGN KEY (condition_id) REFERENCES conditions(id) ON DELETE RESTRICT
+            name {dialect.getTextType()},
+            FOREIGN KEY (property_value_id) REFERENCES property_values(id) ON DELETE CASCADE,
+            FOREIGN KEY (symbol_id) REFERENCES symbols(id) ON DELETE RESTRICT,
+            FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE RESTRICT
         )
         """
