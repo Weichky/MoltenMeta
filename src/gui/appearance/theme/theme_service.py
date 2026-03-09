@@ -146,9 +146,7 @@ class ThemeService(QObject, QtStyleTools):
 
     def _startSystemThemeWatcher(self) -> None:
         self._style_hints = self._app.styleHints()
-        self._style_hints.colorSchemeChanged.connect(
-            self._onSystemColorSchemeChanged
-        )
+        self._style_hints.colorSchemeChanged.connect(self._onSystemColorSchemeChanged)
         self._applyTheme()
 
     def _onSystemColorSchemeChanged(self) -> None:
@@ -206,6 +204,7 @@ class ThemeService(QObject, QtStyleTools):
         self.theme_changed.emit()
 
     def updateDensityScale(self, scale: int) -> None:
+        self._density_scale = scale
         extra = dict(default_extra)
         extra["density_scale"] = str(scale)
         self.applyTheme(
