@@ -1,6 +1,9 @@
 # runtime
 runtime/
 
+# temp dir
+temp/
+
 # summury
 tree.txt
 .VSCodeCounter/
