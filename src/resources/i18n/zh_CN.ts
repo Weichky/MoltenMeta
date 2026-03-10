@@ -25,9 +25,9 @@
     </message>
 </context>
 <context>
-    <name>UiDatabasePage</name>
+    <name>UiTableManagerPage</name>
     <message>
-        <location filename="../../gui/pages/database_page/ui.py" line="76"/>
+        <location filename="../../gui/pages/table_manager_page/ui.py" line="76"/>
         <source>Table:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -36,17 +36,17 @@
         <translation type="vanished">编辑</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/database_page/ui.py" line="77"/>
+        <location filename="../../gui/pages/table_manager_page/ui.py" line="77"/>
         <source>Save</source>
         <translation>保存</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/database_page/ui.py" line="78"/>
+        <location filename="../../gui/pages/table_manager_page/ui.py" line="78"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../../gui/pages/database_page/ui.py" line="79"/>
+        <location filename="../../gui/pages/table_manager_page/ui.py" line="79"/>
         <source>Loading...</source>
         <translation>加载中...</translation>
     </message>

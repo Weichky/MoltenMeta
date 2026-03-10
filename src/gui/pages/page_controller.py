@@ -4,7 +4,7 @@ import PySide6QtAds as QtAds
 
 from gui.pages.home_page import HomePage
 from gui.pages.settings_page import SettingsPage
-from gui.pages.database_page import DatabasePage
+from gui.pages.table_manager_page import TableManagerPage
 
 from application import AppContext
 
@@ -61,7 +61,7 @@ class PageController:
         self._database_spec = DockPageSpec(
             key="database",
             titleProvider=lambda: QCoreApplication.translate("DockPage", "Database"),
-            factory=lambda: DatabasePage(context),
+            factory=lambda: TableManagerPage(context),
         )
 
         self.dock_manager = dock_manager

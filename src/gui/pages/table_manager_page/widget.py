@@ -4,17 +4,17 @@ from PySide6.QtCore import Signal
 
 from application import AppContext
 
-from .ui import UiDatabasePage
+from .ui import UiTableManagerPage
 
 
-class DatabasePage(QtWidgets.QWidget):
+class TableManagerPage(QtWidgets.QWidget):
     tableChanged = Signal(str)
 
     def __init__(self, context: AppContext):
         super().__init__(parent=None)
         self.i18n_service = context.i18n
 
-        self.ui = UiDatabasePage()
+        self.ui = UiTableManagerPage()
         self.ui.setupUi(self)
         self.ui.retranslateUi()
 

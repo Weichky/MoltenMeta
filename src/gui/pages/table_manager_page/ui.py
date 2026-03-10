@@ -2,7 +2,7 @@ from PySide6 import QtWidgets
 from PySide6.QtCore import QObject
 
 
-class UiDatabasePage(QObject):
+class UiTableManagerPage(QObject):
     DEFAULT_PAGE_SIZE = 1000
     DEFAULT_ROW_COUNT = 100
 

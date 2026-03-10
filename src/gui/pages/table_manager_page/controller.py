@@ -6,7 +6,7 @@ from PySide6.QtCore import QObject, Qt, QCoreApplication
 from application import AppContext
 from db import DatabaseManager
 
-from .ui import UiDatabasePage
+from .ui import UiTableManagerPage
 
 
 def _translate(context: str, text: str) -> str:
@@ -276,7 +276,7 @@ class DatabaseTableModel(QtCore.QAbstractTableModel):
 
 
 class DatabaseController(QObject):
-    def __init__(self, ui: UiDatabasePage, context: AppContext):
+    def __init__(self, ui: UiTableManagerPage, context: AppContext):
         super().__init__()
         self.ui = ui
         self._context = context
