@@ -72,9 +72,7 @@ class MainWindow(QMainWindow):
         self.sidebar.ui.settingsButton.clicked.connect(
             self.workspace.controller.showSettings
         )
-        self.sidebar.ui.databaseButton.clicked.connect(
-            self.workspace.controller.showDatabase
-        )
+        self.sidebar.ui.dataButton.clicked.connect(self.workspace.controller.showData)
 
         # Connect menubar settings action
         self.menubar.ui.action_settings.triggered.connect(

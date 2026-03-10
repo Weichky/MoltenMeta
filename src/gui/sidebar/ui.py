@@ -83,18 +83,16 @@ class UiSidebar(QObject):
         self.sidebarLayout.addWidget(self.settingsButton)
 
         # Create database button
-        self.databaseButton = QPushButton(self.contents)
-        self.databaseButton.setObjectName("databaseButton")
+        self.dataButton = QPushButton(self.contents)
+        self.dataButton.setObjectName("dataButton")
 
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.databaseButton.sizePolicy().hasHeightForWidth()
-        )
-        self.databaseButton.setSizePolicy(sizePolicy)
+        sizePolicy.setHeightForWidth(self.dataButton.sizePolicy().hasHeightForWidth())
+        self.dataButton.setSizePolicy(sizePolicy)
 
-        self.sidebarLayout.addWidget(self.databaseButton)
+        self.sidebarLayout.addWidget(self.dataButton)
 
         # Add vertical spacer
         self.verticalSpacer = QSpacerItem(
@@ -134,7 +132,7 @@ class UiSidebar(QObject):
         buttons = [
             self.homeButton,
             self.settingsButton,
-            self.databaseButton,
+            self.dataButton,
             self.toggleButton,
         ]
         for btn in buttons:
@@ -144,10 +142,9 @@ class UiSidebar(QObject):
             btn.setStyleSheet("text-align: left; padding-left: 12px;")
 
     def retranslateUi(self, dock: QDockWidget):
-        # Set button texts
         self.homeButton.setText(self.tr("Home"))
         self.settingsButton.setText(self.tr("Settings"))
-        self.databaseButton.setText(self.tr("Database"))
+        self.dataButton.setText(self.tr("Data"))
 
     def adjustSidebarSize(self, sidebar, is_collapsed: bool = False):
         if is_collapsed:

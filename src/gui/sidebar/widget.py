@@ -51,7 +51,7 @@ class SidebarWidget(QDockWidget):
         icons_path = Path(ICONS_PATH)
         self.ui.homeButton.setIcon(QIcon(str(icons_path / "home.svg")))
         self.ui.settingsButton.setIcon(QIcon(str(icons_path / "config.svg")))
-        self.ui.databaseButton.setIcon(QIcon(str(icons_path / "database_code.svg")))
+        self.ui.dataButton.setIcon(QIcon(str(icons_path / "database_code.svg")))
         self._updateToggleIcon()
 
     def _setupToggleButton(self):
@@ -75,7 +75,7 @@ class SidebarWidget(QDockWidget):
             buttons = [
                 self.ui.homeButton,
                 self.ui.settingsButton,
-                self.ui.databaseButton,
+                self.ui.dataButton,
             ]
             for btn in buttons:
                 btn.setText("")

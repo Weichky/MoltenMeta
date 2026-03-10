@@ -4,7 +4,7 @@ import PySide6QtAds as QtAds
 
 from gui.pages.home_page import HomePage
 from gui.pages.settings_page import SettingsPage
-from gui.pages.table_manager_page import TableManagerPage
+from gui.pages.data_page import DataPage
 
 from application import AppContext
 
@@ -58,10 +58,10 @@ class PageController:
             factory=lambda: SettingsPage(context),
         )
 
-        self._database_spec = DockPageSpec(
-            key="database",
-            titleProvider=lambda: QCoreApplication.translate("DockPage", "Database"),
-            factory=lambda: TableManagerPage(context),
+        self._data_spec = DockPageSpec(
+            key="data",
+            titleProvider=lambda: QCoreApplication.translate("DockPage", "Data"),
+            factory=lambda: DataPage(context),
         )
 
         self.dock_manager = dock_manager
@@ -71,7 +71,7 @@ class PageController:
         self.pageSpecs = {
             self._home_spec.key: self._home_spec,
             self._settings_spec.key: self._settings_spec,
-            self._database_spec.key: self._database_spec,
+            self._data_spec.key: self._data_spec,
         }
 
     def showHome(self):
@@ -83,8 +83,8 @@ class PageController:
     def showProject(self):
         self.logger.debug("Project page not implemented yet")
 
-    def showDatabase(self):
-        self._showPage(self._database_spec)
+    def showData(self):
+        self._showPage(self._data_spec)
 
     def showSimulation(self):
         self.logger.debug("Simulation page not implemented yet")
@@ -176,7 +176,7 @@ class PageController:
 
     def _connectHomeSignals(self, page: HomePage):
         page.projectButtonClicked.connect(self.showProject)
-        page.databaseButtonClicked.connect(self.showDatabase)
+        page.databaseButtonClicked.connect(self.showData)
         page.simulationButtonClicked.connect(self.showSimulation)
         page.settingsButtonClicked.connect(self.showSettings)
 
