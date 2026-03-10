@@ -286,6 +286,7 @@ class DataController(QObject):
         self.ui.refresh_button.clicked.connect(self._onRefreshClicked)
         self.ui.save_button.clicked.connect(self._onSaveClicked)
         self.ui.cancel_button.clicked.connect(self._onCancelClicked)
+        self.ui.add_button.clicked.connect(self._onAddClicked)
 
         self._context.i18n.language_changed.connect(self.ui.retranslateUi)
 
@@ -429,6 +430,13 @@ class DataController(QObject):
             self._model.discardChanges()
             self.ui.save_button.setEnabled(False)
             self.ui.cancel_button.setEnabled(False)
+
+    def _onAddClicked(self) -> None:
+        from .dialogs import AddDialog
+
+        dialog = AddDialog(self._db_manager, self.ui.table_view)
+        if dialog.exec() == QtWidgets.QDialog.DialogCode.Accepted:
+            self._onRefreshClicked()
 
     def _updateRowCountLabel(self) -> None:
         rows_label = _translate("DataController", "Rows:")
