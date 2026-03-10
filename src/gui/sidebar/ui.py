@@ -68,6 +68,18 @@ class UiSidebar(QObject):
 
         self.sidebarLayout.addWidget(self.homeButton)
 
+        # Create database button
+        self.dataButton = QPushButton(self.contents)
+        self.dataButton.setObjectName("dataButton")
+
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.dataButton.sizePolicy().hasHeightForWidth())
+        self.dataButton.setSizePolicy(sizePolicy)
+
+        self.sidebarLayout.addWidget(self.dataButton)
+
         # Create settings button
         self.settingsButton = QPushButton(self.contents)
         self.settingsButton.setObjectName("settingsButton")
@@ -80,19 +92,7 @@ class UiSidebar(QObject):
         )
         self.settingsButton.setSizePolicy(sizePolicy)
 
-        self.sidebarLayout.addWidget(self.settingsButton)
-
-        # Create database button
-        self.dataButton = QPushButton(self.contents)
-        self.dataButton.setObjectName("dataButton")
-
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.dataButton.sizePolicy().hasHeightForWidth())
-        self.dataButton.setSizePolicy(sizePolicy)
-
-        self.sidebarLayout.addWidget(self.dataButton)
+        self.sidebarLayout.addWidget(self.settingsButton)        
 
         # Add vertical spacer
         self.verticalSpacer = QSpacerItem(

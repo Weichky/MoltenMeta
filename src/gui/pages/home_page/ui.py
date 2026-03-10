@@ -74,6 +74,6 @@ class UiHomePage(QObject):
         self.description.setText("<h6>"+software_description+"</h6>")
             
         # Translate tiles
-        tile_titles = [self.tr("Project"), self.tr("Database"), self.tr("Simulation"), self.tr("Settings")]
+        tile_titles = [self.tr("Project"), self.tr("Data"), self.tr("Simulation"), self.tr("Settings")]
         for tile, title in zip(self.tiles, tile_titles):
             tile.setText(title)
