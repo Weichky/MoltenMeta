@@ -327,15 +327,10 @@ class DataController(QObject):
         self._model.dataChanged.connect(self._onDataChanged)
 
         self.ui.table_view.setModel(self._model)
-            
-            # Resize all columns to fit their contents first
         self.ui.table_view.resizeColumnsToContents()
         
-        # Then set the last section to stretch mode to fill remaining space
-        header= self.ui.table_view.horizontalHeader()
-        last_column = self._model.columnCount() - 1
-        if last_column >= 0:
-            header.setSectionResizeMode(last_column, QtWidgets.QHeaderView.Stretch)
+        # Reapply header settings for the new model
+        self.ui.table_view.horizontalHeader().setStretchLastSection(True)
 
     def _onDataChanged(
         self,
