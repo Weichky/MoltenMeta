@@ -310,7 +310,12 @@ class UnitsRepository(BaseRepository[UnitSnapshot]):
 
     def findBySymbol(self, symbol: str) -> UnitSnapshot | None:
         placeholder = self.dialect.getPlaceholder()
-        sql = f"SELECT * FROM units WHERE symbol = {placeholder}"
+        sql = f"""
+            SELECT u.*, s.symbol
+            FROM units u
+            LEFT JOIN symbols s ON u.symbol_id = s.id
+            WHERE s.symbol = {placeholder}
+        """
         cursor = self.connection.execute(sql, [symbol])
         row = cursor.fetchone()
 

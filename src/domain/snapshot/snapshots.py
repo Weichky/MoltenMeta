@@ -248,24 +248,32 @@ class PropertyValueSnapshot(SnapshotBase):
 
 @dataclass(frozen=True)
 class PropertyValueConditionSnapshot(SnapshotBase):
-    value_id: int
-    condition_id: int
+    id: int | None = field(default=None, init=False)
+    property_value_id: int
+    symbol_id: int
+    unit_id: int
     value: float
+    name: str | None = None
 
     @classmethod
     def fromRow(cls, row) -> "PropertyValueConditionSnapshot":
         instance = cls(
-            value_id=row["value_id"],
-            condition_id=row["condition_id"],
+            property_value_id=row["property_value_id"],
+            symbol_id=row["symbol_id"],
+            unit_id=row["unit_id"],
             value=row["value"],
+            name=row.get("name"),
         )
+        object.__setattr__(instance, "id", row.get("id"))
         return instance
 
     def toRecord(self) -> dict:
         return {
-            "value_id": self.value_id,
-            "condition_id": self.condition_id,
+            "property_value_id": self.property_value_id,
+            "symbol_id": self.symbol_id,
+            "unit_id": self.unit_id,
             "value": self.value,
+            "name": self.name,
         }
 
 

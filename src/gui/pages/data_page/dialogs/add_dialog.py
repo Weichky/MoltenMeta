@@ -1,7 +1,12 @@
+import logging
 from PySide6 import QtWidgets
 from PySide6.QtCore import Qt, QCoreApplication
 
 from ..schemas import ENTITY_TYPES, ENTITY_FIELDS, getFkDisplayColumn
+from ..tables import TABLE_TO_REPO_PROPERTY, TABLE_TO_SNAPSHOT_CLASS
+
+
+_logger = logging.getLogger(__name__)
 
 
 def _translate(context: str, text: str) -> str:
@@ -12,12 +17,14 @@ class AddDialog(QtWidgets.QDialog):
     def __init__(
         self,
         db_manager,
+        user_db_service=None,
         parent=None,
         quick_mode: bool = False,
         entity_type: str | None = None,
     ):
         super().__init__(parent)
         self._db_manager = db_manager
+        self._user_db_service = user_db_service
         self._quick_mode = quick_mode
         self._selected_type = entity_type
         self._form_widgets: dict[str, QtWidgets.QWidget] = {}
@@ -143,9 +150,9 @@ class AddDialog(QtWidgets.QDialog):
                 item.widget().deleteLater()
 
         self._form_widgets.clear()
-        
+
         self.form_layout.addStretch(1)
-        
+
         fields = ENTITY_FIELDS.get(self._selected_type, [])
         for field in fields:
             row_widget = QtWidgets.QWidget()
@@ -174,15 +181,19 @@ class AddDialog(QtWidgets.QDialog):
                 # add_btn.setFixedWidth(20)
                 add_btn.setToolTip(_translate("AddDialog", "Quick add"))
                 add_btn.clicked.connect(
-                    lambda checked,
-                    fk_target=field.fk_target,
-                    combo=combo: self._quickAdd(fk_target, combo)
+                    lambda checked, fk_target=field.fk_target, combo=combo: (
+                        self._quickAdd(fk_target, combo)
+                    )
                 )
                 row_layout.addWidget(add_btn)
             elif field.field_type == "number":
                 input_widget = QtWidgets.QLineEdit()
                 input_widget.setMinimumHeight(30)
                 input_widget.setObjectName(field.name)
+                # Add validator for numeric input
+                validator = QtWidgets.QDoubleValidator()
+                validator.setNotation(QtWidgets.QDoubleValidator.Notation.StandardNotation)
+                input_widget.setValidator(validator)
                 row_layout.addWidget(input_widget, 1)
                 self._form_widgets[field.name] = input_widget
             else:
@@ -219,7 +230,11 @@ class AddDialog(QtWidgets.QDialog):
                     else f"ID:{row['id']}"
                 )
                 combo.addItem(display, row["id"])
-        except Exception:
+        except Exception as e:
+            _logger.warning(
+                f"Failed to load display column '{display_column}' for table "
+                f"'{fk_table}', falling back to ID display: {e}"
+            )
             cursor = conn.execute(f"SELECT id FROM {fk_table} ORDER BY id")
             for row in cursor.fetchall():
                 combo.addItem(f"ID:{row['id']}", row["id"])
@@ -252,11 +267,10 @@ class AddDialog(QtWidgets.QDialog):
         if not self._form_widgets:
             return
 
-        conn = self._db_manager.connection
         fields = ENTITY_FIELDS.get(self._selected_type, [])
 
-        columns = []
-        values = []
+        # Build data dict from form
+        data: dict = {}
         for field in fields:
             widget = self._form_widgets.get(field.name)
             if not widget:
@@ -286,11 +300,35 @@ class AddDialog(QtWidgets.QDialog):
                         return
 
             if value or not field.required:
-                columns.append(field.name)
                 if isinstance(value, str):
-                    values.append(value.strip() if value else value)
+                    data[field.name] = value.strip() if value else value
                 else:
-                    values.append(value)
+                    data[field.name] = value
+
+        # Try to use Repository if available
+        if self._user_db_service:
+            repo_property = TABLE_TO_REPO_PROPERTY.get(self._selected_type)
+            snapshot_class = TABLE_TO_SNAPSHOT_CLASS.get(self._selected_type)
+            if repo_property and snapshot_class:
+                repo = getattr(self._user_db_service, repo_property, None)
+                if repo:
+                    try:
+                        snapshot = snapshot_class.fromRow(data)
+                        repo.insert(snapshot)
+                        self.accept()
+                        return
+                    except Exception as e:
+                        QtWidgets.QMessageBox.critical(
+                            self,
+                            _translate("AddDialog", "Error"),
+                            _translate("AddDialog", "Failed to add data:") + f" {e}",
+                        )
+                        return
+
+        # Fallback to direct SQL
+        conn = self._db_manager.connection
+        columns = list(data.keys())
+        values = list(data.values())
 
         try:
             placeholders = ", ".join(["?" for _ in columns])

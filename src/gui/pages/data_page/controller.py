@@ -1,12 +1,18 @@
+import logging
 from typing import Any
 
 from PySide6 import QtWidgets, QtCore
 from PySide6.QtCore import QObject, Qt, QCoreApplication
 
 from application import AppContext
+from application.service.user_db_service import UserDbService
 from db import DatabaseManager
 
 from .ui import UiDataPage
+from .tables import TABLE_TO_REPO_PROPERTY, TABLE_TO_SNAPSHOT_CLASS
+
+
+_logger = logging.getLogger(__name__)
 
 
 def _translate(context: str, text: str) -> str:
@@ -20,10 +26,12 @@ class DataTableModel(QtCore.QAbstractTableModel):
     def __init__(
         self,
         db_manager: DatabaseManager,
+        user_db_service=None,
         parent: QtWidgets.QWidget | None = None,
     ):
         super().__init__(parent)
         self._db_manager = db_manager
+        self._user_db_service = user_db_service
         self._table_name: str | None = None
         self._columns: list[str] = []
         self._primary_key: str | None = None
@@ -31,6 +39,7 @@ class DataTableModel(QtCore.QAbstractTableModel):
         self._total_count: int = 0
         self._page_size = self.DEFAULT_PAGE_SIZE
         self._is_loaded = False
+        self._snapshot_class = None
 
         self._pending_changes: dict[int, dict[str, Any]] = {}
         self._original_data: dict[int, dict[str, Any]] = {}
@@ -45,6 +54,7 @@ class DataTableModel(QtCore.QAbstractTableModel):
         self._is_loaded = False
         self._pending_changes.clear()
         self._original_data.clear()
+        self._snapshot_class = TABLE_TO_SNAPSHOT_CLASS.get(table_name)
 
         if table_name:
             self._loadSchema()
@@ -88,11 +98,60 @@ class DataTableModel(QtCore.QAbstractTableModel):
         if not conn:
             return
 
+        # Try to use Repository if available
+        if self._user_db_service and self._snapshot_class:
+            repo_property = TABLE_TO_REPO_PROPERTY.get(self._table_name)
+            if repo_property:
+                repo = getattr(self._user_db_service, repo_property, None)
+                if repo:
+                    # Use Repository to fetch data
+                    try:
+                        # For elements, we need special handling with JOIN
+                        if self._table_name == "elements":
+                            # For elements, use direct SQL with JOIN
+                            cursor = conn.execute(
+                                f"""SELECT e.*, s.symbol
+                                    FROM elements e
+                                    LEFT JOIN symbols s ON e.symbol_id = s.id
+                                    LIMIT {limit} OFFSET {offset}"""
+                            )
+                            rows = cursor.fetchall()
+                            cursor = conn.execute(f"SELECT COUNT(*) as cnt FROM {self._table_name}")
+                            count_result = cursor.fetchone()
+                            self._total_count = count_result["cnt"] if count_result else 0
+
+                            start_idx = offset
+                            for row in rows:
+                                self._data.append(row)
+                                self._original_data[start_idx] = dict(row)
+                                start_idx += 1
+                        else:
+                            # Use Repository for other tables
+                            snapshots: list = repo.findAll()
+                            self._total_count = len(snapshots)
+
+                            start_idx = offset
+                            for snapshot in snapshots[offset:offset + limit]:
+                                record = snapshot.toRecord()
+                                # Add id if available
+                                if snapshot.id is not None:
+                                    record["id"] = snapshot.id
+                                self._data.append(record)
+                                self._original_data[start_idx] = dict(record)
+                                start_idx += 1
+                        return
+                    except Exception as e:
+                        _logger.warning(
+                            f"Repository query failed for table '{self._table_name}', "
+                            f"falling back to direct SQL: {e}"
+                        )
+
+        # Fallback to direct SQL
         if self._table_name == "elements":
             cursor = conn.execute(
-                f"""SELECT e.*, s.symbol 
-                    FROM elements e 
-                    LEFT JOIN symbols s ON e.symbol_id = s.id 
+                f"""SELECT e.*, s.symbol
+                    FROM elements e
+                    LEFT JOIN symbols s ON e.symbol_id = s.id
                     LIMIT {limit} OFFSET {offset}"""
             )
         else:
@@ -269,6 +328,7 @@ class DataController(QObject):
         self.ui = ui
         self._context = context
         self._db_manager = context.user_db._db_manager
+        self._user_db_service: UserDbService = context.user_db
         self._logger = context.log.getLogger(__name__)
 
         self._model: DataTableModel | None = None
@@ -278,7 +338,7 @@ class DataController(QObject):
             | QtWidgets.QAbstractItemView.EditTrigger.EditKeyPressed
             | QtWidgets.QAbstractItemView.EditTrigger.AnyKeyPressed
         )
-        
+
         # Enable stretching for the last section of the horizontal header
         self.ui.table_view.horizontalHeader().setStretchLastSection(True)
 
@@ -292,6 +352,13 @@ class DataController(QObject):
         self.ui.add_button.clicked.connect(self._onAddClicked)
 
         self._context.i18n.language_changed.connect(self.ui.retranslateUi)
+
+    def _getRepository(self, table_name: str):
+        """Get the repository for a predefined table, or None if not found."""
+        repo_property = TABLE_TO_REPO_PROPERTY.get(table_name)
+        if repo_property:
+            return getattr(self._user_db_service, repo_property, None)
+        return None
 
     def _loadTableList(self) -> None:
         conn = self._db_manager.connection
@@ -322,13 +389,13 @@ class DataController(QObject):
         if self._model:
             self._model.dataChanged.disconnect(self._onDataChanged)
 
-        self._model = DataTableModel(self._db_manager)
+        self._model = DataTableModel(self._db_manager, self._user_db_service)
         self._model.setTable(table_name)
         self._model.dataChanged.connect(self._onDataChanged)
 
         self.ui.table_view.setModel(self._model)
         self.ui.table_view.resizeColumnsToContents()
-        
+
         # Reapply header settings for the new model
         self.ui.table_view.horizontalHeader().setStretchLastSection(True)
 
@@ -438,7 +505,7 @@ class DataController(QObject):
     def _onAddClicked(self) -> None:
         from .dialogs import AddDialog
 
-        dialog = AddDialog(self._db_manager, self.ui.table_view)
+        dialog = AddDialog(self._db_manager, self._user_db_service, self.ui.table_view)
         if dialog.exec() == QtWidgets.QDialog.DialogCode.Accepted:
             self._onRefreshClicked()
 
