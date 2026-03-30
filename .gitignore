@@ -1,6 +1,9 @@
 # runtime
 runtime/
 
+# vscode
+.vscode/
+
 # temp dir
 temp/
 
