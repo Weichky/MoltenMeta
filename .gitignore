@@ -1,3 +1,5 @@
+# Note that there is an exclusion list at the end
+
 # runtime
 runtime/
 
@@ -18,9 +20,6 @@ tree.txt
 __pycache__/
 *.py[codz]
 *$py.class
-
-# C extensions
-*.so
 
 # Distribution / packaging
 .Python
@@ -222,3 +221,6 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Exclude all lib directories under src/modules/*
+!src/modules/*/lib/

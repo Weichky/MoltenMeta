@@ -21,6 +21,9 @@
  * $$
 **/
 
+// This module is also an official example of how to create a module for MoltenMeta.
+// For more information, please refer to our official documentation.
+
 # include <pybind11/pybind11.h>
 # include <pybind11/numpy.h>
 # include <cmath>
@@ -42,9 +45,9 @@ struct MiedemaConst
 };
 
 namespace py = pybind11;
-class MiedemaModule {
+class MiedemaCore {
     public:
-        MiedemaModule(ElementProperties elemA, ElementProperties elemB, MiedemaConst miedemaConst)
+        MiedemaCore(ElementProperties elemA, ElementProperties elemB, MiedemaConst miedemaConst)
             : elemA(elemA), elemB(elemB), miedemaConst(miedemaConst) {
             precompute();
         }
@@ -105,7 +108,9 @@ class MiedemaModule {
 
 };
 
-PYBIND11_MODULE(MiedemaModule, m) {
+// To know how to use pybind11, please refer to pybind11's official documentation.
+// We don't provide instructions here.
+PYBIND11_MODULE(miedema_core, m) {
     py::class_<ElementProperties>(m, "ElementProperties")
         .def(py::init<double, double, double, double>())
         .def_readwrite("V_23", &ElementProperties::V_23)
@@ -118,8 +123,8 @@ PYBIND11_MODULE(MiedemaModule, m) {
         .def_readwrite("p", &MiedemaConst::p)
         .def_readwrite("q", &MiedemaConst::q)
         .def_readwrite("r_over_p", &MiedemaConst::r_over_p);
-    py::class_<MiedemaModule>(m, "MiedemaModule")
+    py::class_<MiedemaCore>(m, "MiedemaCore")
         .def(py::init<ElementProperties, ElementProperties, MiedemaConst>())
-        .def("calculateSingle", &MiedemaModule::calculateSingle)
-        .def("calculateRange", &MiedemaModule::calculateRange);
+        .def("calculateSingle", &MiedemaCore::calculateSingle)
+        .def("calculateRange", &MiedemaCore::calculateRange);
 }
