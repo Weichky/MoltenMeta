@@ -1,5 +1,8 @@
 # Note that there is an exclusion list at the end
 
+# .so
+*.so
+
 # runtime
 runtime/
 
