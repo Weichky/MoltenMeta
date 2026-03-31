@@ -72,6 +72,9 @@ class MiedemaCalc:
         )
 
     def calculate(self, elem_A: int, elem_B: int, x_A: float) -> float:
+        if not 0 <= x_A <= 1:
+            raise ValueError(f"x_A must be in [0, 1], got {x_A}")
+
         elem_props_A = self._getElementProperties(elem_A)
         elem_props_B = self._getElementProperties(elem_B)
         miedema_const = self._getMiedemaConst(elem_A, elem_B)
@@ -82,6 +85,13 @@ class MiedemaCalc:
     def calculateRange(
         self, elem_A: int, elem_B: int, x_A_start: float, x_A_end: float, n_points: int
     ) -> list[float]:
+        if not 0 <= x_A_start <= 1:
+            raise ValueError(f"x_A_start must be in [0, 1], got {x_A_start}")
+        if not 0 <= x_A_end <= 1:
+            raise ValueError(f"x_A_end must be in [0, 1], got {x_A_end}")
+        if n_points < 1:
+            raise ValueError(f"n_points must be >= 1, got {n_points}")
+
         elem_props_A = self._getElementProperties(elem_A)
         elem_props_B = self._getElementProperties(elem_B)
         miedema_const = self._getMiedemaConst(elem_A, elem_B)
