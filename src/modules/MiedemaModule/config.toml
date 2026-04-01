@@ -8,6 +8,7 @@ version = "1.0.0"
 author = "Weichky"
 license = "MIT"
 description = "Miedema module for calculating enthalpy of mixing"
+category = "enthalpy_of_mixing"
 
 [[inputs]]
 symbol = "x_A"
@@ -22,6 +23,7 @@ required = true
 symbol = "\\Delta H_{mix}"
 description = "Enthalpy of mixing"
 unit = "kJ/mol"
+can_be_used_as_input = true
 
 [data]
 # This is the path to the csv file

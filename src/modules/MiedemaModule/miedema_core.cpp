@@ -6,7 +6,7 @@
  *   - elemA/elemB: ElementProperties {V_23, phi, n_WS_13, mu}
  *   - miedemaConst: {a, p, q, r_over_p}
  * 
- * Output: ΔH_AB in J/mol (per mole of alloy)
+ * Output: ΔH_AB in kJ/mol (per mole of alloy)
  * 
  * Ref: Miedema et al., Philips Tech. Rev. (1973)
 
