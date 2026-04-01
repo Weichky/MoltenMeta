@@ -71,7 +71,7 @@ class MiedemaCalc:
             r_over_p,
         )
 
-    def calculate(self, elem_A: int, elem_B: int, x_A: float) -> float:
+    def calculateSingle(self, elem_A: int, elem_B: int, x_A: float) -> float:
         if not 0 <= x_A <= 1:
             raise ValueError(f"x_A must be in [0, 1], got {x_A}")
 

@@ -1,0 +1,113 @@
+# Miedema Module Info
+# This module is also an official example of how to create a module for MoltenMeta.
+# For more information, please refer to our official documentation.
+
+[module]
+# The package name should be the same as the name of your module's python entry point file (without the .py extension).
+package_name = "miedema_module"
+entry_class = "MiedemaCalc"
+all_methods = [
+    "calculateSingle",
+    "calculateRange"
+]
+
+# The type determines the domain to which the module belongs,
+# and the category determines the path within that domain.
+type = "simulation"
+category = "enthalpy_of_mixing"
+
+# This name is just for displaying. To clarify the package name, see "package_name"
+name = "Miedema Module"
+version = "1.0.0"
+author = "Weichky"
+license = "MIT"
+description = "Miedema module for calculating enthalpy of mixing"
+
+[data]
+# This is the path to the csv file
+csv = "miedema_element_properties.csv"
+# [WIP]
+# If you don't want to save the data to database, you can set this to false
+# Then every time you run the module, it will read the data from the csv file
+save_to_database = true
+table_name = "miedema_element_properties"
+columns = [
+    "element_id",
+    "is_transition_metal",
+    "n_ws_13",
+    "phi",
+    "v_23",
+    "mu",
+    "r_over_p"
+]
+
+[calculateSingle.inputs]
+symbol = [
+    "elem_A",
+    "elem_B",
+    "x_A"
+]
+description = [
+    "Element A's id (element number in the periodic table)",
+    "Element B's id (element number in the periodic table)",
+    "Mole fraction of element A"
+]
+# You can leave unit empty
+# In this case, we don't automatically specify the unit in the software
+# You have to specify the unit yourself
+unit = [
+    "",
+    "",
+    ""
+]
+
+[calculateSingle.outputs]
+symbol = [
+    "\\Delta H_{mix}"
+]
+description = [
+    "Enthalpy of mixing"
+]
+unit = [
+    "kJ/mol"
+]
+can_be_used_as_input = true
+
+# Not nessary to specify, just for human readability.
+is_collection = false
+
+[calculateRange.inputs]
+symbol = [
+    "elem_A",
+    "elem_B",
+    "x_A_start",
+    "x_A_end",
+    "n_points"
+]
+description = [
+    "Element A's id (element number in the periodic table)",
+    "Element B's id (element number in the periodic table)",
+    "Starting mole fraction of element A",
+    "Ending mole fraction of element A",
+    "Number of points"
+]
+unit = [
+    "",
+    "",
+    "",
+    "",
+    ""
+]
+
+[calculateRange.outputs]
+symbol = [
+    "\\Delta H_{mix}"
+]
+description = [
+    "Enthalpy of mixing"
+]
+unit = [
+    "kJ/mol"
+]
+can_be_used_as_input = true
+is_collection = true
