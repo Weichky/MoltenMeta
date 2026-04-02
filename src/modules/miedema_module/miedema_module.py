@@ -71,7 +71,7 @@ class MiedemaCalc:
             r_over_p,
         )
 
-    def calculateSingle(self, elem_A: int, elem_B: int, x_A: float) -> float:
+    def calculateSingle(self, elem_A: int, elem_B: int, x_A: float) -> dict:
         if not 0 <= x_A <= 1:
             raise ValueError(f"x_A must be in [0, 1], got {x_A}")
 
@@ -80,11 +80,20 @@ class MiedemaCalc:
         miedema_const = self._getMiedemaConst(elem_A, elem_B)
 
         core = _miedema_core.MiedemaCore(elem_props_A, elem_props_B, miedema_const)
-        return core.calculateSingle(x_A)
+        value = core.calculateSingle(x_A)
+
+        return {
+            "elem_A": elem_A,
+            "elem_B": elem_B,
+            "x_A": x_A,
+            "value": value,
+            "unit": "kJ/mol",
+            "method": "Miedema",
+        }
 
     def calculateRange(
         self, elem_A: int, elem_B: int, x_A_start: float, x_A_end: float, n_points: int
-    ) -> list[float]:
+    ) -> list[dict]:
         if not 0 <= x_A_start <= 1:
             raise ValueError(f"x_A_start must be in [0, 1], got {x_A_start}")
         if not 0 <= x_A_end <= 1:
@@ -97,5 +106,27 @@ class MiedemaCalc:
         miedema_const = self._getMiedemaConst(elem_A, elem_B)
 
         core = _miedema_core.MiedemaCore(elem_props_A, elem_props_B, miedema_const)
-        result = core.calculateRange(x_A_start, x_A_end, n_points)
-        return list(result)
+        raw_results = core.calculateRange(x_A_start, x_A_end, n_points)
+
+        return [
+            {
+                "elem_A": elem_A,
+                "elem_B": elem_B,
+                "x_A": x_A,
+                "value": value,
+                "unit": "kJ/mol",
+                "method": "Miedema",
+            }
+            for x_A, value in zip(
+                self._generateXPoints(x_A_start, x_A_end, n_points),
+                raw_results,
+            )
+        ]
+
+    def _generateXPoints(
+        self, x_A_start: float, x_A_end: float, n_points: int
+    ) -> list[float]:
+        if n_points == 1:
+            return [x_A_start]
+        step = (x_A_end - x_A_start) / (n_points - 1)
+        return [x_A_start + i * step for i in range(n_points)]

@@ -47,6 +47,11 @@ symbol = [
     "elem_B",
     "x_A"
 ]
+latex = [
+    "elem_A",
+    "elem_B",
+    "x_A"
+]
 description = [
     "Element A's id (element number in the periodic table)",
     "Element B's id (element number in the periodic table)",
@@ -59,6 +64,16 @@ unit = [
     "",
     "",
     ""
+]
+
+input_method = "composition_tool"
+
+composition_tool.mode = "mole_fraction"
+composition_tool.max_components = 2
+composition_tool.map = [
+    ["elem_A", 0],
+    ["elem_B", 2],
+    ["x_A", 1]
 ]
 
 [calculateSingle.outputs]
@@ -84,6 +99,13 @@ symbol = [
     "x_A_end",
     "n_points"
 ]
+latex = [
+    "elem_A",
+    "elem_B",
+    "x^\\text{start}_A",
+    "x^\\text{end}_A",
+    "n points"
+]
 description = [
     "Element A's id (element number in the periodic table)",
     "Element B's id (element number in the periodic table)",
@@ -97,6 +119,16 @@ unit = [
     "",
     "",
     ""
+]
+
+input_method = "raw"
+
+raw.method_map = [
+    ["elem_A", "element_input"],
+    ["elem_B", "element_input"],
+    ["x_A_start", "float_input"],
+    ["x_A_end", "float_input"],
+    ["n_points", "int_input"]
 ]
 
 [calculateRange.outputs]
