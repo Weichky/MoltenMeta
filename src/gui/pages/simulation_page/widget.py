@@ -1,9 +1,52 @@
 from PySide6 import QtWidgets, QtCore
+from PySide6.QtCore import Qt
 
 
 from .ui import UiSimulationPage
 from .controller import SimulationController
 from .plot_panel import PlotPanel
+
+
+class ResultTableModel(QtCore.QAbstractTableModel):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._columns: list[str] = []
+        self._data: list[list] = []
+
+    def update(self, columns: list[str], data: list[list]) -> None:
+        self.beginResetModel()
+        self._columns = columns
+        self._data = data
+        self.endResetModel()
+
+    def rowCount(self, parent: QtCore.QModelIndex = QtCore.QModelIndex()) -> int:
+        return len(self._data)
+
+    def columnCount(self, parent: QtCore.QModelIndex = QtCore.QModelIndex()) -> int:
+        return len(self._columns)
+
+    def data(self, index: QtCore.QModelIndex, role: int = Qt.ItemDataRole.DisplayRole):
+        if not index.isValid():
+            return None
+        if role != Qt.ItemDataRole.DisplayRole:
+            return None
+        row = index.row()
+        col = index.column()
+        if row < len(self._data) and col < len(self._columns):
+            return str(self._data[row][col])
+        return None
+
+    def headerData(
+        self,
+        section: int,
+        orientation: Qt.Orientation,
+        role: int = Qt.ItemDataRole.DisplayRole,
+    ) -> str | None:
+        if role != Qt.ItemDataRole.DisplayRole:
+            return None
+        if orientation == Qt.Orientation.Horizontal and section < len(self._columns):
+            return self._columns[section]
+        return None
 
 
 class SimulationPage(QtWidgets.QWidget):
@@ -25,6 +68,10 @@ class SimulationPage(QtWidgets.QWidget):
 
         self._plot_panel = PlotPanel()
         self.ui.plotContainer.addWidget(self._plot_panel)
+
+        self._result_model = ResultTableModel()
+        self.ui.resultTable.setModel(self._result_model)
+        self.ui.resultTable.horizontalHeader().setStretchLastSection(True)
 
         self._connect_signals()
         self._populate_categories()
@@ -101,7 +148,8 @@ class SimulationPage(QtWidgets.QWidget):
 
     def _display_result(self, result: dict) -> None:
         config = self._controller.get_current_config()
-        plot_config = config.get("plot", {})
+        method_config = config.get(self._current_method, {})
+        plot_config = method_config.get("plot", {})
         latex = result.get("latex", {})
         unit = result.get("unit", {})
         values = result.get("values", [])
@@ -118,7 +166,9 @@ class SimulationPage(QtWidgets.QWidget):
         if unit.get(y_keys[0]):
             y_label += f" ({unit[y_keys[0]]})"
 
-        if len(values) == 1:
+        is_collection = method_config.get("outputs", {}).get("is_collection", False)
+
+        if not is_collection:
             x_val = values[0].get(x_key, 0)
             y_val = values[0].get(y_keys[0], 0)
             self._plot_panel.plot_single_point(x_val, y_val, x_label, y_label, title)
@@ -134,6 +184,24 @@ class SimulationPage(QtWidgets.QWidget):
             idx_min = y_data.index(y_min)
             x_at_min = x_data[idx_min]
             self.ui.resultLabel.setText(f"Min: {y_min:.4f} at {x_key}={x_at_min:.2f}")
+
+        self._update_result_table(values, x_key, y_keys)
+
+    def _update_result_table(
+        self,
+        values: list[dict],
+        x_key: str,
+        y_keys: list[str],
+    ) -> None:
+        columns = [x_key]
+        columns.extend(y_keys)
+        data = []
+        for v in values:
+            row = [v.get(x_key, "")]
+            for y_key in y_keys:
+                row.append(v.get(y_key, ""))
+            data.append(row)
+        self._result_model.update(columns, data)
 
     def _retranslate_ui(self) -> None:
         pass

@@ -1,11 +1,13 @@
 from PySide6 import QtWidgets
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
+import matplotlib as mpl
 
 
 class PlotPanel(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
+        mpl.rcParams["text.usetex"] = False
         self._canvas = FigureCanvasQTAgg(Figure(figsize=(8, 6)))
         self._ax = self._canvas.figure.add_subplot(111)
         layout = QtWidgets.QVBoxLayout(self)
@@ -14,6 +16,11 @@ class PlotPanel(QtWidgets.QWidget):
         self._ax.set_xlabel("")
         self._ax.set_ylabel("")
         self._ax.grid(True, alpha=0.3)
+
+    def _wrap_latex(self, text: str) -> str:
+        if text.startswith("$") and text.endswith("$"):
+            return text
+        return f"${text}$"
 
     def plot(
         self,
@@ -27,10 +34,10 @@ class PlotPanel(QtWidgets.QWidget):
     ) -> None:
         self._ax.clear()
         self._ax.plot(x_data, y_data, marker=marker, color=color, linewidth=2)
-        self._ax.set_xlabel(x_label, fontsize=12)
-        self._ax.set_ylabel(y_label, fontsize=12)
+        self._ax.set_xlabel(self._wrap_latex(x_label), fontsize=12)
+        self._ax.set_ylabel(self._wrap_latex(y_label), fontsize=12)
         if title:
-            self._ax.set_title(title, fontsize=14)
+            self._ax.set_title(self._wrap_latex(title), fontsize=14)
         self._ax.grid(True, alpha=0.3)
         self._canvas.draw()
 
@@ -45,10 +52,10 @@ class PlotPanel(QtWidgets.QWidget):
     ) -> None:
         self._ax.clear()
         self._ax.scatter([x], [y], color=color, s=100, zorder=5, marker="o")
-        self._ax.set_xlabel(x_label, fontsize=12)
-        self._ax.set_ylabel(y_label, fontsize=12)
+        self._ax.set_xlabel(self._wrap_latex(x_label), fontsize=12)
+        self._ax.set_ylabel(self._wrap_latex(y_label), fontsize=12)
         if title:
-            self._ax.set_title(title, fontsize=14)
+            self._ax.set_title(self._wrap_latex(title), fontsize=14)
         self._ax.grid(True, alpha=0.3)
         self._canvas.draw()
 
