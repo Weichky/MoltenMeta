@@ -33,8 +33,12 @@
 | ✅ Completed | Home page, Settings page, Database page |
 | ✅ Completed | Data import (CSV) |
 | ✅ Completed | Settings persistence and hot-reload |
-| 🚧 In Progress | Analysis and simulation pages |
-| 🚧 In Progress | C++ algorithm engine integration |
+| ✅ Completed | Module system (ModuleManager + ModuleService) |
+| ✅ Completed | Simulation page with dynamic form generation |
+| ✅ Completed | Miedema module deployment (runtime/modules/miedema_module/) |
+| ✅ Completed | C++ algorithm engine integration (miedema_core.so) |
+| 🚧 In Progress | Data export, custom plotting, data groups |
+| 🚧 In Progress | Report generation (PDF/DOCX) |
 
 ---
 
@@ -48,12 +52,14 @@ src/
 ├── core/          # Core utilities (config, logging)
 ├── db/            # Database layer (adapters, repositories)
 ├── domain/        # Domain entities and business logic
+├── framework/     # Framework utilities (ModuleManager)
 ├── gui/           # UI layer (PySide6 widgets)
 │   ├── pages/     # Page widgets
 │   ├── sidebar/   # Sidebar components
 │   ├── menubar/   # Menu bar components
 │   └── appearance/# Theme and styling
-└── i18n/          # Internationalization
+├── i18n/          # Internationalization
+└── modules/       # Module source code (deployed to runtime/)
 ```
 
 ---
@@ -131,16 +137,36 @@ def example(param: int | None) -> str | None: ...
 │  UI Layer (gui/)                                        │
 │  - PySide6 widgets, pages, components                   │
 ├─────────────────────────────────────────────────────────┤
-│  Application Layer (application/)                       │
+│  Application Layer (application/)                         │
 │  - Services, use cases                                  │
 ├─────────────────────────────────────────────────────────┤
 │  Domain Layer (domain/)                                 │
 │  - Entities, business logic, snapshots                  │
 ├─────────────────────────────────────────────────────────┤
-│  Infrastructure Layer (db/, core/)                      │
+│  Infrastructure Layer (db/, core/, framework/)             │
 │  - Repositories, adapters, utilities                    │
 └─────────────────────────────────────────────────────────┘
 ```
+
+### Module System
+
+Modules are deployed to `runtime/modules/` and discovered at runtime via `ModuleManager`.
+
+**Layer separation**:
+- `framework/module_manager.py` — Pure discovery, no business logic
+- `application/service/module_service.py` — Business validation + call_method wrapper
+
+```
+runtime/modules/
+└── {package_name}/
+    ├── __init__.py
+    ├── config.toml
+    ├── lib/
+    │   └── *.so
+    └── *.csv
+```
+
+Modules use duck typing (no base class required).
 
 ### Two-Phase Initialization
 
