@@ -4,6 +4,7 @@ from gui.appearance.theme import ThemeService
 from domain.settings import Settings
 from application.service.core_db_service import CoreDbService
 from application.service.user_db_service import UserDbService
+from application.service.module_service import ModuleService
 
 
 class AppContext:
@@ -15,6 +16,7 @@ class AppContext:
         theme: ThemeService,
         core_db: CoreDbService | None = None,
         user_db: UserDbService | None = None,
+        modules: ModuleService | None = None,
     ):
         self.log = log
         self.settings = settings
@@ -22,3 +24,4 @@ class AppContext:
         self.theme = theme
         self.core_db = core_db
         self.user_db = user_db
+        self.modules = modules

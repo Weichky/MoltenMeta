@@ -10,6 +10,7 @@ from domain.settings import Settings
 
 from application.service.core_db_service import CoreDbService
 from application.service.user_db_service import UserDbService
+from application.service.module_service import ModuleService
 from i18n import I18nService
 
 from gui.appearance.theme import ThemeService
@@ -79,5 +80,7 @@ def initApp(app) -> AppContext:
         core_db_service.settings.theme_mode,
         core_db_service.settings.density_scale,
     )
+
+    context.modules = ModuleService(getRuntimePath(), context.log)
 
     return context
