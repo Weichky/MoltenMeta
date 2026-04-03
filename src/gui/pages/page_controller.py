@@ -5,6 +5,7 @@ import PySide6QtAds as QtAds
 from gui.pages.home_page import HomePage
 from gui.pages.settings_page import SettingsPage
 from gui.pages.data_page import DataPage
+from gui.pages.simulation_page import SimulationPage
 
 from application import AppContext
 
@@ -64,6 +65,12 @@ class PageController:
             factory=lambda: DataPage(context),
         )
 
+        self._simulation_spec = DockPageSpec(
+            key="simulation",
+            titleProvider=lambda: QCoreApplication.translate("DockPage", "Simulation"),
+            factory=lambda: SimulationPage(context),
+        )
+
         self.dock_manager = dock_manager
         self.background_layer = background_layer
         self.pages = {}  # Page cache
@@ -72,6 +79,7 @@ class PageController:
             self._home_spec.key: self._home_spec,
             self._settings_spec.key: self._settings_spec,
             self._data_spec.key: self._data_spec,
+            self._simulation_spec.key: self._simulation_spec,
         }
 
     def showHome(self):
@@ -87,7 +95,7 @@ class PageController:
         self._showPage(self._data_spec)
 
     def showSimulation(self):
-        self.logger.debug("Simulation page not implemented yet")
+        self._showPage(self._simulation_spec)
 
     # A dock is visible if it is not floating or hidden
     def _hasVisibleDock(self) -> bool:

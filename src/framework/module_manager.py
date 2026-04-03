@@ -1,4 +1,5 @@
 import importlib
+import sys
 import tomllib
 from pathlib import Path
 
@@ -10,7 +11,14 @@ class ModuleManager:
         self._logger = log_service.getLogger(__name__)
         self._modules: dict[str, object] = {}
         self._module_infos: dict[str, dict] = {}
+        self._runtime_path = runtime_path
+        self._ensure_runtime_in_path()
         self._discover(runtime_path / "modules")
+
+    def _ensure_runtime_in_path(self) -> None:
+        runtime_parent = str(self._runtime_path.parent)
+        if runtime_parent not in sys.path:
+            sys.path.insert(0, runtime_parent)
 
     def _discover(self, modules_dir: Path) -> None:
         if not modules_dir.exists():
