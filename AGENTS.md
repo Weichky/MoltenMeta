@@ -31,7 +31,7 @@
 | ✅ Completed | Theme system with light/dark mode support |
 | ✅ Completed | Internationalization (i18n) framework |
 | ✅ Completed | Home page, Settings page, Database page |
-| ✅ Completed | Data import (CSV) |
+| 🚧 In Progress | Data import (CSV) — menu action exists, logic not wired |
 | ✅ Completed | Settings persistence and hot-reload |
 | ✅ Completed | Module system (ModuleManager + ModuleService) |
 | ✅ Completed | Simulation page with dynamic form generation |
@@ -49,17 +49,20 @@ src/
 ├── algorithm/       # Algorithm engine (C++ / Python)
 │   └── python/       # Python bindings
 ├── application/    # Application services and use cases
-├── core/          # Core utilities (config, logging)
-├── db/            # Database layer (adapters, repositories)
-├── domain/        # Domain entities and business logic
-├── framework/     # Framework utilities (ModuleManager)
-├── gui/           # UI layer (PySide6 widgets)
-│   ├── pages/     # Page widgets
-│   ├── sidebar/   # Sidebar components
-│   ├── menubar/   # Menu bar components
-│   └── appearance/# Theme and styling
-├── i18n/          # Internationalization
-└── modules/       # Module source code (deployed to runtime/)
+├── catalog/        # Enumerations and constants (database types, languages, log levels)
+├── core/           # Core utilities (config, logging)
+├── db/             # Database layer (adapters, repositories)
+├── domain/         # Domain entities and business logic
+├── framework/      # Framework utilities (ModuleManager)
+├── gui/            # UI layer (PySide6 widgets)
+│   ├── pages/      # Page widgets
+│   ├── sidebar/    # Sidebar components
+│   ├── menubar/    # Menu bar components
+│   ├── background_layer/  # Background components
+│   └── appearance/ # Theme and styling
+├── i18n/           # Internationalization
+├── modules/        # Module source code (deployed to runtime/)
+└── resources/      # Static resources (data, i18n, images, styles)
 ```
 
 ---
@@ -160,6 +163,7 @@ Modules are deployed to `runtime/modules/` and discovered at runtime via `Module
 runtime/modules/
 └── {package_name}/
     ├── __init__.py
+    ├── {package_name}.py    # Entry class (e.g., miedema_module.py)
     ├── config.toml
     ├── lib/
     │   └── *.so
