@@ -167,6 +167,9 @@ class SimulationPage(QtWidgets.QWidget):
         is_collection = method_config.get("outputs", {}).get("is_collection", False)
 
         if not is_collection:
+            if not values:
+                self.ui.statusLabel.setText("Error: No result returned")
+                return
             x_val = values[0].get(x_key, 0)
             y_val = values[0].get(y_keys[0], 0)
             self._plot_panel.plotSinglePoint(x_val, y_val, x_label, y_label, title)
@@ -176,6 +179,9 @@ class SimulationPage(QtWidgets.QWidget):
         else:
             x_data = [v.get(x_key, 0) for v in values]
             y_data = [v.get(y_keys[0], 0) for v in values]
+            if not x_data or not y_data:
+                self.ui.statusLabel.setText("Error: Empty result data")
+                return
             self._plot_panel.plot(x_data, y_data, x_label, y_label, title)
 
             y_min = min(y_data)

@@ -110,8 +110,8 @@ latex = [
     "n_\\text{points}"
 ]
 description = [
-    "Element A's id (element number in the periodic table)",
-    "Element B's id (element number in the periodic table)",
+    "Element A's symbol (e.g. Al, Si)",
+    "Element B's symbol (e.g. Al, Si)",
     "Starting mole fraction of element A",
     "Ending mole fraction of element A",
     "Number of points"
@@ -127,8 +127,8 @@ unit = [
 input_method = "raw"
 
 raw.method_map = [
-    ["elem_A", "element_input"],
-    ["elem_B", "element_input"],
+    ["elem_A", "element_symbol_input"],
+    ["elem_B", "element_symbol_input"],
     ["x_A_start", "float_input"],
     ["x_A_end", "float_input"],
     ["n_points", "int_input"]

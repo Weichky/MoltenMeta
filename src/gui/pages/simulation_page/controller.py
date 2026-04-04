@@ -1,6 +1,7 @@
 import tomllib
-from pathlib import Path
 from PySide6 import QtWidgets
+
+from core.platform import getRuntimePath
 
 from .input_dialog import InputDialog
 
@@ -34,7 +35,7 @@ class SimulationController:
     def loadModuleConfig(self, package_name: str, method_name: str) -> dict | None:
         try:
             self._module_service.getModule(package_name)
-            mod_dir = Path("runtime/modules") / package_name
+            mod_dir = getRuntimePath() / "modules" / package_name
             config_path = mod_dir / "config.toml"
             with open(config_path, "rb") as f:
                 config = tomllib.load(f)
@@ -53,7 +54,7 @@ class SimulationController:
             return False, {}
 
         inputs_config = config.get("inputs", {})
-        dialog = InputDialog(inputs_config, parent)
+        dialog = InputDialog(inputs_config, self._context.user_db, parent)
         if dialog.exec() == QtWidgets.QDialog.Accepted:
             return True, dialog.getInputs()
         return False, {}
