@@ -13,17 +13,17 @@ class InputDialog(QtWidgets.QDialog):
         self._inputs_layout = None
         self._raw_widgets: dict[str, QtWidgets.QWidget] = {}
         self._composition_input: QtWidgets.QLineEdit | None = None
-        self._setup_ui()
+        self._setupUi()
 
-    def _setup_ui(self) -> None:
+    def _setupUi(self) -> None:
         layout = QtWidgets.QVBoxLayout(self)
 
         input_method = self._config.get("input_method", "raw")
 
         if input_method == "composition_tool":
-            self._setup_composition_tool(layout)
+            self._setupCompositionTool(layout)
         else:
-            self._setup_raw_inputs(layout)
+            self._setupRawInputs(layout)
 
         button_box = QtWidgets.QDialogButtonBox(
             QtWidgets.QDialogButtonBox.StandardButton.Ok
@@ -33,7 +33,7 @@ class InputDialog(QtWidgets.QDialog):
         button_box.rejected.connect(self.reject)
         layout.addWidget(button_box)
 
-    def _setup_composition_tool(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
+    def _setupCompositionTool(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
         comp_config = self._config["composition_tool"]
         map_data = comp_config["map"]
 
@@ -52,7 +52,7 @@ class InputDialog(QtWidgets.QDialog):
         hint.setStyleSheet("color: gray;")
         parent_layout.addWidget(hint)
 
-    def _setup_raw_inputs(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
+    def _setupRawInputs(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
         method_map = self._config.get("raw", {}).get("method_map", [])
         descriptions = self._config.get("inputs", {}).get("description", [])
         units = self._config.get("inputs", {}).get("unit", [])
@@ -91,14 +91,14 @@ class InputDialog(QtWidgets.QDialog):
 
         parent_layout.addLayout(self._inputs_layout)
 
-    def get_inputs(self) -> dict:
+    def getInputs(self) -> dict:
         input_method = self._config.get("input_method", "raw")
 
         if input_method == "composition_tool" and self._composition_input:
             comp_str = self._composition_input.text().strip()
             parsed = self._composition_tool.parse(comp_str)
             if parsed:
-                return self._composition_tool.to_argument_map(
+                return self._composition_tool.toArgumentMap(
                     parsed, self._composition_map, use_atomic_number=True
                 )
             return {}

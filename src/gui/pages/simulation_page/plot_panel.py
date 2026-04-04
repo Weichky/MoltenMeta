@@ -17,7 +17,7 @@ class PlotPanel(QtWidgets.QWidget):
         self._ax.set_ylabel("")
         self._ax.grid(True, alpha=0.3)
 
-    def _wrap_latex(self, text: str) -> str:
+    def _wrapLatex(self, text: str) -> str:
         if text.startswith("$") and text.endswith("$"):
             return text
         return f"${text}$"
@@ -34,14 +34,14 @@ class PlotPanel(QtWidgets.QWidget):
     ) -> None:
         self._ax.clear()
         self._ax.plot(x_data, y_data, marker=marker, color=color, linewidth=2)
-        self._ax.set_xlabel(self._wrap_latex(x_label), fontsize=12)
-        self._ax.set_ylabel(self._wrap_latex(y_label), fontsize=12)
+        self._ax.set_xlabel(self._wrapLatex(x_label), fontsize=12)
+        self._ax.set_ylabel(self._wrapLatex(y_label), fontsize=12)
         if title:
-            self._ax.set_title(self._wrap_latex(title), fontsize=14)
+            self._ax.set_title(self._wrapLatex(title), fontsize=14)
         self._ax.grid(True, alpha=0.3)
         self._canvas.draw()
 
-    def plot_single_point(
+    def plotSinglePoint(
         self,
         x: float,
         y: float,
@@ -52,10 +52,10 @@ class PlotPanel(QtWidgets.QWidget):
     ) -> None:
         self._ax.clear()
         self._ax.scatter([x], [y], color=color, s=100, zorder=5, marker="o")
-        self._ax.set_xlabel(self._wrap_latex(x_label), fontsize=12)
-        self._ax.set_ylabel(self._wrap_latex(y_label), fontsize=12)
+        self._ax.set_xlabel(self._wrapLatex(x_label), fontsize=12)
+        self._ax.set_ylabel(self._wrapLatex(y_label), fontsize=12)
         if title:
-            self._ax.set_title(self._wrap_latex(title), fontsize=14)
+            self._ax.set_title(self._wrapLatex(title), fontsize=14)
         self._ax.grid(True, alpha=0.3)
         self._canvas.draw()
 

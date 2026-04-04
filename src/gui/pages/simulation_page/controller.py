@@ -12,28 +12,28 @@ class SimulationController:
         self._context = context
         self._current_config: dict = {}
 
-    def get_categories(self) -> list[str]:
-        modules = self._module_service.list_modules()
+    def getCategories(self) -> list[str]:
+        modules = self._module_service.listModules()
         categories = set()
         for m in modules:
             if m.get("type") == "simulation":
                 categories.add(m.get("category", ""))
         return sorted(list(categories))
 
-    def get_modules_by_category(self, category: str) -> list[dict]:
-        modules = self._module_service.list_modules()
+    def getModulesByCategory(self, category: str) -> list[dict]:
+        modules = self._module_service.listModules()
         return [
             m
             for m in modules
             if m.get("type") == "simulation" and m.get("category") == category
         ]
 
-    def get_methods_by_module(self, package_name: str) -> list[str]:
-        return self._module_service.get_methods(package_name)
+    def getMethodsByModule(self, package_name: str) -> list[str]:
+        return self._module_service.getMethods(package_name)
 
-    def load_module_config(self, package_name: str, method_name: str) -> dict | None:
+    def loadModuleConfig(self, package_name: str, method_name: str) -> dict | None:
         try:
-            self._module_service.get_module(package_name)
+            self._module_service.getModule(package_name)
             mod_dir = Path("runtime/modules") / package_name
             config_path = mod_dir / "config.toml"
             with open(config_path, "rb") as f:
@@ -44,10 +44,10 @@ class SimulationController:
             self._logger.error(f"Failed to load config for {package_name}: {e}")
             return None
 
-    def get_current_config(self) -> dict:
+    def getCurrentConfig(self) -> dict:
         return self._current_config
 
-    def show_input_dialog(self, method_name: str, parent=None) -> tuple[bool, dict]:
+    def showInputDialog(self, method_name: str, parent=None) -> tuple[bool, dict]:
         config = self._current_config.get(method_name, {})
         if not config:
             return False, {}
@@ -55,14 +55,14 @@ class SimulationController:
         inputs_config = config.get("inputs", {})
         dialog = InputDialog(inputs_config, parent)
         if dialog.exec() == QtWidgets.QDialog.Accepted:
-            return True, dialog.get_inputs()
+            return True, dialog.getInputs()
         return False, {}
 
-    def call_calculation(self, package_name: str, method_name: str, **kwargs) -> dict:
+    def callCalculation(self, package_name: str, method_name: str, **kwargs) -> dict:
         self._logger.info(f"Calling {package_name}.{method_name}")
         self._logger.debug(f"Arguments: {kwargs}")
         try:
-            result = self._module_service.call_method(
+            result = self._module_service.callMethod(
                 package_name, method_name, **kwargs
             )
             self._logger.info("Calculation successful")
@@ -71,8 +71,8 @@ class SimulationController:
             self._logger.error(f"Calculation failed: {e}")
             raise
 
-    def get_module_info(self, package_name: str) -> dict | None:
-        modules = self._module_service.list_modules()
+    def getModuleInfo(self, package_name: str) -> dict | None:
+        modules = self._module_service.listModules()
         for m in modules:
             if m.get("package_name") == package_name:
                 return m

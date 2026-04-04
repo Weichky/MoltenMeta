@@ -148,10 +148,10 @@ class CompositionTool:
         normalized = [f / total for f in fractions]
         return ParsedComposition(elements=elements, fractions=normalized)
 
-    def symbol_to_number(self, symbol: str) -> int | None:
+    def symbolToNumber(self, symbol: str) -> int | None:
         return _ELEMENT_SYMBOL_TO_NUMBER.get(symbol)
 
-    def to_argument_map(
+    def toArgumentMap(
         self,
         parsed: ParsedComposition,
         param_map: list[list],
@@ -164,7 +164,7 @@ class CompositionTool:
                 if idx < len(parsed.elements):
                     elem = parsed.elements[idx]
                     if use_atomic_number:
-                        result[param_name] = self.symbol_to_number(elem)
+                        result[param_name] = self.symbolToNumber(elem)
                     else:
                         result[param_name] = elem
             else:

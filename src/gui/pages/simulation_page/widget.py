@@ -73,81 +73,79 @@ class SimulationPage(QtWidgets.QWidget):
         self.ui.resultTable.setModel(self._result_model)
         self.ui.resultTable.horizontalHeader().setStretchLastSection(True)
 
-        self._connect_signals()
-        self._populate_categories()
+        self._connectSignals()
+        self._populateCategories()
 
-    def _connect_signals(self) -> None:
-        self.ui.categoryCombo.currentIndexChanged.connect(self._on_category_changed)
-        self.ui.moduleCombo.currentIndexChanged.connect(self._on_module_changed)
-        self.ui.methodCombo.currentIndexChanged.connect(self._on_method_changed)
-        self.ui.configureBtn.clicked.connect(self._on_configure_clicked)
-        self.ui.calculateBtn.clicked.connect(self._on_calculate_clicked)
-        self._i18n.language_changed.connect(self._retranslate_ui)
+    def _connectSignals(self) -> None:
+        self.ui.categoryCombo.currentIndexChanged.connect(self._onCategoryChanged)
+        self.ui.moduleCombo.currentIndexChanged.connect(self._onModuleChanged)
+        self.ui.methodCombo.currentIndexChanged.connect(self._onMethodChanged)
+        self.ui.configureBtn.clicked.connect(self._onConfigureClicked)
+        self.ui.calculateBtn.clicked.connect(self._onCalculateClicked)
+        self._i18n.language_changed.connect(self._retranslateUi)
 
-    def _populate_categories(self) -> None:
-        categories = self._controller.get_categories()
+    def _populateCategories(self) -> None:
+        categories = self._controller.getCategories()
         self.ui.categoryCombo.clear()
         for cat in categories:
             self.ui.categoryCombo.addItem(cat)
 
-    def _on_category_changed(self, index: int) -> None:
+    def _onCategoryChanged(self, index: int) -> None:
         if index < 0:
             return
         self._current_category = self.ui.categoryCombo.currentText()
-        modules = self._controller.get_modules_by_category(self._current_category)
+        modules = self._controller.getModulesByCategory(self._current_category)
         self.ui.moduleCombo.clear()
         for m in modules:
             self.ui.moduleCombo.addItem(m["name"], m["package_name"])
 
-    def _on_module_changed(self, index: int) -> None:
+    def _onModuleChanged(self, index: int) -> None:
         if index < 0:
             return
         self._current_module = self.ui.moduleCombo.currentData()
         if self._current_module:
-            methods = self._controller.get_methods_by_module(self._current_module)
+            methods = self._controller.getMethodsByModule(self._current_module)
             self.ui.methodCombo.clear()
             for method in methods:
                 self.ui.methodCombo.addItem(method)
 
-    def _on_method_changed(self, index: int) -> None:
+    def _onMethodChanged(self, index: int) -> None:
         if index < 0:
             return
         self._current_method = self.ui.methodCombo.currentText()
         if self._current_module and self._current_method:
-            self._controller.load_module_config(
+            self._controller.loadModuleConfig(
                 self._current_module, self._current_method
             )
 
-    def _on_configure_clicked(self) -> None:
+    def _onConfigureClicked(self) -> None:
         if not self._current_module or not self._current_method:
             return
-        accepted, inputs = self._controller.show_input_dialog(
-            self._current_method, self
-        )
+        accepted, inputs = self._controller.showInputDialog(self._current_method, self)
         if accepted:
             self._pending_inputs = inputs
             self.ui.statusLabel.setText(f"Ready: {len(inputs)} inputs configured")
 
-    def _on_calculate_clicked(self) -> None:
+    def _onCalculateClicked(self) -> None:
         if not self._current_module or not self._current_method:
             return
 
         inputs = getattr(self, "_pending_inputs", {})
         if not inputs:
-            self._on_configure_clicked()
+            self._onConfigureClicked()
             return
 
         try:
-            result = self._controller.call_calculation(
+            result = self._controller.callCalculation(
                 self._current_module, self._current_method, **inputs
             )
-            self._display_result(result)
+            self._displayResult(result)
             self.ui.statusLabel.setText("Calculation complete")
         except Exception as e:
             self.ui.statusLabel.setText(f"Error: {e}")
 
-    def _display_result(self, result: dict) -> None:
-        config = self._controller.get_current_config()
+    def _displayResult(self, result: dict) -> None:
+        config = self._controller.getCurrentConfig()
         method_config = config.get(self._current_method, {})
         plot_config = method_config.get("plot", {})
         latex = result.get("latex", {})
@@ -171,7 +169,7 @@ class SimulationPage(QtWidgets.QWidget):
         if not is_collection:
             x_val = values[0].get(x_key, 0)
             y_val = values[0].get(y_keys[0], 0)
-            self._plot_panel.plot_single_point(x_val, y_val, x_label, y_label, title)
+            self._plot_panel.plotSinglePoint(x_val, y_val, x_label, y_label, title)
             self.ui.resultLabel.setText(
                 f"{y_keys[0]} = {y_val:.4f} {unit.get(y_keys[0], '')}"
             )
@@ -185,9 +183,9 @@ class SimulationPage(QtWidgets.QWidget):
             x_at_min = x_data[idx_min]
             self.ui.resultLabel.setText(f"Min: {y_min:.4f} at {x_key}={x_at_min:.2f}")
 
-        self._update_result_table(values, x_key, y_keys)
+        self._updateResultTable(values, x_key, y_keys)
 
-    def _update_result_table(
+    def _updateResultTable(
         self,
         values: list[dict],
         x_key: str,
@@ -203,5 +201,5 @@ class SimulationPage(QtWidgets.QWidget):
             data.append(row)
         self._result_model.update(columns, data)
 
-    def _retranslate_ui(self) -> None:
+    def _retranslateUi(self) -> None:
         pass

@@ -12,10 +12,10 @@ class ModuleManager:
         self._modules: dict[str, object] = {}
         self._module_infos: dict[str, dict] = {}
         self._runtime_path = runtime_path
-        self._ensure_runtime_in_path()
+        self._ensureRuntimeInPath()
         self._discover(runtime_path / "modules")
 
-    def _ensure_runtime_in_path(self) -> None:
+    def _ensureRuntimeInPath(self) -> None:
         runtime_parent = str(self._runtime_path.parent)
         if runtime_parent not in sys.path:
             sys.path.insert(0, runtime_parent)
@@ -74,7 +74,7 @@ class ModuleManager:
             for info in self._module_infos.values()
         ]
 
-    def get_methods(self, package_name: str) -> list[str]:
+    def getMethods(self, package_name: str) -> list[str]:
         if package_name not in self._module_infos:
             raise KeyError(f"Module not found: {package_name}")
         return self._module_infos[package_name].get("all_methods", [])

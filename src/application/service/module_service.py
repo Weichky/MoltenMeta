@@ -9,25 +9,25 @@ class ModuleService:
         self._logger = log_service.getLogger(__name__)
         self._manager = ModuleManager(runtime_path, log_service)
 
-    def get_module(self, package_name: str) -> object:
+    def getModule(self, package_name: str) -> object:
         try:
             return self._manager.get(package_name)
         except KeyError:
             self._logger.error(f"Module not found: {package_name}")
             raise
 
-    def list_modules(self) -> list[dict]:
+    def listModules(self) -> list[dict]:
         return self._manager.list()
 
-    def get_methods(self, package_name: str) -> list[str]:
+    def getMethods(self, package_name: str) -> list[str]:
         try:
-            return self._manager.get_methods(package_name)
+            return self._manager.getMethods(package_name)
         except KeyError:
             self._logger.error(f"Module not found: {package_name}")
             raise
 
-    def call_method(self, package_name: str, method_name: str, **kwargs) -> dict:
-        module = self.get_module(package_name)
+    def callMethod(self, package_name: str, method_name: str, **kwargs) -> dict:
+        module = self.getModule(package_name)
         method = getattr(module, method_name, None)
         if method is None:
             raise AttributeError(
