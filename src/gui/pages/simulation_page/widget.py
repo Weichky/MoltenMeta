@@ -1,6 +1,7 @@
 from PySide6 import QtWidgets, QtCore
 from PySide6.QtCore import Qt
 
+from domain.settings import Settings
 
 from .ui import UiSimulationPage
 from .controller import SimulationController
@@ -91,7 +92,12 @@ class SimulationPage(QtWidgets.QWidget):
         self._theme_service.theme_changed.connect(self._applyTheme)
 
     def _applyTheme(self) -> None:
-        scheme = self._theme_service.scheme
+        settings = Settings(records=self._context.core_db.settings_repo.findAll())
+        plot_color_scheme = settings.plot_color_scheme
+        if plot_color_scheme == "follow":
+            scheme = self._theme_service.scheme
+        else:
+            scheme = plot_color_scheme
         self._plot_panel.setScheme(scheme)
 
     def _populateCategories(self) -> None:
@@ -162,7 +168,7 @@ class SimulationPage(QtWidgets.QWidget):
         unit = result.get("unit", {})
         values = result.get("values", [])
 
-        settings = self._context.settings
+        settings = Settings(records=self._context.core_db.settings_repo.findAll())
         plot_config = self._plot_style_service.buildConfig(
             module_config, method_config, settings
         )
@@ -181,6 +187,13 @@ class SimulationPage(QtWidgets.QWidget):
         )
         if unit.get(y_keys[0]):
             y_label += f" ({unit[y_keys[0]]})"
+
+        plot_color_scheme = settings.plot_color_scheme
+        if plot_color_scheme == "follow":
+            scheme = self._theme_service.scheme
+        else:
+            scheme = plot_color_scheme
+        self._plot_panel.setScheme(scheme)
 
         is_collection = method_config.get("outputs", {}).get("is_collection", False)
 

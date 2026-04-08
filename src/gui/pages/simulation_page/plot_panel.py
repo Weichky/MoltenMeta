@@ -85,6 +85,7 @@ class PlotPanel(QtWidgets.QWidget):
             marker=style.marker,
             color=style.colors[0] if style.colors else "tab:blue",
             linewidth=style.lineWidth,
+            linestyle=style.lineStyle,
             markersize=style.markerSize,
         )
         self._ax.set_xlabel(

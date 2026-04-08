@@ -67,14 +67,18 @@ class UiSettingsPage(QObject):
         # Add navigation items
         self.general_button = QtWidgets.QPushButton()
         self.log_button = QtWidgets.QPushButton()
+        self.plot_button = QtWidgets.QPushButton()
 
         self.general_button.setCheckable(True)
         self.log_button.setCheckable(True)
+        self.plot_button.setCheckable(True)
         self.general_button.setChecked(True)
         self.log_button.setChecked(False)
+        self.plot_button.setChecked(False)
 
         self.nav_buttons_layout.addWidget(self.general_button)
         self.nav_buttons_layout.addWidget(self.log_button)
+        self.nav_buttons_layout.addWidget(self.plot_button)
 
         # Set button container as scroll area widget
         self.nav_scroll.setWidget(self.nav_buttons_widget)
@@ -93,6 +97,10 @@ class UiSettingsPage(QObject):
         # Create log settings page
         self.log_page = self._createLogPage()
         self.content_area.addWidget(self.log_page)
+
+        # Create plot settings page
+        self.plot_page = self._createPlotPage()
+        self.content_area.addWidget(self.plot_page)
 
         # Add to splitter
         self.splitter.addWidget(self.nav_panel)
@@ -207,7 +215,7 @@ class UiSettingsPage(QObject):
         self.theme_mode_combo.setCurrentIndex(
             self.theme_mode_combo.findData(theme_mode)
         )
-        
+
         self.density_scale_label = QtWidgets.QLabel()
         appearance_layout.addWidget(self.density_scale_label)
 
@@ -216,7 +224,6 @@ class UiSettingsPage(QObject):
         self.density_scale_spin.setRange(-4, 4)
         self.density_scale_spin.setValue(self._settings.density_scale)
         appearance_layout.addWidget(self.density_scale_spin)
-
 
         appearance_layout.addStretch()
         page_layout.addWidget(appearance_group)
@@ -266,6 +273,101 @@ class UiSettingsPage(QObject):
 
         return page
 
+    def _createPlotPage(self) -> QtWidgets.QWidget:
+        page = QtWidgets.QWidget()
+        page.setObjectName("plotPage")
+        page_layout = QtWidgets.QVBoxLayout(page)
+        page_layout.setSpacing(10)
+        page_layout.setContentsMargins(10, 10, 10, 10)
+
+        plot_style_group = QtWidgets.QGroupBox()
+        plot_style_group.setObjectName("plotStyleGroup")
+        plot_style_layout = QtWidgets.QFormLayout(plot_style_group)
+
+        self.palette_label = QtWidgets.QLabel()
+        self.palette_combo = QtWidgets.QComboBox()
+        self.palette_combo.setObjectName("paletteCombo")
+        for name in ["vibrant", "pastel", "default", "colorblind_safe"]:
+            self.palette_combo.addItem(name, name)
+        palette = self._settings.plot_colorscheme or "default"
+        self.palette_combo.setCurrentIndex(self.palette_combo.findData(palette))
+        plot_style_layout.addRow(self.palette_label, self.palette_combo)
+
+        self.color_scheme_label = QtWidgets.QLabel()
+        self.color_scheme_combo = QtWidgets.QComboBox()
+        self.color_scheme_combo.setObjectName("colorSchemeCombo")
+        for scheme in ["follow", "light", "dark"]:
+            self.color_scheme_combo.addItem(scheme, scheme)
+        color_scheme = self._settings.plot_color_scheme
+        self.color_scheme_combo.setCurrentIndex(
+            self.color_scheme_combo.findData(color_scheme)
+        )
+        plot_style_layout.addRow(self.color_scheme_label, self.color_scheme_combo)
+
+        self.line_style_label = QtWidgets.QLabel()
+        self.line_style_combo = QtWidgets.QComboBox()
+        self.line_style_combo.setObjectName("lineStyleCombo")
+        for style in ["-", "--", ":", "-."]:
+            self.line_style_combo.addItem(style, style)
+        line_style = self._settings.plot_line_style or "-"
+        self.line_style_combo.setCurrentIndex(
+            self.line_style_combo.findData(line_style)
+        )
+        plot_style_layout.addRow(self.line_style_label, self.line_style_combo)
+
+        self.marker_label = QtWidgets.QLabel()
+        self.marker_combo = QtWidgets.QComboBox()
+        self.marker_combo.setObjectName("markerCombo")
+        for marker in ["o", "s", "^", "D", "v", "<", ">"]:
+            self.marker_combo.addItem(marker, marker)
+        marker = self._settings.plot_marker or "o"
+        self.marker_combo.setCurrentIndex(self.marker_combo.findData(marker))
+        plot_style_layout.addRow(self.marker_label, self.marker_combo)
+
+        self.line_width_label = QtWidgets.QLabel()
+        self.line_width_spin = QtWidgets.QDoubleSpinBox()
+        self.line_width_spin.setObjectName("lineWidthSpin")
+        self.line_width_spin.setRange(0.5, 10.0)
+        self.line_width_spin.setSingleStep(0.5)
+        self.line_width_spin.setValue(self._settings.plot_line_width or 2.0)
+        plot_style_layout.addRow(self.line_width_label, self.line_width_spin)
+
+        self.marker_size_label = QtWidgets.QLabel()
+        self.marker_size_spin = QtWidgets.QDoubleSpinBox()
+        self.marker_size_spin.setObjectName("markerSizeSpin")
+        self.marker_size_spin.setRange(1.0, 20.0)
+        self.marker_size_spin.setSingleStep(0.5)
+        self.marker_size_spin.setValue(self._settings.plot_marker_size or 6.0)
+        plot_style_layout.addRow(self.marker_size_label, self.marker_size_spin)
+
+        self.grid_check = QtWidgets.QCheckBox()
+        self.grid_check.setObjectName("gridCheck")
+        self.grid_check.setChecked(
+            self._settings.plot_grid if self._settings.plot_grid is not None else True
+        )
+        plot_style_layout.addRow(self.grid_check)
+
+        self.font_size_label = QtWidgets.QLabel()
+        self.font_size_spin = QtWidgets.QSpinBox()
+        self.font_size_spin.setObjectName("fontSizeSpin")
+        self.font_size_spin.setRange(8, 24)
+        self.font_size_spin.setValue(self._settings.plot_font_size or 12)
+        plot_style_layout.addRow(self.font_size_label, self.font_size_spin)
+
+        page_layout.addWidget(plot_style_group)
+
+        preview_group = QtWidgets.QGroupBox()
+        preview_group.setObjectName("plotPreviewGroup")
+        preview_layout = QtWidgets.QVBoxLayout(preview_group)
+
+        self.preview_label = QtWidgets.QLabel()
+        preview_layout.addWidget(self.preview_label)
+
+        page_layout.addWidget(preview_group)
+        page_layout.addStretch()
+
+        return page
+
     def retranslateUi(self):
         self.display_mode_translations = {
             "light": self.tr("Light"),
@@ -284,6 +386,7 @@ class UiSettingsPage(QObject):
         # Navigation buttons
         self.general_button.setText(self.tr("General"))
         self.log_button.setText(self.tr("Log"))
+        self.plot_button.setText(self.tr("Plot"))
 
         # General settings page
         self.lang_label.setText(self.tr("Language:"))
@@ -298,6 +401,17 @@ class UiSettingsPage(QObject):
         )
         if log_display_group:
             log_display_group.setTitle(self.tr("Log Output"))
+
+        # Plot settings page
+        self.palette_label.setText(self.tr("Palette:"))
+        self.color_scheme_label.setText(self.tr("Color Scheme:"))
+        self.line_style_label.setText(self.tr("Line Style:"))
+        self.marker_label.setText(self.tr("Marker:"))
+        self.line_width_label.setText(self.tr("Line Width:"))
+        self.marker_size_label.setText(self.tr("Marker Size:"))
+        self.font_size_label.setText(self.tr("Font Size:"))
+        self.grid_check.setText(self.tr("Show Grid"))
+        self.preview_label.setText(self.tr("Preview"))
 
         # # Group box titles
         # for i in range(self.content_area.count()):

@@ -93,6 +93,10 @@ class Settings:
         return self.get("plot", "colorscheme")
 
     @property
+    def plot_color_scheme(self) -> str:
+        return self.get("plot", "colorScheme") or "follow"
+
+    @property
     def plot_line_style(self) -> str | None:
         return self.get("plot", "lineStyle")
 

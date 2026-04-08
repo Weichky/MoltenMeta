@@ -22,6 +22,7 @@ sqlite_path = "data/db/moltenmeta.mmdb"
 
 [plot]
 colorscheme = "default"
+colorScheme = "follow"
 lineStyle = "-"
 marker = "o"
 lineWidth = 2.0

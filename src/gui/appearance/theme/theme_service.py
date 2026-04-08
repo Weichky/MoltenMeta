@@ -219,6 +219,8 @@ class ThemeService(QObject, QtStyleTools):
 
     @property
     def scheme(self) -> str:
+        if self._theme_mode == "system":
+            return "dark" if self._isSystemDark() else "light"
         return self._scheme
 
     @property
