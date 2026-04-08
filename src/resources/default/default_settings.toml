@@ -19,3 +19,12 @@ python_version = "3.14"
 [database]
 db_type = "sqlite"
 sqlite_path = "data/db/moltenmeta.mmdb"
+
+[plot]
+colorscheme = "default"
+lineStyle = "-"
+marker = "o"
+lineWidth = 2.0
+markerSize = 6.0
+grid = true
+fontSize = 12

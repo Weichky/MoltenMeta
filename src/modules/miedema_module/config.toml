@@ -94,6 +94,14 @@ can_be_used_as_input = true
 # Not nessary to specify, just for human readability.
 is_collection = false
 
+[calculateSingle.plot]
+plotType = "scatter_2d"
+x = "x_A"
+xLabel = "x_A"
+y = ["Delta_H_mix"]
+yLabels = ["\\Delta H_{mix}"]
+title = "Enthalpy of Mixing"
+
 [calculateRange.inputs]
 symbol = [
     "elem_A",
@@ -149,3 +157,11 @@ unit = [
 ]
 can_be_used_as_input = true
 is_collection = true
+
+[calculateRange.plot]
+plotType = "line_2d"
+x = "x_A"
+xLabel = "x_A"
+y = ["Delta_H_mix"]
+yLabels = ["\\Delta H_{mix}"]
+title = "Enthalpy of Mixing vs Composition"

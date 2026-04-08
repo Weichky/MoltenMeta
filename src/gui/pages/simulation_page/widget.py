@@ -6,6 +6,8 @@ from .ui import UiSimulationPage
 from .controller import SimulationController
 from .plot_panel import PlotPanel
 
+from core.plot import PlotStyleService
+
 
 class ResultTableModel(QtCore.QAbstractTableModel):
     def __init__(self, parent=None):
@@ -57,7 +59,9 @@ class SimulationPage(QtWidgets.QWidget):
         super().__init__(parent=None)
         self._context = context
         self._i18n = context.i18n
+        self._theme_service = context.theme
         self._controller = SimulationController(context)
+        self._plot_style_service = PlotStyleService()
 
         self._current_category: str = ""
         self._current_module: str = ""
@@ -75,6 +79,7 @@ class SimulationPage(QtWidgets.QWidget):
 
         self._connectSignals()
         self._populateCategories()
+        self._applyTheme()
 
     def _connectSignals(self) -> None:
         self.ui.categoryCombo.currentIndexChanged.connect(self._onCategoryChanged)
@@ -83,6 +88,11 @@ class SimulationPage(QtWidgets.QWidget):
         self.ui.configureBtn.clicked.connect(self._onConfigureClicked)
         self.ui.calculateBtn.clicked.connect(self._onCalculateClicked)
         self._i18n.language_changed.connect(self._retranslateUi)
+        self._theme_service.theme_changed.connect(self._applyTheme)
+
+    def _applyTheme(self) -> None:
+        scheme = self._theme_service.scheme
+        self._plot_panel.setScheme(scheme)
 
     def _populateCategories(self) -> None:
         categories = self._controller.getCategories()
@@ -146,21 +156,29 @@ class SimulationPage(QtWidgets.QWidget):
 
     def _displayResult(self, result: dict) -> None:
         config = self._controller.getCurrentConfig()
+        module_config = config.get("module", {})
         method_config = config.get(self._current_method, {})
-        plot_config = method_config.get("plot", {})
         latex = result.get("latex", {})
         unit = result.get("unit", {})
         values = result.get("values", [])
 
-        x_key = plot_config.get("x", "x_A")
-        y_keys = plot_config.get("y", ["Delta_H_mix"])
-        title = plot_config.get("title", "")
+        settings = self._context.settings
+        plot_config = self._plot_style_service.buildConfig(
+            module_config, method_config, settings
+        )
 
-        x_label = latex.get(x_key, x_key)
+        x_key = plot_config.x
+        y_keys = plot_config.y
+
+        x_label = plot_config.xLabel or latex.get(x_key, x_key)
         if unit.get(x_key):
             x_label += f" ({unit[x_key]})"
 
-        y_label = latex.get(y_keys[0], y_keys[0])
+        y_label = (
+            plot_config.yLabels[0]
+            if plot_config.yLabels
+            else (latex.get(y_keys[0], y_keys[0]) if y_keys else "")
+        )
         if unit.get(y_keys[0]):
             y_label += f" ({unit[y_keys[0]]})"
 
@@ -171,18 +189,18 @@ class SimulationPage(QtWidgets.QWidget):
                 self.ui.statusLabel.setText("Error: No result returned")
                 return
             x_val = values[0].get(x_key, 0)
-            y_val = values[0].get(y_keys[0], 0)
-            self._plot_panel.plotSinglePoint(x_val, y_val, x_label, y_label, title)
+            y_val = values[0].get(y_keys[0], 0) if y_keys else 0
+            self._plot_panel.plotSinglePoint(plot_config, x_val, y_val)
             self.ui.resultLabel.setText(
-                f"{y_keys[0]} = {y_val:.4f} {unit.get(y_keys[0], '')}"
+                f"{y_keys[0]} = {y_val:.4f} {unit.get(y_keys[0], '')}" if y_keys else ""
             )
         else:
             x_data = [v.get(x_key, 0) for v in values]
-            y_data = [v.get(y_keys[0], 0) for v in values]
+            y_data = [v.get(y_keys[0], 0) for v in values] if y_keys else []
             if not x_data or not y_data:
                 self.ui.statusLabel.setText("Error: Empty result data")
                 return
-            self._plot_panel.plot(x_data, y_data, x_label, y_label, title)
+            self._plot_panel.plot(plot_config, x_data, y_data)
 
             y_min = min(y_data)
             idx_min = y_data.index(y_min)

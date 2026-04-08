@@ -86,3 +86,38 @@ class Settings:
         if self.get("appearance", "theme_mode") == "system":
             return "light"
         return self.get("appearance", "scheme")
+
+    # plot
+    @property
+    def plot_colorscheme(self) -> str | None:
+        return self.get("plot", "colorscheme")
+
+    @property
+    def plot_line_style(self) -> str | None:
+        return self.get("plot", "lineStyle")
+
+    @property
+    def plot_marker(self) -> str | None:
+        return self.get("plot", "marker")
+
+    @property
+    def plot_line_width(self) -> float | None:
+        val = self.get("plot", "lineWidth")
+        return float(val) if val else None
+
+    @property
+    def plot_marker_size(self) -> float | None:
+        val = self.get("plot", "markerSize")
+        return float(val) if val else None
+
+    @property
+    def plot_grid(self) -> bool | None:
+        val = self.get("plot", "grid")
+        if val is None:
+            return None
+        return val == "true"
+
+    @property
+    def plot_font_size(self) -> int | None:
+        val = self.get("plot", "fontSize")
+        return int(val) if val else None
