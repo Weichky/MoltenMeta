@@ -134,7 +134,13 @@ pybind11_add_module(${_MODULE_NAME} ${_CPP_SOURCE})
 # -----------------------------------------------------------------------------
 # 8. CONFIGURE LIBRARY PROPERTIES
 # -----------------------------------------------------------------------------
-# Fine-tune how the compiled library file is named and located.
+# Platform-specific suffix: .pyd on Windows, .so on Linux/macOS
+if(WIN32)
+    set(PLATFORM_SUFFIX ".pyd")
+else()
+    set(PLATFORM_SUFFIX ".so")
+endif()
+
 set_target_properties(${_MODULE_NAME} PROPERTIES
     # Output directory (where to put the .so/.pyd file)
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib
@@ -144,10 +150,7 @@ set_target_properties(${_MODULE_NAME} PROPERTIES
     # but we want just "miedema_core.so".
     PREFIX ""
 
-    # Force the file extension to be ".so" on all platforms.
-    # On macOS, CMake would normally produce ".dylib", but Python expects ".so".
-    # On Windows, Python expects ".pyd", but we'll leave that for future handling.
-    SUFFIX ".so"
+    SUFFIX "${PLATFORM_SUFFIX}"
 )
 
 # =============================================================================
