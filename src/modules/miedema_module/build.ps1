@@ -8,6 +8,6 @@ New-Item -ItemType Directory -Force -Path $LIB_DIR | Out-Null
 Set-Location $BUILD_DIR
 
 cmake ..
-make
+cmake --build . --config Release
 
 Write-Host "Build complete. Library located at: $LIB_DIR"
