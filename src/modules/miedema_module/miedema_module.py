@@ -24,6 +24,7 @@ Step 4: Return the result in structured format with element symbols
 """
 
 import csv
+import sys
 import tomllib
 import importlib.util
 from pathlib import Path
@@ -32,7 +33,11 @@ from .element_map import elemIdToSymbol
 
 _MODULE_DIR = Path(__file__).parent
 
-_LIB_PATH = _MODULE_DIR / "lib" / "miedema_core.so"
+if sys.platform == "win32":
+    _LIB_NAME = "miedema_core.pyd"
+else:
+    _LIB_NAME = "miedema_core.so"
+_LIB_PATH = _MODULE_DIR / "lib" / _LIB_NAME
 _spec = importlib.util.spec_from_file_location("miedema_core", _LIB_PATH)
 assert _spec is not None and _spec.loader is not None
 _miedema_core = importlib.util.module_from_spec(_spec)
