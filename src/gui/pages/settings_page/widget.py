@@ -16,6 +16,7 @@ class SettingsPage(QtWidgets.QWidget):
         # In other cases, signals are connected in the widget
         self.controller = SettingsController(self.ui, context, context.theme)
         self.controller.connectSignals()
+        self.controller._updatePlotPreview()
 
     def retranslateUi(self):
         self.ui.retranslateUi()

@@ -29,4 +29,6 @@ marker = "o"
 lineWidth = 2.0
 markerSize = 6.0
 grid = true
+gridMode = "auto"
+gridDensity = 1.0
 fontSize = 12

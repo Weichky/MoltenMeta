@@ -88,7 +88,7 @@ class SettingsController(QObject):
             lambda: self.ui.content_area.setCurrentIndex(1)
         )
         self.ui.plot_button.clicked.connect(
-            lambda: self.ui.content_area.setCurrentIndex(2)
+            lambda: (self.ui.content_area.setCurrentIndex(2), self._updatePlotPreview())
         )
 
     def connectSignals(self):
@@ -110,7 +110,14 @@ class SettingsController(QObject):
         self.ui.line_width_spin.valueChanged.connect(self._onLineWidthChanged)
         self.ui.marker_size_spin.valueChanged.connect(self._onMarkerSizeChanged)
         self.ui.grid_check.toggled.connect(self._onGridChanged)
-        self.ui.font_size_spin.valueChanged.connect(self._onFontSizeChanged)
+        self.ui.grid_mode_combo.currentIndexChanged.connect(self._onGridModeChanged)
+        self.ui.grid_density_spin.valueChanged.connect(self._onGridDensityChanged)
+        self.ui.title_font_size_spin.valueChanged.connect(self._onTitleFontSizeChanged)
+        self.ui.label_font_size_spin.valueChanged.connect(self._onLabelFontSizeChanged)
+        self.ui.tick_font_size_spin.valueChanged.connect(self._onTickFontSizeChanged)
+        self.ui.legend_font_size_spin.valueChanged.connect(
+            self._onLegendFontSizeChanged
+        )
 
         # i18n
         # Connect to self.ui instead of self.
@@ -154,6 +161,12 @@ class SettingsController(QObject):
         marker = self.ui.marker_combo.currentData()
         line_width = self.ui.line_width_spin.value()
         grid = self.ui.grid_check.isChecked()
+        grid_mode = self.ui.grid_mode_combo.currentData()
+        grid_density = self.ui.grid_density_spin.value()
+        title_font_size = self.ui.title_font_size_spin.value()
+        label_font_size = self.ui.label_font_size_spin.value()
+        tick_font_size = self.ui.tick_font_size_spin.value()
+        legend_font_size = self.ui.legend_font_size_spin.value()
 
         if colorscheme == "custom":
             primary = settings.get("plot", "custom_primary") or "#1f77b4"
@@ -170,7 +183,19 @@ class SettingsController(QObject):
         gen = ColorGenerator(theme, algo)
         colors = gen.getColorN(5)
 
-        self.ui.updatePreview(colors, line_style, marker, line_width, grid)
+        self.ui.updatePreview(
+            colors,
+            line_style,
+            marker,
+            line_width,
+            grid,
+            grid_mode,
+            grid_density,
+            title_font_size,
+            label_font_size,
+            tick_font_size,
+            legend_font_size,
+        )
 
     def _onColorschemeChanged(self, index: int):
         scheme = self.ui.palette_combo.itemData(index)
@@ -272,7 +297,43 @@ class SettingsController(QObject):
         self._updatePlotPreview()
         self.plot_settings_changed.emit()
 
-    def _onFontSizeChanged(self, value: int):
-        self._settings_repo.upsert([SettingsSnapshot("plot", "fontSize", str(value))])
+    def _onGridModeChanged(self, index: int):
+        mode = self.ui.grid_mode_combo.itemData(index)
+        self._settings_repo.upsert([SettingsSnapshot("plot", "gridMode", mode)])
+        self._updatePlotPreview()
+        self.plot_settings_changed.emit()
+
+    def _onGridDensityChanged(self, value: float):
+        self._settings_repo.upsert(
+            [SettingsSnapshot("plot", "gridDensity", str(value))]
+        )
+        self._updatePlotPreview()
+        self.plot_settings_changed.emit()
+
+    def _onTitleFontSizeChanged(self, value: int):
+        self._settings_repo.upsert(
+            [SettingsSnapshot("plot", "titleFontSize", str(value))]
+        )
+        self._updatePlotPreview()
+        self.plot_settings_changed.emit()
+
+    def _onLabelFontSizeChanged(self, value: int):
+        self._settings_repo.upsert(
+            [SettingsSnapshot("plot", "labelFontSize", str(value))]
+        )
+        self._updatePlotPreview()
+        self.plot_settings_changed.emit()
+
+    def _onTickFontSizeChanged(self, value: int):
+        self._settings_repo.upsert(
+            [SettingsSnapshot("plot", "tickFontSize", str(value))]
+        )
+        self._updatePlotPreview()
+        self.plot_settings_changed.emit()
+
+    def _onLegendFontSizeChanged(self, value: int):
+        self._settings_repo.upsert(
+            [SettingsSnapshot("plot", "legendFontSize", str(value))]
+        )
         self._updatePlotPreview()
         self.plot_settings_changed.emit()

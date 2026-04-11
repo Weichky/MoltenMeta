@@ -126,6 +126,30 @@ class Settings:
         return val == "true"
 
     @property
-    def plot_font_size(self) -> int | None:
-        val = self.get("plot", "fontSize")
+    def plot_grid_mode(self) -> str | None:
+        return self.get("plot", "gridMode")
+
+    @property
+    def plot_grid_density(self) -> float | None:
+        val = self.get("plot", "gridDensity")
+        return float(val) if val else None
+
+    @property
+    def plot_title_font_size(self) -> int | None:
+        val = self.get("plot", "titleFontSize")
+        return int(val) if val else None
+
+    @property
+    def plot_label_font_size(self) -> int | None:
+        val = self.get("plot", "labelFontSize")
+        return int(val) if val else None
+
+    @property
+    def plot_tick_font_size(self) -> int | None:
+        val = self.get("plot", "tickFontSize")
+        return int(val) if val else None
+
+    @property
+    def plot_legend_font_size(self) -> int | None:
+        val = self.get("plot", "legendFontSize")
         return int(val) if val else None

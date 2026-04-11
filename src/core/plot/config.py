@@ -165,17 +165,76 @@ class PlotStyleService:
         if grid is NotImplemented:
             grid = system_style.grid
 
-        fontSize = (
-            int(method_colorscheme["fontSize"])
-            if "fontSize" in method_colorscheme
-            else int(module_colorscheme["fontSize"])
-            if "fontSize" in module_colorscheme
+        gridMode = (
+            method_colorscheme.get("gridMode")
+            or module_colorscheme.get("gridMode")
+            or (settings.get("plot", "gridMode") if settings else None)
+            or system_style.gridMode
+        )
+
+        gridDensity = (
+            float(method_colorscheme["gridDensity"])
+            if "gridDensity" in method_colorscheme
+            else float(module_colorscheme["gridDensity"])
+            if "gridDensity" in module_colorscheme
             else (
-                int(settings.get("plot", "fontSize"))
-                if settings and settings.get("plot", "fontSize")
+                float(settings.get("plot", "gridDensity"))
+                if settings and settings.get("plot", "gridDensity")
                 else None
             )
-            or system_style.fontSize
+            or system_style.gridDensity
+        )
+
+        titleFontSize = (
+            int(method_colorscheme["titleFontSize"])
+            if "titleFontSize" in method_colorscheme
+            else int(module_colorscheme["titleFontSize"])
+            if "titleFontSize" in module_colorscheme
+            else (
+                int(settings.get("plot", "titleFontSize"))
+                if settings and settings.get("plot", "titleFontSize")
+                else None
+            )
+            or system_style.titleFontSize
+        )
+
+        labelFontSize = (
+            int(method_colorscheme["labelFontSize"])
+            if "labelFontSize" in method_colorscheme
+            else int(module_colorscheme["labelFontSize"])
+            if "labelFontSize" in module_colorscheme
+            else (
+                int(settings.get("plot", "labelFontSize"))
+                if settings and settings.get("plot", "labelFontSize")
+                else None
+            )
+            or system_style.labelFontSize
+        )
+
+        tickFontSize = (
+            int(method_colorscheme["tickFontSize"])
+            if "tickFontSize" in method_colorscheme
+            else int(module_colorscheme["tickFontSize"])
+            if "tickFontSize" in module_colorscheme
+            else (
+                int(settings.get("plot", "tickFontSize"))
+                if settings and settings.get("plot", "tickFontSize")
+                else None
+            )
+            or system_style.tickFontSize
+        )
+
+        legendFontSize = (
+            int(method_colorscheme["legendFontSize"])
+            if "legendFontSize" in method_colorscheme
+            else int(module_colorscheme["legendFontSize"])
+            if "legendFontSize" in module_colorscheme
+            else (
+                int(settings.get("plot", "legendFontSize"))
+                if settings and settings.get("plot", "legendFontSize")
+                else None
+            )
+            or system_style.legendFontSize
         )
 
         return PlotStyle(
@@ -186,7 +245,12 @@ class PlotStyleService:
             lineWidth=lineWidth,
             markerSize=markerSize,
             grid=grid,
-            fontSize=fontSize,
+            gridMode=gridMode,
+            gridDensity=gridDensity,
+            titleFontSize=titleFontSize,
+            labelFontSize=labelFontSize,
+            tickFontSize=tickFontSize,
+            legendFontSize=legendFontSize,
         )
 
     def buildConfig(

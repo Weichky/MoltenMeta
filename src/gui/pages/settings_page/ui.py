@@ -3,6 +3,7 @@ from PySide6.QtCore import QObject
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
+import numpy as np
 
 from core.log import getLogLevelMap
 from catalog import getSupportedLanguagesNameMap
@@ -290,8 +291,12 @@ class UiSettingsPage(QObject):
         self.palette_label = QtWidgets.QLabel()
         self.palette_combo = QtWidgets.QComboBox()
         self.palette_combo.setObjectName("paletteCombo")
-        for name in ["default", "custom"]:
-            self.palette_combo.addItem(name, name)
+        self.palette_items = [
+            (self.tr("Default"), "default"),
+            (self.tr("Custom"), "custom"),
+        ]
+        for display, value in self.palette_items:
+            self.palette_combo.addItem(display, value)
         palette = self._settings.plot_colorscheme or "default"
         self.palette_combo.setCurrentIndex(self.palette_combo.findData(palette))
         plot_style_layout.addRow(self.palette_label, self.palette_combo)
@@ -299,8 +304,13 @@ class UiSettingsPage(QObject):
         self.algorithm_label = QtWidgets.QLabel()
         self.algorithm_combo = QtWidgets.QComboBox()
         self.algorithm_combo.setObjectName("algorithmCombo")
-        for algo in ["linear", "harmonic", "colorwheel"]:
-            self.algorithm_combo.addItem(algo, algo)
+        self.algorithm_items = [
+            (self.tr("Linear"), "linear"),
+            (self.tr("Harmonic"), "harmonic"),
+            (self.tr("Colorwheel"), "colorwheel"),
+        ]
+        for display, value in self.algorithm_items:
+            self.algorithm_combo.addItem(display, value)
         algorithm = self._settings.plot_color_algorithm or "linear"
         self.algorithm_combo.setCurrentIndex(self.algorithm_combo.findData(algorithm))
         plot_style_layout.addRow(self.algorithm_label, self.algorithm_combo)
@@ -308,8 +318,13 @@ class UiSettingsPage(QObject):
         self.color_scheme_label = QtWidgets.QLabel()
         self.color_scheme_combo = QtWidgets.QComboBox()
         self.color_scheme_combo.setObjectName("colorSchemeCombo")
-        for scheme in ["follow", "light", "dark"]:
-            self.color_scheme_combo.addItem(scheme, scheme)
+        self.color_scheme_items = [
+            (self.tr("Follow"), "follow"),
+            (self.tr("Light"), "light"),
+            (self.tr("Dark"), "dark"),
+        ]
+        for display, value in self.color_scheme_items:
+            self.color_scheme_combo.addItem(display, value)
         color_scheme = self._settings.plot_color_scheme
         self.color_scheme_combo.setCurrentIndex(
             self.color_scheme_combo.findData(color_scheme)
@@ -319,8 +334,14 @@ class UiSettingsPage(QObject):
         self.line_style_label = QtWidgets.QLabel()
         self.line_style_combo = QtWidgets.QComboBox()
         self.line_style_combo.setObjectName("lineStyleCombo")
-        for style in ["-", "--", ":", "-."]:
-            self.line_style_combo.addItem(style, style)
+        self.line_style_items = [
+            (self.tr("Solid"), "-"),
+            (self.tr("Dashed"), "--"),
+            (self.tr("Dotted"), ":"),
+            (self.tr("Dash-Dot"), "-."),
+        ]
+        for display, value in self.line_style_items:
+            self.line_style_combo.addItem(display, value)
         line_style = self._settings.plot_line_style or "-"
         self.line_style_combo.setCurrentIndex(
             self.line_style_combo.findData(line_style)
@@ -330,8 +351,17 @@ class UiSettingsPage(QObject):
         self.marker_label = QtWidgets.QLabel()
         self.marker_combo = QtWidgets.QComboBox()
         self.marker_combo.setObjectName("markerCombo")
-        for marker in ["o", "s", "^", "D", "v", "<", ">"]:
-            self.marker_combo.addItem(marker, marker)
+        self.marker_items = [
+            (self.tr("Circle"), "o"),
+            (self.tr("Square"), "s"),
+            (self.tr("Triangle"), "^"),
+            (self.tr("Diamond"), "D"),
+            (self.tr("Down Triangle"), "v"),
+            (self.tr("Left Triangle"), "<"),
+            (self.tr("Right Triangle"), ">"),
+        ]
+        for display, value in self.marker_items:
+            self.marker_combo.addItem(display, value)
         marker = self._settings.plot_marker or "o"
         self.marker_combo.setCurrentIndex(self.marker_combo.findData(marker))
         plot_style_layout.addRow(self.marker_label, self.marker_combo)
@@ -359,26 +389,91 @@ class UiSettingsPage(QObject):
         )
         plot_style_layout.addRow(self.grid_check)
 
-        self.font_size_label = QtWidgets.QLabel()
-        self.font_size_spin = QtWidgets.QSpinBox()
-        self.font_size_spin.setObjectName("fontSizeSpin")
-        self.font_size_spin.setRange(8, 24)
-        self.font_size_spin.setValue(self._settings.plot_font_size or 12)
-        plot_style_layout.addRow(self.font_size_label, self.font_size_spin)
+        self.grid_mode_label = QtWidgets.QLabel()
+        self.grid_mode_combo = QtWidgets.QComboBox()
+        self.grid_mode_combo.setObjectName("gridModeCombo")
+        self.grid_mode_items = [
+            (self.tr("Auto"), "auto"),
+            (self.tr("Relative"), "relative"),
+            (self.tr("Absolute"), "absolute"),
+        ]
+        for display, value in self.grid_mode_items:
+            self.grid_mode_combo.addItem(display, value)
+        grid_mode = self._settings.plot_grid_mode or "auto"
+        self.grid_mode_combo.setCurrentIndex(self.grid_mode_combo.findData(grid_mode))
+        plot_style_layout.addRow(self.grid_mode_label, self.grid_mode_combo)
+
+        self.grid_density_label = QtWidgets.QLabel()
+        self.grid_density_spin = QtWidgets.QDoubleSpinBox()
+        self.grid_density_spin.setObjectName("gridDensitySpin")
+        self.grid_density_spin.setDecimals(2)
+        self.grid_density_spin.setRange(0.01, 999999)
+        self.grid_density_spin.setValue(self._settings.plot_grid_density or 1.0)
+        plot_style_layout.addRow(self.grid_density_label, self.grid_density_spin)
+
+        self.title_font_size_label = QtWidgets.QLabel()
+        self.title_font_size_spin = QtWidgets.QSpinBox()
+        self.title_font_size_spin.setObjectName("titleFontSizeSpin")
+        self.title_font_size_spin.setRange(6, 32)
+        self.title_font_size_spin.setValue(self._settings.plot_title_font_size or 14)
+        plot_style_layout.addRow(self.title_font_size_label, self.title_font_size_spin)
+
+        self.label_font_size_label = QtWidgets.QLabel()
+        self.label_font_size_spin = QtWidgets.QSpinBox()
+        self.label_font_size_spin.setObjectName("labelFontSizeSpin")
+        self.label_font_size_spin.setRange(6, 32)
+        self.label_font_size_spin.setValue(self._settings.plot_label_font_size or 12)
+        plot_style_layout.addRow(self.label_font_size_label, self.label_font_size_spin)
+
+        self.tick_font_size_label = QtWidgets.QLabel()
+        self.tick_font_size_spin = QtWidgets.QSpinBox()
+        self.tick_font_size_spin.setObjectName("tickFontSizeSpin")
+        self.tick_font_size_spin.setRange(6, 32)
+        self.tick_font_size_spin.setValue(self._settings.plot_tick_font_size or 10)
+        plot_style_layout.addRow(self.tick_font_size_label, self.tick_font_size_spin)
+
+        self.legend_font_size_label = QtWidgets.QLabel()
+        self.legend_font_size_spin = QtWidgets.QSpinBox()
+        self.legend_font_size_spin.setObjectName("legendFontSizeSpin")
+        self.legend_font_size_spin.setRange(6, 32)
+        self.legend_font_size_spin.setValue(self._settings.plot_legend_font_size or 10)
+        plot_style_layout.addRow(
+            self.legend_font_size_label, self.legend_font_size_spin
+        )
 
         page_layout.addWidget(plot_style_group)
 
         preview_group = QtWidgets.QGroupBox()
         preview_group.setObjectName("plotPreviewGroup")
         preview_layout = QtWidgets.QVBoxLayout(preview_group)
+        preview_layout.setContentsMargins(3, 3, 3, 3)
 
-        self.preview_figure = Figure(figsize=(6, 3))
+        scroll_area = QtWidgets.QScrollArea()
+        scroll_area.setObjectName("previewScrollArea")
+        scroll_area.setWidgetResizable(False)
+        scroll_area.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
+        scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+
+        preview_widget = QtWidgets.QWidget()
+        preview_inner_layout = QtWidgets.QVBoxLayout(preview_widget)
+        preview_inner_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.preview_figure = Figure(figsize=(8, 6), constrained_layout=True)
         self.preview_canvas = FigureCanvasQTAgg(self.preview_figure)
-        self.preview_ax = self.preview_figure.add_subplot(111)
-        preview_layout.addWidget(self.preview_canvas)
+        self.preview_canvas.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Minimum,
+            QtWidgets.QSizePolicy.Policy.Minimum,
+        )
+        self.preview_ax1 = self.preview_figure.add_subplot(2, 2, 1)
+        self.preview_ax2 = self.preview_figure.add_subplot(2, 2, 2)
+        self.preview_ax3 = self.preview_figure.add_subplot(2, 2, 3, projection="3d")
+        self.preview_ax4 = self.preview_figure.add_subplot(2, 2, 4)
+        preview_inner_layout.addWidget(self.preview_canvas)
 
+        scroll_area.setWidget(preview_widget)
+        preview_layout.addWidget(scroll_area)
         page_layout.addWidget(preview_group)
-        page_layout.addStretch()
 
         return page
 
@@ -424,8 +519,13 @@ class UiSettingsPage(QObject):
         self.marker_label.setText(self.tr("Marker:"))
         self.line_width_label.setText(self.tr("Line Width:"))
         self.marker_size_label.setText(self.tr("Marker Size:"))
-        self.font_size_label.setText(self.tr("Font Size:"))
+        self.title_font_size_label.setText(self.tr("Title Font Size:"))
+        self.label_font_size_label.setText(self.tr("Label Font Size:"))
+        self.tick_font_size_label.setText(self.tr("Tick Font Size:"))
+        self.legend_font_size_label.setText(self.tr("Legend Font Size:"))
         self.grid_check.setText(self.tr("Show Grid"))
+        self.grid_mode_label.setText(self.tr("Grid Mode:"))
+        self.grid_density_label.setText(self.tr("Grid Density:"))
         preview_group = self.plot_page.findChild(QtWidgets.QWidget, "plotPreviewGroup")
         if preview_group:
             preview_group.setTitle(self.tr("Preview"))
@@ -455,6 +555,53 @@ class UiSettingsPage(QObject):
             new_text = self.color_translations[data]
             self.theme_color_combo.setItemText(i, new_text)
 
+        for i, (display, value) in enumerate(self.palette_items):
+            self.palette_combo.setItemText(i, self.tr(display))
+
+        for i, (display, value) in enumerate(self.algorithm_items):
+            self.algorithm_combo.setItemText(i, self.tr(display))
+
+        for i, (display, value) in enumerate(self.color_scheme_items):
+            self.color_scheme_combo.setItemText(i, self.tr(display))
+
+        for i, (display, value) in enumerate(self.line_style_items):
+            self.line_style_combo.setItemText(i, self.tr(display))
+
+        for i, (display, value) in enumerate(self.marker_items):
+            self.marker_combo.setItemText(i, self.tr(display))
+
+        for i, (display, value) in enumerate(self.grid_mode_items):
+            self.grid_mode_combo.setItemText(i, self.tr(display))
+
+    def _calcGridTicks(
+        self, axis_min: float, axis_max: float, grid_mode: str, grid_density: float
+    ) -> np.ndarray:
+        range_val = axis_max - axis_min
+        if grid_mode == "absolute":
+            interval = grid_density
+        else:
+            interval = range_val / (10.0 * grid_density)
+        return np.arange(axis_min, axis_max + interval, interval)
+
+    def _applyGridToAxis(
+        self, ax, enabled: bool, grid_mode: str, grid_density: float
+    ) -> None:
+        if not enabled:
+            ax.grid(False)
+            return
+
+        if grid_mode == "auto":
+            ax.grid(True, alpha=0.3)
+            return
+
+        xlim = ax.get_xlim()
+        ylim = ax.get_ylim()
+        x_ticks = self._calcGridTicks(xlim[0], xlim[1], grid_mode, grid_density)
+        y_ticks = self._calcGridTicks(ylim[0], ylim[1], grid_mode, grid_density)
+        ax.set_xticks(x_ticks)
+        ax.set_yticks(y_ticks)
+        ax.grid(True, alpha=0.3)
+
     def updatePreview(
         self,
         colors: list[str],
@@ -462,12 +609,24 @@ class UiSettingsPage(QObject):
         marker: str = "o",
         line_width: float = 2.0,
         grid: bool = True,
+        grid_mode: str = "relative",
+        grid_density: float = 1.0,
+        title_font_size: int = 14,
+        label_font_size: int = 12,
+        tick_font_size: int = 10,
+        legend_font_size: int = 10,
     ) -> None:
-        self.preview_ax.clear()
+        self.preview_ax1.clear()
+        self.preview_ax2.clear()
+        self.preview_ax3.clear()
+        self.preview_ax4.clear()
+
         x = list(range(10))
+
+        self.preview_ax1.set_title("Line 2D", fontsize=title_font_size)
         for i, color in enumerate(colors[:5]):
             y = [v + i * 0.5 for v in x]
-            self.preview_ax.plot(
+            self.preview_ax1.plot(
                 x,
                 y,
                 color=color,
@@ -476,6 +635,44 @@ class UiSettingsPage(QObject):
                 linewidth=line_width,
                 markersize=4,
             )
-        self.preview_ax.grid(grid, alpha=0.3)
-        self.preview_figure.tight_layout()
+        self.preview_ax1.set_xlabel("X", fontsize=label_font_size)
+        self.preview_ax1.set_ylabel("Y", fontsize=label_font_size)
+        self.preview_ax1.tick_params(axis="both", labelsize=tick_font_size)
+        self._applyGridToAxis(self.preview_ax1, grid, grid_mode, grid_density)
+
+        self.preview_ax2.set_title("Scatter 2D", fontsize=title_font_size)
+        for i, color in enumerate(colors[:5]):
+            xs = np.random.rand(10) * 10
+            ys = np.random.rand(10) + i
+            self.preview_ax2.scatter(xs, ys, c=color, s=30, marker=marker)
+        self.preview_ax2.set_xlabel("X", fontsize=label_font_size)
+        self.preview_ax2.set_ylabel("Y", fontsize=label_font_size)
+        self.preview_ax2.tick_params(axis="both", labelsize=tick_font_size)
+        self._applyGridToAxis(self.preview_ax2, grid, grid_mode, grid_density)
+
+        self.preview_ax3.set_title("Surface 3D", fontsize=title_font_size)
+        X = np.linspace(-5, 5, 30)
+        Y = np.linspace(-5, 5, 30)
+        X, Y = np.meshgrid(X, Y)
+        Z = np.sin(np.sqrt(X**2 + Y**2))
+        self.preview_ax3.plot_surface(
+            X, Y, Z, color=colors[0], alpha=0.7, rstride=1, cstride=1
+        )
+        self.preview_ax3.view_init(elev=25, azim=45)
+        self.preview_ax3.set_box_aspect([1.2, 1.2, 0.8])
+        self.preview_ax3.tick_params(axis="both", labelsize=tick_font_size)
+
+        self.preview_ax4.set_title("Contour", fontsize=title_font_size)
+        X = np.arange(-5, 5, 0.5)
+        Y = np.arange(-5, 5, 0.5)
+        X, Y = np.meshgrid(X, Y)
+        Z = np.sin(np.sqrt(X**2 + Y**2))
+        self.preview_ax4.contourf(X, Y, Z, levels=10, colors=colors[:10])
+        self.preview_ax4.set_xlim(-5, 5)
+        self.preview_ax4.set_ylim(-5, 5)
+        self.preview_ax4.set_xlabel("X", fontsize=label_font_size)
+        self.preview_ax4.set_ylabel("Y", fontsize=label_font_size)
+        self.preview_ax4.tick_params(axis="both", labelsize=tick_font_size)
+        self._applyGridToAxis(self.preview_ax4, grid, grid_mode, grid_density)
+
         self.preview_canvas.draw()

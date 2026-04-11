@@ -4,6 +4,7 @@ from PySide6 import QtWidgets
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 import matplotlib as mpl
+import numpy as np
 
 if TYPE_CHECKING:
     from core.plot.config import PlotStyleConfig
@@ -27,6 +28,35 @@ class PlotPanel(QtWidgets.QWidget):
         layout.addWidget(self._canvas)
         self._current_scheme = "light"
         self._setTheme("light")
+
+    def _applyGrid(self, enabled: bool, gridMode: str, gridDensity: float) -> None:
+        if not enabled:
+            self._ax.grid(False)
+            return
+
+        if gridMode == "auto":
+            self._ax.grid(True, alpha=0.3)
+            return
+
+        xlim = self._ax.get_xlim()
+        ylim = self._ax.get_ylim()
+
+        def calcInterval(axis_min: float, axis_max: float) -> float:
+            range_val = axis_max - axis_min
+            if gridMode == "absolute":
+                return gridDensity
+            else:
+                return range_val / (10.0 * gridDensity)
+
+        x_interval = calcInterval(xlim[0], xlim[1])
+        y_interval = calcInterval(ylim[0], ylim[1])
+
+        x_ticks = np.arange(xlim[0], xlim[1] + x_interval, x_interval)
+        y_ticks = np.arange(ylim[0], ylim[1] + y_interval, y_interval)
+
+        self._ax.set_xticks(x_ticks)
+        self._ax.set_yticks(y_ticks)
+        self._ax.grid(True, alpha=0.3)
 
     def _setTheme(self, scheme: str) -> None:
         self._current_scheme = scheme
@@ -91,19 +121,20 @@ class PlotPanel(QtWidgets.QWidget):
             markersize=style.markerSize,
         )
         self._ax.set_xlabel(
-            self._wrapLatex(config.xLabel or config.x), fontsize=style.fontSize
+            self._wrapLatex(config.xLabel or config.x), fontsize=style.labelFontSize
         )
         self._ax.set_ylabel(
             self._wrapLatex(config.yLabels[0])
             if config.yLabels
             else (self._wrapLatex(config.y[0]) if config.y else ""),
-            fontsize=style.fontSize,
+            fontsize=style.labelFontSize,
         )
         if config.title:
             self._ax.set_title(
-                self._wrapLatex(config.title), fontsize=style.fontSize + 2
+                self._wrapLatex(config.title), fontsize=style.titleFontSize
             )
-        self._ax.grid(style.grid, alpha=0.3)
+        self._ax.tick_params(axis="both", labelsize=style.tickFontSize)
+        self._applyGrid(style.grid, style.gridMode, style.gridDensity)
         self._canvas.draw()
 
     def plotSinglePoint(
@@ -126,19 +157,20 @@ class PlotPanel(QtWidgets.QWidget):
             marker=style.marker,
         )
         self._ax.set_xlabel(
-            self._wrapLatex(config.xLabel or config.x), fontsize=style.fontSize
+            self._wrapLatex(config.xLabel or config.x), fontsize=style.labelFontSize
         )
         self._ax.set_ylabel(
             self._wrapLatex(config.yLabels[0])
             if config.yLabels
             else (self._wrapLatex(config.y[0]) if config.y else ""),
-            fontsize=style.fontSize,
+            fontsize=style.labelFontSize,
         )
         if config.title:
             self._ax.set_title(
-                self._wrapLatex(config.title), fontsize=style.fontSize + 2
+                self._wrapLatex(config.title), fontsize=style.titleFontSize
             )
-        self._ax.grid(style.grid, alpha=0.3)
+        self._ax.tick_params(axis="both", labelsize=style.tickFontSize)
+        self._applyGrid(style.grid, style.gridMode, style.gridDensity)
         self._canvas.draw()
 
     def clear(self) -> None:
