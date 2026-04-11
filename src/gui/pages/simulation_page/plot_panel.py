@@ -77,13 +77,15 @@ class PlotPanel(QtWidgets.QWidget):
         y_data: list[float],
     ) -> None:
         style = config.style
+        generator = config.colorGenerator
         self._ax.clear()
         self._applyAxisColors()
+        color = generator.getColor(0, 1) if generator else style.themeColors.primary
         self._ax.plot(
             x_data,
             y_data,
             marker=style.marker,
-            color=style.colors[0] if style.colors else "tab:blue",
+            color=color,
             linewidth=style.lineWidth,
             linestyle=style.lineStyle,
             markersize=style.markerSize,
@@ -111,12 +113,14 @@ class PlotPanel(QtWidgets.QWidget):
         y: float,
     ) -> None:
         style = config.style
+        generator = config.colorGenerator
         self._ax.clear()
         self._applyAxisColors()
+        color = generator.getColor(0, 1) if generator else style.themeColors.primary
         self._ax.scatter(
             [x],
             [y],
-            color=style.colors[0] if style.colors else "tab:red",
+            color=color,
             s=100,
             zorder=5,
             marker=style.marker,

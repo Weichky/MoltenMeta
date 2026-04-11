@@ -1,6 +1,9 @@
 from PySide6 import QtWidgets, QtCore
 from PySide6.QtCore import QObject
 
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
+from matplotlib.figure import Figure
+
 from core.log import getLogLevelMap
 from catalog import getSupportedLanguagesNameMap
 
@@ -287,11 +290,20 @@ class UiSettingsPage(QObject):
         self.palette_label = QtWidgets.QLabel()
         self.palette_combo = QtWidgets.QComboBox()
         self.palette_combo.setObjectName("paletteCombo")
-        for name in ["vibrant", "pastel", "default", "colorblind_safe"]:
+        for name in ["default", "custom"]:
             self.palette_combo.addItem(name, name)
         palette = self._settings.plot_colorscheme or "default"
         self.palette_combo.setCurrentIndex(self.palette_combo.findData(palette))
         plot_style_layout.addRow(self.palette_label, self.palette_combo)
+
+        self.algorithm_label = QtWidgets.QLabel()
+        self.algorithm_combo = QtWidgets.QComboBox()
+        self.algorithm_combo.setObjectName("algorithmCombo")
+        for algo in ["linear", "harmonic", "colorwheel"]:
+            self.algorithm_combo.addItem(algo, algo)
+        algorithm = self._settings.plot_color_algorithm or "linear"
+        self.algorithm_combo.setCurrentIndex(self.algorithm_combo.findData(algorithm))
+        plot_style_layout.addRow(self.algorithm_label, self.algorithm_combo)
 
         self.color_scheme_label = QtWidgets.QLabel()
         self.color_scheme_combo = QtWidgets.QComboBox()
@@ -360,8 +372,10 @@ class UiSettingsPage(QObject):
         preview_group.setObjectName("plotPreviewGroup")
         preview_layout = QtWidgets.QVBoxLayout(preview_group)
 
-        self.preview_label = QtWidgets.QLabel()
-        preview_layout.addWidget(self.preview_label)
+        self.preview_figure = Figure(figsize=(6, 3))
+        self.preview_canvas = FigureCanvasQTAgg(self.preview_figure)
+        self.preview_ax = self.preview_figure.add_subplot(111)
+        preview_layout.addWidget(self.preview_canvas)
 
         page_layout.addWidget(preview_group)
         page_layout.addStretch()
@@ -404,6 +418,7 @@ class UiSettingsPage(QObject):
 
         # Plot settings page
         self.palette_label.setText(self.tr("Palette:"))
+        self.algorithm_label.setText(self.tr("Color Algorithm:"))
         self.color_scheme_label.setText(self.tr("Color Scheme:"))
         self.line_style_label.setText(self.tr("Line Style:"))
         self.marker_label.setText(self.tr("Marker:"))
@@ -411,7 +426,9 @@ class UiSettingsPage(QObject):
         self.marker_size_label.setText(self.tr("Marker Size:"))
         self.font_size_label.setText(self.tr("Font Size:"))
         self.grid_check.setText(self.tr("Show Grid"))
-        self.preview_label.setText(self.tr("Preview"))
+        preview_group = self.plot_page.findChild(QtWidgets.QWidget, "plotPreviewGroup")
+        if preview_group:
+            preview_group.setTitle(self.tr("Preview"))
 
         # # Group box titles
         # for i in range(self.content_area.count()):
@@ -437,3 +454,28 @@ class UiSettingsPage(QObject):
             data = self.theme_color_combo.itemData(i)
             new_text = self.color_translations[data]
             self.theme_color_combo.setItemText(i, new_text)
+
+    def updatePreview(
+        self,
+        colors: list[str],
+        line_style: str = "-",
+        marker: str = "o",
+        line_width: float = 2.0,
+        grid: bool = True,
+    ) -> None:
+        self.preview_ax.clear()
+        x = list(range(10))
+        for i, color in enumerate(colors[:5]):
+            y = [v + i * 0.5 for v in x]
+            self.preview_ax.plot(
+                x,
+                y,
+                color=color,
+                linestyle=line_style,
+                marker=marker,
+                linewidth=line_width,
+                markersize=4,
+            )
+        self.preview_ax.grid(grid, alpha=0.3)
+        self.preview_figure.tight_layout()
+        self.preview_canvas.draw()

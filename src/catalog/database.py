@@ -2,9 +2,11 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 
+
 class DatabaseType(Enum):
     SQLITE = "sqlite"
     POSTGRESQL = "postgresql"
+
 
 @dataclass
 class DatabaseConnInfo:

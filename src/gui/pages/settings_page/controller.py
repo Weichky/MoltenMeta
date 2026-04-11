@@ -9,6 +9,11 @@ from application import AppContext
 from .ui import UiSettingsPage
 
 from domain.snapshot import SettingsSnapshot
+from domain.settings import Settings
+
+from core.plot.config import PlotStyleService
+from core.plot.color import ColorPalette
+from catalog import ColorAlgorithm
 
 from gui.appearance.theme import ThemeService
 
@@ -58,6 +63,7 @@ class SettingsController(QObject):
         self._log_service = context.log
         self._settings_repo = context.core_db.settings_repo
         self._theme_service = theme_service
+        self._plot_style_service = PlotStyleService()
         self._setupNavigation()
         self._setupLogHandler()
 
@@ -93,6 +99,9 @@ class SettingsController(QObject):
         self.ui.density_scale_spin.valueChanged.connect(self._onDensityScaleChanged)
 
         self.ui.palette_combo.currentIndexChanged.connect(self._onColorschemeChanged)
+        self.ui.algorithm_combo.currentIndexChanged.connect(
+            self._onColorAlgorithmChanged
+        )
         self.ui.color_scheme_combo.currentIndexChanged.connect(
             self._onColorSchemeChanged
         )
@@ -137,9 +146,96 @@ class SettingsController(QObject):
             [SettingsSnapshot("appearance", "density_scale", str(value))]
         )
 
+    def _updatePlotPreview(self) -> None:
+        settings = Settings(records=self._settings_repo.findAll())
+        colorscheme = self.ui.palette_combo.currentData()
+        algorithm = self.ui.algorithm_combo.currentData()
+        line_style = self.ui.line_style_combo.currentData()
+        marker = self.ui.marker_combo.currentData()
+        line_width = self.ui.line_width_spin.value()
+        grid = self.ui.grid_check.isChecked()
+
+        if colorscheme == "custom":
+            primary = settings.get("plot", "custom_primary") or "#1f77b4"
+            secondary = settings.get("plot", "custom_secondary") or "#ff7f0e"
+            from core.plot.color import ThemeColors
+
+            theme = ThemeColors(primary=primary, secondary=secondary)
+        else:
+            theme = ColorPalette.getThemeColors(colorscheme)
+
+        algo = ColorAlgorithm(algorithm) if algorithm else ColorAlgorithm.LINEAR
+        from core.plot.color import ColorGenerator
+
+        gen = ColorGenerator(theme, algo)
+        colors = gen.getColorN(5)
+
+        self.ui.updatePreview(colors, line_style, marker, line_width, grid)
+
     def _onColorschemeChanged(self, index: int):
         scheme = self.ui.palette_combo.itemData(index)
         self._settings_repo.upsert([SettingsSnapshot("plot", "colorscheme", scheme)])
+        if scheme == "custom":
+            self._showCustomColorDialog()
+        self._updatePlotPreview()
+        self.plot_settings_changed.emit()
+
+    def _showCustomColorDialog(self) -> None:
+        current_primary = self._settings_repo.findBySectionAndKey(
+            "plot", "custom_primary"
+        )
+        current_secondary = self._settings_repo.findBySectionAndKey(
+            "plot", "custom_secondary"
+        )
+
+        current_text = ""
+        if current_primary:
+            current_text = current_primary.value
+        if current_secondary:
+            current_text += ", " + current_secondary.value
+
+        dialog = QtWidgets.QInputDialog(self.ui.plot_page)
+        dialog.setWindowTitle(self.tr("Custom Colors"))
+        dialog.setLabelText(
+            self.tr("Enter primary and secondary colors (e.g., #3f50b5, #f44336)")
+        )
+        if current_text:
+            dialog.setTextValue(current_text)
+
+        if dialog.exec():
+            text = dialog.textValue()
+            if text:
+                colors = self._parseColors(text)
+                if colors:
+                    self._saveCustomColors(colors)
+                    self._updatePlotPreview()
+
+    def _parseColors(self, text: str) -> list[str]:
+        import re
+
+        color_pattern = re.compile(r"^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")
+        colors = []
+        for part in text.replace(",", " ").split():
+            part = part.strip()
+            if color_pattern.match(part):
+                if len(part) == 4:
+                    part = f"#{part[1]}{part[1]}{part[2]}{part[2]}{part[3]}{part[3]}"
+                colors.append(part.upper())
+        return colors[:2]
+
+    def _saveCustomColors(self, colors: list[str]) -> None:
+        snapshots = []
+        snapshots.append(SettingsSnapshot("plot", "custom_primary", colors[0]))
+        if len(colors) > 1:
+            snapshots.append(SettingsSnapshot("plot", "custom_secondary", colors[1]))
+        self._settings_repo.upsert(snapshots)
+
+    def _onColorAlgorithmChanged(self, index: int):
+        algorithm = self.ui.algorithm_combo.itemData(index)
+        self._settings_repo.upsert(
+            [SettingsSnapshot("plot", "color_algorithm", algorithm)]
+        )
+        self._updatePlotPreview()
         self.plot_settings_changed.emit()
 
     def _onColorSchemeChanged(self, index: int):
@@ -150,30 +246,33 @@ class SettingsController(QObject):
     def _onLineStyleChanged(self, index: int):
         style = self.ui.line_style_combo.itemData(index)
         self._settings_repo.upsert([SettingsSnapshot("plot", "lineStyle", style)])
+        self._updatePlotPreview()
         self.plot_settings_changed.emit()
 
     def _onMarkerChanged(self, index: int):
         marker = self.ui.marker_combo.itemData(index)
         self._settings_repo.upsert([SettingsSnapshot("plot", "marker", marker)])
+        self._updatePlotPreview()
         self.plot_settings_changed.emit()
 
     def _onLineWidthChanged(self, value: float):
         self._settings_repo.upsert([SettingsSnapshot("plot", "lineWidth", str(value))])
+        self._updatePlotPreview()
         self.plot_settings_changed.emit()
 
     def _onMarkerSizeChanged(self, value: float):
         self._settings_repo.upsert([SettingsSnapshot("plot", "markerSize", str(value))])
+        self._updatePlotPreview()
         self.plot_settings_changed.emit()
 
     def _onGridChanged(self, checked: bool):
         self._settings_repo.upsert(
             [SettingsSnapshot("plot", "grid", "true" if checked else "false")]
         )
+        self._updatePlotPreview()
         self.plot_settings_changed.emit()
 
     def _onFontSizeChanged(self, value: int):
         self._settings_repo.upsert([SettingsSnapshot("plot", "fontSize", str(value))])
+        self._updatePlotPreview()
         self.plot_settings_changed.emit()
-
-    def _onFontSizeChanged(self, value: int):
-        self._settings_repo.upsert([SettingsSnapshot("plot", "fontSize", str(value))])

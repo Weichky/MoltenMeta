@@ -6,16 +6,13 @@ from typing import TYPE_CHECKING
 import tomllib
 
 from catalog import (
-    DEFAULT_FONT_SIZE,
-    DEFAULT_GRID,
-    DEFAULT_LINE_STYLE,
-    DEFAULT_LINE_WIDTH,
-    DEFAULT_MARKER,
-    DEFAULT_MARKER_SIZE,
     DEFAULT_PLOT_TYPE,
+    DEFAULT_THEME_PRESET,
+    DEFAULT_ALGORITHM,
+    ColorAlgorithm,
 )
 
-from core.plot.color import ColorPalette
+from core.plot.color import ColorPalette, ColorGenerator, ThemeColors
 from core.plot.style import PlotStyle, getDefaultPlotStyle
 
 if TYPE_CHECKING:
@@ -26,6 +23,7 @@ if TYPE_CHECKING:
 class PlotStyleConfig:
     plotType: str = DEFAULT_PLOT_TYPE
     style: PlotStyle = field(default_factory=getDefaultPlotStyle)
+    colorGenerator: ColorGenerator | None = None
     x: str = ""
     xLabel: str = ""
     y: list[str] = field(default_factory=list)
@@ -42,133 +40,170 @@ def _getDefaultSettings() -> dict:
         return {}
 
 
+def _parseAlgorithm(algo_str: str | None) -> ColorAlgorithm:
+    if not algo_str:
+        return DEFAULT_ALGORITHM
+    for algo in ColorAlgorithm:
+        if algo.value == algo_str:
+            return algo
+    return DEFAULT_ALGORITHM
+
+
+def _parseThemeColors(
+    preset: str | None,
+    primary: str | None,
+    secondary: str | None,
+    settings: "Settings | None" = None,
+) -> ThemeColors | None:
+    if preset == "custom" and settings:
+        custom_primary = settings.get("plot", "custom_primary")
+        custom_secondary = settings.get("plot", "custom_secondary")
+        if custom_primary:
+            return ThemeColors(
+                primary=custom_primary,
+                secondary=custom_secondary or "#000000",
+            )
+        return None
+    if preset and preset != "custom":
+        return ColorPalette.getThemeColors(preset)
+    if primary:
+        return ThemeColors(
+            primary=primary,
+            secondary=secondary or "#000000",
+        )
+    return None
+
+
 class PlotStyleService:
     def __init__(self) -> None:
         pass
 
-    def buildStyle(self, module_config: dict, settings: "Settings | None") -> PlotStyle:
-        db_colorscheme = settings.get("plot", "colorscheme") if settings else None
-        db_style = self._getStyleFromDb(settings)
+    def buildStyle(
+        self, module_config: dict, method_config: dict, settings: "Settings | None"
+    ) -> PlotStyle:
         system_style = getDefaultPlotStyle()
 
-        module_palette = module_config.get("colorscheme", {}).get("colors")
-        module_lineStyle = module_config.get("lineStyle")
-        module_marker = module_config.get("marker")
-        module_lineWidth = module_config.get("lineWidth")
-        module_markerSize = module_config.get("markerSize")
-        module_grid = module_config.get("grid")
-        module_fontSize = module_config.get("fontSize")
+        module_colorscheme = module_config.get("colorscheme", {})
+        method_colorscheme = method_config.get("colorscheme", {})
 
-        user_palette = None
-        user_lineStyle = None
-        user_marker = None
-        user_lineWidth = None
-        user_markerSize = None
-        user_grid = None
-        user_fontSize = None
+        module_algorithm = _parseAlgorithm(module_colorscheme.get("algorithm"))
+        method_algorithm_str = method_colorscheme.get("algorithm")
+        db_algorithm_str = settings.get("plot", "color_algorithm") if settings else None
 
-        if db_style:
-            user_palette = db_style.colors or None
-            user_lineStyle = (
-                db_style.lineStyle if db_style.lineStyle != DEFAULT_LINE_STYLE else None
+        algorithm优先级 = (
+            _parseAlgorithm(method_algorithm_str)
+            or module_algorithm
+            or _parseAlgorithm(db_algorithm_str)
+            or system_style.algorithm
+        )
+
+        module_preset = module_colorscheme.get("preset")
+        method_preset = method_colorscheme.get("preset")
+        db_preset = settings.get("plot", "colorscheme") if settings else None
+
+        module_primary = module_colorscheme.get("primary")
+        method_primary = method_colorscheme.get("primary")
+        module_secondary = module_colorscheme.get("secondary")
+        method_secondary = method_colorscheme.get("secondary")
+
+        final_theme = (
+            _parseThemeColors(method_preset, method_primary, method_secondary, settings)
+            or _parseThemeColors(
+                module_preset, module_primary, module_secondary, settings
             )
-            user_marker = db_style.marker if db_style.marker != DEFAULT_MARKER else None
-            user_lineWidth = (
-                db_style.lineWidth if db_style.lineWidth != DEFAULT_LINE_WIDTH else None
-            )
-            user_markerSize = (
-                db_style.markerSize
-                if db_style.markerSize != DEFAULT_MARKER_SIZE
+            or _parseThemeColors(db_preset, None, None, settings)
+            or system_style.themeColors
+        )
+
+        lineStyle = (
+            method_colorscheme.get("lineStyle")
+            or module_colorscheme.get("lineStyle")
+            or (settings.get("plot", "lineStyle") if settings else None)
+            or system_style.lineStyle
+        )
+        marker = (
+            method_colorscheme.get("marker")
+            or module_colorscheme.get("marker")
+            or (settings.get("plot", "marker") if settings else None)
+            or system_style.marker
+        )
+        lineWidth = (
+            float(method_colorscheme["lineWidth"])
+            if "lineWidth" in method_colorscheme
+            else float(module_colorscheme["lineWidth"])
+            if "lineWidth" in module_colorscheme
+            else (
+                float(settings.get("plot", "lineWidth"))
+                if settings and settings.get("plot", "lineWidth")
                 else None
             )
-            user_grid = db_style.grid if db_style.grid != DEFAULT_GRID else None
-            user_fontSize = (
-                db_style.fontSize if db_style.fontSize != DEFAULT_FONT_SIZE else None
+            or system_style.lineWidth
+        )
+        markerSize = (
+            float(method_colorscheme["markerSize"])
+            if "markerSize" in method_colorscheme
+            else float(module_colorscheme["markerSize"])
+            if "markerSize" in module_colorscheme
+            else (
+                float(settings.get("plot", "markerSize"))
+                if settings and settings.get("plot", "markerSize")
+                else None
             )
-        elif db_colorscheme:
-            user_palette = ColorPalette.getColors(db_colorscheme)
+            or system_style.markerSize
+        )
+        grid = (
+            method_colorscheme.get("grid", NotImplemented)
+            if "grid" in method_colorscheme
+            else module_colorscheme.get("grid", NotImplemented)
+            if "grid" in module_colorscheme
+            else (
+                settings.get("plot", "grid") == "true"
+                if settings and settings.get("plot", "grid")
+                else NotImplemented
+            )
+        )
+        if grid is NotImplemented:
+            grid = system_style.grid
 
-        final_colors = (
-            module_palette
-            or module_config.get("colors")
-            or user_palette
-            or system_style.colors
-        )
-        final_lineStyle = module_lineStyle or user_lineStyle or system_style.lineStyle
-        final_marker = module_marker or user_marker or system_style.marker
-        final_lineWidth = (
-            float(module_lineWidth)
-            if module_lineWidth is not None
-            else user_lineWidth or system_style.lineWidth
-        )
-        final_markerSize = (
-            float(module_markerSize)
-            if module_markerSize is not None
-            else user_markerSize or system_style.markerSize
-        )
-        final_grid = (
-            module_grid
-            if module_grid is not None
-            else user_grid
-            if user_grid is not None
-            else system_style.grid
-        )
-        final_fontSize = (
-            int(module_fontSize)
-            if module_fontSize is not None
-            else user_fontSize or system_style.fontSize
+        fontSize = (
+            int(method_colorscheme["fontSize"])
+            if "fontSize" in method_colorscheme
+            else int(module_colorscheme["fontSize"])
+            if "fontSize" in module_colorscheme
+            else (
+                int(settings.get("plot", "fontSize"))
+                if settings and settings.get("plot", "fontSize")
+                else None
+            )
+            or system_style.fontSize
         )
 
         return PlotStyle(
-            colors=final_colors,
-            lineStyle=final_lineStyle,
-            marker=final_marker,
-            lineWidth=final_lineWidth,
-            markerSize=final_markerSize,
-            grid=final_grid,
-            fontSize=final_fontSize,
+            algorithm=algorithm优先级,
+            themeColors=final_theme,
+            lineStyle=lineStyle,
+            marker=marker,
+            lineWidth=lineWidth,
+            markerSize=markerSize,
+            grid=grid,
+            fontSize=fontSize,
         )
 
     def buildConfig(
         self, module_config: dict, method_config: dict, settings: "Settings | None"
     ) -> PlotStyleConfig:
         plot_config = method_config.get("plot", {})
-        style = self.buildStyle(plot_config, settings)
+        style = self.buildStyle(module_config, method_config, settings)
+        theme = style.themeColors or ColorPalette.getThemeColors(DEFAULT_THEME_PRESET)
+        generator = ColorGenerator(theme, style.algorithm)
 
         return PlotStyleConfig(
             plotType=plot_config.get("plotType", DEFAULT_PLOT_TYPE),
             style=style,
+            colorGenerator=generator,
             x=plot_config.get("x", ""),
             xLabel=plot_config.get("xLabel", ""),
             y=plot_config.get("y", []),
             yLabels=plot_config.get("yLabels", []),
             title=plot_config.get("title", ""),
-        )
-
-    def _getStyleFromDb(self, settings: "Settings | None") -> PlotStyle | None:
-        if settings is None:
-            return None
-        colors = []
-        for i in range(8):
-            c = settings.get("plot", f"color_{i}")
-            if c:
-                colors.append(c)
-        lineStyle = settings.get("plot", "lineStyle")
-        marker = settings.get("plot", "marker")
-        lineWidth = settings.get("plot", "lineWidth")
-        markerSize = settings.get("plot", "markerSize")
-        grid = settings.get("plot", "grid")
-        fontSize = settings.get("plot", "fontSize")
-
-        if not any([colors, lineStyle, marker, lineWidth, markerSize, grid, fontSize]):
-            return None
-
-        return PlotStyle(
-            colors=colors,
-            lineStyle=lineStyle or DEFAULT_LINE_STYLE,
-            marker=marker or DEFAULT_MARKER,
-            lineWidth=float(lineWidth) if lineWidth else DEFAULT_LINE_WIDTH,
-            markerSize=float(markerSize) if markerSize else DEFAULT_MARKER_SIZE,
-            grid=grid == "true" if grid else DEFAULT_GRID,
-            fontSize=int(fontSize) if fontSize else DEFAULT_FONT_SIZE,
         )
