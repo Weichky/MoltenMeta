@@ -28,15 +28,17 @@
 | ✅ Completed | Dual SQLite databases (core settings + user data) |
 | ✅ Completed | Repository pattern with multi-dialect support (SQLite/PostgreSQL) |
 | ✅ Completed | Domain snapshots (frozen dataclasses) |
-| ✅ Completed | Theme system with light/dark mode support |
+| ✅ Completed | Theme system with light/dark mode support, PlotPanel theme follow |
 | ✅ Completed | Internationalization (i18n) framework |
 | ✅ Completed | Home page, Settings page, Database page |
-| 🚧 In Progress | Data import (CSV) — menu action exists, logic not wired |
 | ✅ Completed | Settings persistence and hot-reload |
 | ✅ Completed | Module system (ModuleManager + ModuleService) |
 | ✅ Completed | Simulation page with dynamic form generation |
 | ✅ Completed | Miedema module deployment (runtime/modules/miedema_module/) |
 | ✅ Completed | C++ algorithm engine integration (miedema_core.so) |
+| ✅ Completed | matplotlib fully configurable (ColorGenerator, PlotStyleService, Settings Plot Tab) |
+| ✅ Completed | Log window (QtLogHandler integrated in Settings Page) |
+| 🚧 In Progress | Data import (CSV) — menu action exists, logic not wired |
 | 🚧 In Progress | Data export, custom plotting, data groups |
 | 🚧 In Progress | Report generation (PDF/DOCX) |
 
