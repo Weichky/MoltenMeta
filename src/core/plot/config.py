@@ -185,6 +185,19 @@ class PlotStyleService:
             or system_style.gridDensity
         )
 
+        gridLabelDensity = (
+            float(method_colorscheme["gridLabelDensity"])
+            if "gridLabelDensity" in method_colorscheme
+            else float(module_colorscheme["gridLabelDensity"])
+            if "gridLabelDensity" in module_colorscheme
+            else (
+                float(settings.get("plot", "gridLabelDensity"))
+                if settings and settings.get("plot", "gridLabelDensity")
+                else None
+            )
+            or system_style.gridLabelDensity
+        )
+
         titleFontSize = (
             int(method_colorscheme["titleFontSize"])
             if "titleFontSize" in method_colorscheme
@@ -247,6 +260,7 @@ class PlotStyleService:
             grid=grid,
             gridMode=gridMode,
             gridDensity=gridDensity,
+            gridLabelDensity=gridLabelDensity,
             titleFontSize=titleFontSize,
             labelFontSize=labelFontSize,
             tickFontSize=tickFontSize,

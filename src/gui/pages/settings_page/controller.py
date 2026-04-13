@@ -112,6 +112,9 @@ class SettingsController(QObject):
         self.ui.grid_check.toggled.connect(self._onGridChanged)
         self.ui.grid_mode_combo.currentIndexChanged.connect(self._onGridModeChanged)
         self.ui.grid_density_spin.valueChanged.connect(self._onGridDensityChanged)
+        self.ui.grid_label_density_spin.valueChanged.connect(
+            self._onGridLabelDensityChanged
+        )
         self.ui.title_font_size_spin.valueChanged.connect(self._onTitleFontSizeChanged)
         self.ui.label_font_size_spin.valueChanged.connect(self._onLabelFontSizeChanged)
         self.ui.tick_font_size_spin.valueChanged.connect(self._onTickFontSizeChanged)
@@ -163,6 +166,7 @@ class SettingsController(QObject):
         grid = self.ui.grid_check.isChecked()
         grid_mode = self.ui.grid_mode_combo.currentData()
         grid_density = self.ui.grid_density_spin.value()
+        grid_label_density = self.ui.grid_label_density_spin.value()
         title_font_size = self.ui.title_font_size_spin.value()
         label_font_size = self.ui.label_font_size_spin.value()
         tick_font_size = self.ui.tick_font_size_spin.value()
@@ -191,6 +195,7 @@ class SettingsController(QObject):
             grid,
             grid_mode,
             grid_density,
+            grid_label_density,
             title_font_size,
             label_font_size,
             tick_font_size,
@@ -306,6 +311,13 @@ class SettingsController(QObject):
     def _onGridDensityChanged(self, value: float):
         self._settings_repo.upsert(
             [SettingsSnapshot("plot", "gridDensity", str(value))]
+        )
+        self._updatePlotPreview()
+        self.plot_settings_changed.emit()
+
+    def _onGridLabelDensityChanged(self, value: float):
+        self._settings_repo.upsert(
+            [SettingsSnapshot("plot", "gridLabelDensity", str(value))]
         )
         self._updatePlotPreview()
         self.plot_settings_changed.emit()

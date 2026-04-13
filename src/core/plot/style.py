@@ -5,6 +5,7 @@ from catalog import (
     DEFAULT_GRID,
     DEFAULT_GRID_MODE,
     DEFAULT_GRID_DENSITY,
+    DEFAULT_GRID_LABEL_DENSITY,
     DEFAULT_LINE_STYLE,
     DEFAULT_LINE_WIDTH,
     DEFAULT_MARKER,
@@ -31,6 +32,7 @@ class PlotStyle:
     grid: bool = DEFAULT_GRID
     gridMode: str = DEFAULT_GRID_MODE
     gridDensity: float = DEFAULT_GRID_DENSITY
+    gridLabelDensity: float = DEFAULT_GRID_LABEL_DENSITY
     titleFontSize: int = DEFAULT_TITLE_FONT_SIZE
     labelFontSize: int = DEFAULT_LABEL_FONT_SIZE
     tickFontSize: int = DEFAULT_TICK_FONT_SIZE
@@ -48,6 +50,7 @@ def getDefaultPlotStyle() -> PlotStyle:
         grid=DEFAULT_GRID,
         gridMode=DEFAULT_GRID_MODE,
         gridDensity=DEFAULT_GRID_DENSITY,
+        gridLabelDensity=DEFAULT_GRID_LABEL_DENSITY,
         titleFontSize=DEFAULT_TITLE_FONT_SIZE,
         labelFontSize=DEFAULT_LABEL_FONT_SIZE,
         tickFontSize=DEFAULT_TICK_FONT_SIZE,

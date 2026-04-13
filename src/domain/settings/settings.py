@@ -135,6 +135,11 @@ class Settings:
         return float(val) if val else None
 
     @property
+    def plot_grid_label_density(self) -> float | None:
+        val = self.get("plot", "gridLabelDensity")
+        return float(val) if val else None
+
+    @property
     def plot_title_font_size(self) -> int | None:
         val = self.get("plot", "titleFontSize")
         return int(val) if val else None

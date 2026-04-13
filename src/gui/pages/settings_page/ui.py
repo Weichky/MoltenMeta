@@ -411,6 +411,18 @@ class UiSettingsPage(QObject):
         self.grid_density_spin.setValue(self._settings.plot_grid_density or 1.0)
         plot_style_layout.addRow(self.grid_density_label, self.grid_density_spin)
 
+        self.grid_label_density_label = QtWidgets.QLabel()
+        self.grid_label_density_spin = QtWidgets.QDoubleSpinBox()
+        self.grid_label_density_spin.setObjectName("gridLabelDensitySpin")
+        self.grid_label_density_spin.setDecimals(2)
+        self.grid_label_density_spin.setRange(0.01, 999999)
+        self.grid_label_density_spin.setValue(
+            self._settings.plot_grid_label_density or 1.0
+        )
+        plot_style_layout.addRow(
+            self.grid_label_density_label, self.grid_label_density_spin
+        )
+
         self.title_font_size_label = QtWidgets.QLabel()
         self.title_font_size_spin = QtWidgets.QSpinBox()
         self.title_font_size_spin.setObjectName("titleFontSizeSpin")
@@ -526,6 +538,7 @@ class UiSettingsPage(QObject):
         self.grid_check.setText(self.tr("Show Grid"))
         self.grid_mode_label.setText(self.tr("Grid Mode:"))
         self.grid_density_label.setText(self.tr("Grid Density:"))
+        self.grid_label_density_label.setText(self.tr("Grid Label Density:"))
         preview_group = self.plot_page.findChild(QtWidgets.QWidget, "plotPreviewGroup")
         if preview_group:
             preview_group.setTitle(self.tr("Preview"))
@@ -584,7 +597,12 @@ class UiSettingsPage(QObject):
         return np.arange(axis_min, axis_max + interval, interval)
 
     def _applyGridToAxis(
-        self, ax, enabled: bool, grid_mode: str, grid_density: float
+        self,
+        ax,
+        enabled: bool,
+        grid_mode: str,
+        grid_density: float,
+        grid_label_density: float = 1.0,
     ) -> None:
         if not enabled:
             ax.grid(False)
@@ -596,11 +614,24 @@ class UiSettingsPage(QObject):
 
         xlim = ax.get_xlim()
         ylim = ax.get_ylim()
-        x_ticks = self._calcGridTicks(xlim[0], xlim[1], grid_mode, grid_density)
-        y_ticks = self._calcGridTicks(ylim[0], ylim[1], grid_mode, grid_density)
-        ax.set_xticks(x_ticks)
-        ax.set_yticks(y_ticks)
-        ax.grid(True, alpha=0.3)
+        x_grid_ticks = self._calcGridTicks(xlim[0], xlim[1], grid_mode, grid_density)
+        y_grid_ticks = self._calcGridTicks(ylim[0], ylim[1], grid_mode, grid_density)
+
+        ax.set_xticks(x_grid_ticks)
+        ax.set_yticks(y_grid_ticks)
+        ax.set_xticks(x_grid_ticks, minor=True)
+        ax.set_yticks(y_grid_ticks, minor=True)
+        ax.tick_params(which="major", label1On=True)
+        ax.tick_params(which="minor", label1On=False)
+
+        ax.grid(True, which="major", alpha=0.3)
+        ax.grid(True, which="minor", alpha=0.15)
+
+        label_every = max(1, int(grid_label_density))
+        for i, tick in enumerate(ax.xaxis.get_major_ticks()):
+            tick.label1.set_visible(i % label_every == 0)
+        for i, tick in enumerate(ax.yaxis.get_major_ticks()):
+            tick.label1.set_visible(i % label_every == 0)
 
     def updatePreview(
         self,
@@ -611,6 +642,7 @@ class UiSettingsPage(QObject):
         grid: bool = True,
         grid_mode: str = "relative",
         grid_density: float = 1.0,
+        grid_label_density: float = 1.0,
         title_font_size: int = 14,
         label_font_size: int = 12,
         tick_font_size: int = 10,
@@ -638,7 +670,9 @@ class UiSettingsPage(QObject):
         self.preview_ax1.set_xlabel("X", fontsize=label_font_size)
         self.preview_ax1.set_ylabel("Y", fontsize=label_font_size)
         self.preview_ax1.tick_params(axis="both", labelsize=tick_font_size)
-        self._applyGridToAxis(self.preview_ax1, grid, grid_mode, grid_density)
+        self._applyGridToAxis(
+            self.preview_ax1, grid, grid_mode, grid_density, grid_label_density
+        )
 
         self.preview_ax2.set_title("Scatter 2D", fontsize=title_font_size)
         for i, color in enumerate(colors[:5]):
@@ -648,7 +682,9 @@ class UiSettingsPage(QObject):
         self.preview_ax2.set_xlabel("X", fontsize=label_font_size)
         self.preview_ax2.set_ylabel("Y", fontsize=label_font_size)
         self.preview_ax2.tick_params(axis="both", labelsize=tick_font_size)
-        self._applyGridToAxis(self.preview_ax2, grid, grid_mode, grid_density)
+        self._applyGridToAxis(
+            self.preview_ax2, grid, grid_mode, grid_density, grid_label_density
+        )
 
         self.preview_ax3.set_title("Surface 3D", fontsize=title_font_size)
         X = np.linspace(-5, 5, 30)
@@ -673,6 +709,8 @@ class UiSettingsPage(QObject):
         self.preview_ax4.set_xlabel("X", fontsize=label_font_size)
         self.preview_ax4.set_ylabel("Y", fontsize=label_font_size)
         self.preview_ax4.tick_params(axis="both", labelsize=tick_font_size)
-        self._applyGridToAxis(self.preview_ax4, grid, grid_mode, grid_density)
+        self._applyGridToAxis(
+            self.preview_ax4, grid, grid_mode, grid_density, grid_label_density
+        )
 
         self.preview_canvas.draw()

@@ -29,7 +29,13 @@ class PlotPanel(QtWidgets.QWidget):
         self._current_scheme = "light"
         self._setTheme("light")
 
-    def _applyGrid(self, enabled: bool, gridMode: str, gridDensity: float) -> None:
+    def _applyGrid(
+        self,
+        enabled: bool,
+        gridMode: str,
+        gridDensity: float,
+        gridLabelDensity: float = 1.0,
+    ) -> None:
         if not enabled:
             self._ax.grid(False)
             return
@@ -56,7 +62,19 @@ class PlotPanel(QtWidgets.QWidget):
 
         self._ax.set_xticks(x_ticks)
         self._ax.set_yticks(y_ticks)
-        self._ax.grid(True, alpha=0.3)
+        self._ax.set_xticks(x_ticks, minor=True)
+        self._ax.set_yticks(y_ticks, minor=True)
+        self._ax.tick_params(which="major", label1On=True)
+        self._ax.tick_params(which="minor", label1On=False)
+
+        self._ax.grid(True, which="major", alpha=0.3)
+        self._ax.grid(True, which="minor", alpha=0.15)
+
+        label_every = max(1, int(gridLabelDensity))
+        for i, tick in enumerate(self._ax.xaxis.get_major_ticks()):
+            tick.label1.set_visible(i % label_every == 0)
+        for i, tick in enumerate(self._ax.yaxis.get_major_ticks()):
+            tick.label1.set_visible(i % label_every == 0)
 
     def _setTheme(self, scheme: str) -> None:
         self._current_scheme = scheme
@@ -134,7 +152,9 @@ class PlotPanel(QtWidgets.QWidget):
                 self._wrapLatex(config.title), fontsize=style.titleFontSize
             )
         self._ax.tick_params(axis="both", labelsize=style.tickFontSize)
-        self._applyGrid(style.grid, style.gridMode, style.gridDensity)
+        self._applyGrid(
+            style.grid, style.gridMode, style.gridDensity, style.gridLabelDensity
+        )
         self._canvas.draw()
 
     def plotSinglePoint(
@@ -170,7 +190,9 @@ class PlotPanel(QtWidgets.QWidget):
                 self._wrapLatex(config.title), fontsize=style.titleFontSize
             )
         self._ax.tick_params(axis="both", labelsize=style.tickFontSize)
-        self._applyGrid(style.grid, style.gridMode, style.gridDensity)
+        self._applyGrid(
+            style.grid, style.gridMode, style.gridDensity, style.gridLabelDensity
+        )
         self._canvas.draw()
 
     def clear(self) -> None:
