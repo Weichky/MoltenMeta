@@ -79,6 +79,10 @@ class MainWindow(QMainWindow):
             self.workspace.controller.showSettings
         )
 
+        # Connect import action
+        self.menubar.importRequested.connect(self._onImportRequested)
+        self._context = context
+
         # i18n
         context.i18n.language_changed.connect(self.retranslateUi)
 
@@ -103,6 +107,46 @@ class MainWindow(QMainWindow):
         for child in widget.children():
             if isinstance(child, QWidget):
                 self.updateStylesRecursive(child)
+
+    def _onImportRequested(self) -> None:
+        from PySide6.QtWidgets import QFileDialog, QMessageBox
+
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            self.tr("Import CSV"),
+            "",
+            self.tr("CSV Files (*.csv);;All Files (*.*)"),
+        )
+
+        if not file_path:
+            return
+
+        result = self._context.user_db.importPropertyValuesFromCsv(file_path)
+
+        if result.success:
+            self.log.info(
+                f"Imported {result.imported_count} values from {file_path} into group '{result.group_name}'"
+            )
+            QMessageBox.information(
+                self,
+                self.tr("Import Successful"),
+                self.tr(
+                    f"Imported {result.imported_count} values.\n"
+                    f"Group: {result.group_name}"
+                ),
+            )
+            self.workspace.controller.showData()
+        else:
+            error_details = "\n".join(
+                f"Row {e.row}: {e.message}" + (f" - {e.detail}" if e.detail else "")
+                for e in result.errors
+            )
+            self.log.warning(f"Import failed from {file_path}: {error_details}")
+            QMessageBox.critical(
+                self,
+                self.tr("Import Failed"),
+                error_details,
+            )
 
     def retranslateUi(self):
         self.ui.retranslateUi(self)

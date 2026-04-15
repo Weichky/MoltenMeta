@@ -66,6 +66,16 @@ class SystemsRepository(BaseRepository[SystemSnapshot]):
         )
         """
 
+    def findByLabel(self, label: str) -> SystemSnapshot | None:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT * FROM systems WHERE label = {placeholder}"
+        cursor = self.connection.execute(sql, [label])
+        row = cursor.fetchone()
+
+        if row:
+            return SystemSnapshot.fromRow(row)
+        return None
+
 
 class SystemCompositionsRepository(BaseRepository[SystemCompositionSnapshot]):
     def getTableName(self) -> str:
@@ -93,6 +103,24 @@ class SystemCompositionsRepository(BaseRepository[SystemCompositionSnapshot]):
         cursor = self.connection.execute(sql, [system_id])
         rows = cursor.fetchall()
         return [SystemCompositionSnapshot.fromRow(row) for row in rows]
+
+    def insertBatch(self, items: List[SystemCompositionSnapshot]) -> int:
+        if not items:
+            return 0
+
+        table = self.getTableName()
+        dialect = self.dialect
+        placeholders = ", ".join(
+            [dialect.getPlaceholder() for _ in items[0].toRecord().keys()]
+        )
+        sql = f"INSERT OR IGNORE INTO {table} ({', '.join(items[0].toRecord().keys())}) VALUES ({placeholders})"
+
+        for item in items:
+            record = item.toRecord()
+            self.connection.execute(sql, list(record.values()))
+
+        self.connection.commit()
+        return len(items)
 
 
 class PropertiesRepository(BaseRepository[PropertySnapshot]):
@@ -208,6 +236,49 @@ class PropertyValuesRepository(BaseRepository[PropertyValueSnapshot]):
         rows = cursor.fetchall()
         return [PropertyValueSnapshot.fromRow(row) for row in rows]
 
+    def findByGroupIdPaginated(
+        self, group_id: int, limit: int, offset: int
+    ) -> List[PropertyValueSnapshot]:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT * FROM property_values WHERE group_id = {placeholder} ORDER BY id LIMIT {placeholder} OFFSET {placeholder}"
+        cursor = self.connection.execute(sql, [group_id, limit, offset])
+        rows = cursor.fetchall()
+        return [PropertyValueSnapshot.fromRow(row) for row in rows]
+
+    def countByGroupId(self, group_id: int) -> int:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT COUNT(*) as cnt FROM property_values WHERE group_id = {placeholder}"
+        cursor = self.connection.execute(sql, [group_id])
+        row = cursor.fetchone()
+        return row["cnt"] if row else 0
+
+    def findUngroupedPaginated(
+        self, limit: int, offset: int
+    ) -> List[PropertyValueSnapshot]:
+        sql = f"SELECT * FROM property_values WHERE group_id IS NULL ORDER BY id LIMIT {self.dialect.getPlaceholder()} OFFSET {self.dialect.getPlaceholder()}"
+        cursor = self.connection.execute(sql, [limit, offset])
+        rows = cursor.fetchall()
+        return [PropertyValueSnapshot.fromRow(row) for row in rows]
+
+    def countUngrouped(self) -> int:
+        sql = "SELECT COUNT(*) as cnt FROM property_values WHERE group_id IS NULL"
+        cursor = self.connection.execute(sql)
+        row = cursor.fetchone()
+        return row["cnt"] if row else 0
+
+    def updateGroupIdBatch(self, data_ids: list[int], new_group_id: int | None) -> int:
+        if not data_ids:
+            return 0
+        placeholders = ", ".join([self.dialect.getPlaceholder() for _ in data_ids])
+        if new_group_id is None:
+            sql = f"UPDATE property_values SET group_id = NULL WHERE id IN ({placeholders})"
+        else:
+            sql = f"UPDATE property_values SET group_id = {self.dialect.getPlaceholder()} WHERE id IN ({placeholders})"
+            data_ids = [new_group_id] + data_ids
+        cursor = self.connection.execute(sql, data_ids)
+        self.connection.commit()
+        return cursor.rowCount
+
     def findAll(self) -> List[PropertyValueSnapshot]:
         sql = "SELECT * FROM property_values"
         cursor = self.connection.execute(sql)
@@ -251,14 +322,12 @@ class MetaRepository(BaseRepository[MetaSnapshot]):
         dialect = self.dialect
 
         if dialect.supportsInsertOrReplace():
-            # Use INSERT OR REPLACE for SQLite
             placeholders = ", ".join([dialect.getPlaceholder() for _ in columns])
             sql = f"INSERT OR REPLACE INTO {table} ({', '.join(columns)}) VALUES ({placeholders})"
-            cursor = self.connection.execute(sql, values)
+            self.connection.execute(sql, values)
         else:
-            # Use upsert syntax for PostgreSQL
             sql = dialect.getUpsertSyntax(table, columns)
-            cursor = self.connection.execute(sql, values)
+            self.connection.execute(sql, values)
 
         self.connection.commit()
 

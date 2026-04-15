@@ -43,6 +43,7 @@ class DataTableModel(QtCore.QAbstractTableModel):
 
         self._pending_changes: dict[int, dict[str, Any]] = {}
         self._original_data: dict[int, dict[str, Any]] = {}
+        self._group_id: int | None = None
 
     def setTable(self, table_name: str) -> None:
         self.beginResetModel()
@@ -55,6 +56,7 @@ class DataTableModel(QtCore.QAbstractTableModel):
         self._pending_changes.clear()
         self._original_data.clear()
         self._snapshot_class = TABLE_TO_SNAPSHOT_CLASS.get(table_name)
+        self._group_id = None
 
         if table_name:
             self._loadSchema()
@@ -62,6 +64,18 @@ class DataTableModel(QtCore.QAbstractTableModel):
                 self._loadData(0, self.DEFAULT_PAGE_SIZE)
                 self._is_loaded = True
 
+        self.endResetModel()
+
+    def setGroupFilter(self, group_id: int | None) -> None:
+        if self._table_name != "property_values":
+            return
+        if self._group_id == group_id:
+            return
+        self._group_id = group_id
+        self.beginResetModel()
+        self._data = []
+        self._total_count = 0
+        self._loadData(0, self.DEFAULT_PAGE_SIZE)
         self.endResetModel()
 
     def _loadSchema(self) -> None:
@@ -106,6 +120,44 @@ class DataTableModel(QtCore.QAbstractTableModel):
                 if repo:
                     # Use Repository to fetch data
                     try:
+                        # Handle group filtering for property_values
+                        if (
+                            self._table_name == "property_values"
+                            and self._group_id is not None
+                        ):
+                            snapshots = repo.findByGroupIdPaginated(
+                                self._group_id, limit, offset
+                            )
+                            count_method = getattr(repo, "countByGroupId", None)
+                            self._total_count = (
+                                count_method(self._group_id) if count_method else 0
+                            )
+                            start_idx = offset
+                            for snapshot in snapshots:
+                                record = snapshot.toRecord()
+                                if snapshot.id is not None:
+                                    record["id"] = snapshot.id
+                                self._data.append(record)
+                                self._original_data[start_idx] = dict(record)
+                                start_idx += 1
+                            return
+                        elif (
+                            self._table_name == "property_values"
+                            and self._group_id is None
+                        ):
+                            snapshots = repo.findUngroupedPaginated(limit, offset)
+                            count_method = getattr(repo, "countUngrouped", None)
+                            self._total_count = count_method() if count_method else 0
+                            start_idx = offset
+                            for snapshot in snapshots:
+                                record = snapshot.toRecord()
+                                if snapshot.id is not None:
+                                    record["id"] = snapshot.id
+                                self._data.append(record)
+                                self._original_data[start_idx] = dict(record)
+                                start_idx += 1
+                            return
+
                         # For elements, we need special handling with JOIN
                         if self._table_name == "elements":
                             # For elements, use direct SQL with JOIN
@@ -356,6 +408,7 @@ class DataController(QObject):
         self.ui.save_button.clicked.connect(self._onSaveClicked)
         self.ui.cancel_button.clicked.connect(self._onCancelClicked)
         self.ui.add_button.clicked.connect(self._onAddClicked)
+        self.ui.import_button.clicked.connect(self._onImportClicked)
 
         if self._group_tree:
             self._group_tree.groupSelectionChanged.connect(
@@ -382,7 +435,48 @@ class DataController(QObject):
                 self._logger.warning(f"Failed to load groups: {e}")
 
     def _onGroupSelectionChanged(self, group_id: int | None) -> None:
-        pass
+        if self._model and self._model.getTableName() == "property_values":
+            self._model.setGroupFilter(group_id)
+
+    def _onImportClicked(self) -> None:
+        from PySide6.QtWidgets import QFileDialog, QMessageBox
+
+        file_path, _ = QFileDialog.getOpenFileName(
+            self.ui.table_view,
+            self.tr("Import CSV"),
+            "",
+            self.tr("CSV Files (*.csv);;All Files (*.*)"),
+        )
+
+        if not file_path:
+            return
+
+        result = self._user_db_service.importPropertyValuesFromCsv(file_path)
+
+        if result.success:
+            self._logger.info(
+                f"Imported {result.imported_count} values from {file_path} into group '{result.group_name}'"
+            )
+            QMessageBox.information(
+                self.ui.table_view,
+                self.tr("Import Successful"),
+                self.tr(
+                    f"Imported {result.imported_count} values.\n"
+                    f"Group: {result.group_name}"
+                ),
+            )
+            self._loadGroups()
+        else:
+            error_details = "\n".join(
+                f"Row {e.row}: {e.message}" + (f" - {e.detail}" if e.detail else "")
+                for e in result.errors
+            )
+            self._logger.warning(f"Import failed from {file_path}: {error_details}")
+            QMessageBox.critical(
+                self.ui.table_view,
+                self.tr("Import Failed"),
+                error_details,
+            )
 
     def _loadTableList(self) -> None:
         conn = self._db_manager.connection

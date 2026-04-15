@@ -109,6 +109,14 @@ class BaseRepository(ABC, Generic[T]):
         entity_class = self.getEntityClass()
         return [entity_class.fromRow(row) for row in rows]  # type: ignore
 
+    def save(self, entity: T) -> T:
+        if hasattr(entity, "id") and entity.id is not None:
+            self.update(entity)
+            return entity
+        else:
+            self.insert(entity)
+            return entity
+
     def update(self, entity: T) -> bool:
         if not hasattr(entity, "id") or entity.id is None:
             raise ValueError("Entity must have an ID to update")

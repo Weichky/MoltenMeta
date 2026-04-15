@@ -1,6 +1,7 @@
 import logging
 from PySide6 import QtWidgets
 from PySide6.QtCore import Qt, QCoreApplication
+from PySide6.QtGui import QDoubleValidator
 
 from ..schemas import ENTITY_TYPES, ENTITY_FIELDS, getFkDisplayColumn
 from ..tables import TABLE_TO_REPO_PROPERTY, TABLE_TO_SNAPSHOT_CLASS
@@ -191,10 +192,8 @@ class AddDialog(QtWidgets.QDialog):
                 input_widget.setMinimumHeight(30)
                 input_widget.setObjectName(field.name)
                 # Add validator for numeric input
-                validator = QtWidgets.QDoubleValidator()
-                validator.setNotation(
-                    QtWidgets.QDoubleValidator.Notation.StandardNotation
-                )
+                validator = QDoubleValidator()
+                validator.setNotation(QDoubleValidator.Notation.StandardNotation)
                 input_widget.setValidator(validator)
                 row_layout.addWidget(input_widget, 1)
                 self._form_widgets[field.name] = input_widget
@@ -221,17 +220,26 @@ class AddDialog(QtWidgets.QDialog):
         display_column = getFkDisplayColumn(fk_table)
 
         try:
-            cursor = conn.execute(
-                f"SELECT id, {display_column} FROM {fk_table} ORDER BY {display_column}"
-            )
-            rows = cursor.fetchall()
-            for row in rows:
-                display = (
-                    str(row[display_column])
-                    if row[display_column]
-                    else f"ID:{row['id']}"
+            if fk_table == "symbols":
+                cursor = conn.execute(
+                    f"SELECT id, symbol, name, category FROM symbols ORDER BY category, symbol"
                 )
-                combo.addItem(display, row["id"])
+                rows = cursor.fetchall()
+                for row in rows:
+                    display = f"{row['symbol']} - {row['name']} ({row['category']})"
+                    combo.addItem(display, row["id"])
+            else:
+                cursor = conn.execute(
+                    f"SELECT id, {display_column} FROM {fk_table} ORDER BY {display_column}"
+                )
+                rows = cursor.fetchall()
+                for row in rows:
+                    display = (
+                        str(row[display_column])
+                        if row[display_column]
+                        else f"ID:{row['id']}"
+                    )
+                    combo.addItem(display, row["id"])
         except Exception as e:
             _logger.warning(
                 f"Failed to load display column '{display_column}' for table "
