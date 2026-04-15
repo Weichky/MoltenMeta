@@ -56,48 +56,14 @@ class UiGroupTree(QObject):
         if not parent.objectName():
             parent.setObjectName("groupTree")
 
-        self.container = QtWidgets.QVBoxLayout(parent)
-        self.container.setContentsMargins(0, 0, 0, 0)
-        self.container.setSpacing(4)
+        self.layout = QtWidgets.QVBoxLayout(parent)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(0)
 
-        self._setupHeader(parent)
-        self._setupTreeView(parent)
-
-    def _setupHeader(self, parent: QtWidgets.QWidget) -> None:
-        self.header_widget = QtWidgets.QWidget()
-        self.header_layout = QtWidgets.QHBoxLayout(self.header_widget)
-        self.header_layout.setContentsMargins(0, 0, 0, 0)
-        self.header_layout.setSpacing(4)
-
-        self.title_label = QtWidgets.QLabel()
-        self.header_layout.addWidget(self.title_label)
-
-        self.header_layout.addStretch()
-
-        self.add_button = QtWidgets.QPushButton()
-        self.add_button.setObjectName("addGroupButton")
-        self.add_button.setFixedSize(24, 24)
-        self.header_layout.addWidget(self.add_button)
-
-        self.delete_button = QtWidgets.QPushButton()
-        self.delete_button.setObjectName("deleteGroupButton")
-        self.delete_button.setFixedSize(24, 24)
-        self.delete_button.setEnabled(False)
-        self.header_layout.addWidget(self.delete_button)
-
-        self.container.addWidget(self.header_widget)
-
-    def _setupTreeView(self, parent: QtWidgets.QWidget) -> None:
         self.tree_view = QtWidgets.QTreeView()
         self.tree_view.setObjectName("groupTreeView")
         self.tree_view.setHeaderHidden(True)
-        self.tree_view.setAnimated(True)
-        self.tree_view.setSizePolicy(
-            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding
-        )
-        self.container.addWidget(self.tree_view, stretch=1)
+        self.layout.addWidget(self.tree_view, stretch=1)
 
     def retranslateUi(self) -> None:
-        self.title_label.setText(self.tr("Groups"))
-        self.add_button.setText("+")
-        self.delete_button.setText("-")
+        pass

@@ -5,6 +5,18 @@ from PySide6.QtCore import Signal
 from application import AppContext
 
 from .ui import UiDataPage
+from .group_tree.placeholder import UiPlaceholderTree, PlaceholderTreeModel
+
+
+class PlaceholderTreeWidget(QtWidgets.QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
+
+        self.ui = UiPlaceholderTree()
+        self.ui.setupUi(self)
+
+        self.model = PlaceholderTreeModel()
+        self.ui.tree_view.setModel(self.model)
 
 
 class DataPage(QtWidgets.QWidget):
@@ -21,8 +33,11 @@ class DataPage(QtWidgets.QWidget):
         from .controller import DataController
         from .group_tree import GroupTreeWidget
 
-        self.group_tree = GroupTreeWidget(context, self.ui.group_tree_widget)
-        self.ui.group_tree_layout.addWidget(self.group_tree)
+        self.group_tree = GroupTreeWidget(context, self.ui.tree_widget)
+        self.ui.tree_layout.addWidget(self.group_tree)
+
+        self.placeholder_tree = PlaceholderTreeWidget(self.ui.placeholder_widget)
+        self.ui.placeholder_layout.addWidget(self.placeholder_tree)
 
         self.controller = DataController(self.ui, context, self.group_tree)
         self.controller.connectSignals()

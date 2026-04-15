@@ -27,8 +27,6 @@ class GroupTreeController(QObject):
         self._selected_group_id: int | None = None
 
     def connectSignals(self) -> None:
-        self._ui.add_button.clicked.connect(self._onAddClicked)
-        self._ui.delete_button.clicked.connect(self._onDeleteClicked)
         self._ui.tree_view.clicked.connect(self._onIndexClicked)
         self._ui.tree_view.selectionModel().selectionChanged.connect(
             self._onSelectionChanged
@@ -97,7 +95,6 @@ class GroupTreeController(QObject):
             self._model.removeGroup(group_id)
             self._logger.info(f"Deleted group {group_id}")
             self._selected_group_id = None
-            self._ui.delete_button.setEnabled(False)
             return True
         except Exception as e:
             self._logger.error(f"Failed to delete group: {e}")
@@ -112,8 +109,6 @@ class GroupTreeController(QObject):
         item = self._model.getItemAtIndex(index)
         if item:
             self._selected_group_id = item.group_id
-            enable_delete = not item.is_category and item.group_id is not None
-            self._ui.delete_button.setEnabled(enable_delete)
             self.selectionChanged.emit(item.group_id)
 
     def _onSelectionChanged(

@@ -16,15 +16,14 @@ class UiDataPage(QObject):
         self.root_layout.setSpacing(8)
 
         self._setupToolbar(dataPage)
-        self._setupFilterBar(dataPage)
-        self._setupContentSplitter(dataPage)
+        self._setupContentArea(dataPage)
         self._setupStatusBar(dataPage)
 
     def _setupToolbar(self, parent: QtWidgets.QWidget):
         self.toolbar = QtWidgets.QWidget()
         self.toolbar_layout = QtWidgets.QHBoxLayout(self.toolbar)
         self.toolbar_layout.setContentsMargins(0, 0, 0, 0)
-        self.toolbar_layout.setSpacing(12)
+        self.toolbar_layout.setSpacing(4)
 
         self.add_button = QtWidgets.QPushButton()
         self.toolbar_layout.addWidget(self.add_button)
@@ -53,11 +52,69 @@ class UiDataPage(QObject):
 
         self.root_layout.addWidget(self.toolbar)
 
+    def _setupContentArea(self, parent: QtWidgets.QWidget):
+        self.content_area = QtWidgets.QWidget()
+        self.content_area_layout = QtWidgets.QVBoxLayout(self.content_area)
+        self.content_area_layout.setContentsMargins(0, 0, 0, 0)
+        self.content_area_layout.setSpacing(8)
+
+        self._setupContentSplitter(parent)
+
+        self.root_layout.addWidget(self.content_area, stretch=1)
+
+    def _setupContentSplitter(self, parent: QtWidgets.QWidget):
+        self.content_splitter = QtWidgets.QSplitter(Qt.Horizontal)
+
+        self.left_panel = QtWidgets.QFrame()
+        self.left_panel.setFrameShape(QtWidgets.QFrame.Shape.Box)
+        self.left_panel_layout = QtWidgets.QVBoxLayout(self.left_panel)
+        self.left_panel_layout.setContentsMargins(0, 0, 0, 0)
+        self.left_panel_layout.setSpacing(4)
+
+        self.tree_widget = QtWidgets.QWidget()
+        self.tree_widget.setObjectName("treeWidget")
+        self.tree_layout = QtWidgets.QVBoxLayout(self.tree_widget)
+        self.tree_layout.setContentsMargins(0, 0, 0, 0)
+        self.tree_layout.setSpacing(0)
+
+        self.placeholder_widget = QtWidgets.QWidget()
+        self.placeholder_widget.setObjectName("placeholderWidget")
+        self.placeholder_layout = QtWidgets.QVBoxLayout(self.placeholder_widget)
+        self.placeholder_layout.setContentsMargins(0, 0, 0, 0)
+        self.placeholder_layout.setSpacing(0)
+
+        self.left_panel_layout.addWidget(self.placeholder_widget)
+        self.left_panel_layout.addWidget(self.tree_widget)
+
+        self.content_splitter.addWidget(self.left_panel)
+
+        self._setupRightArea(parent)
+
+        self.content_splitter.setStretchFactor(0, 0)
+        self.content_splitter.setStretchFactor(1, 1)
+
+        self.content_area_layout.addWidget(self.content_splitter, stretch=1)
+
+    def _setupRightArea(self, parent: QtWidgets.QWidget):
+        self.right_area = QtWidgets.QWidget()
+        self.right_area_layout = QtWidgets.QVBoxLayout(self.right_area)
+        self.right_area_layout.setContentsMargins(0, 0, 0, 0)
+        self.right_area_layout.setSpacing(8)
+
+        self._setupFilterBar(parent)
+        self._setupTableView(parent)
+        self.right_area_layout.addWidget(self.table_view, stretch=1)
+
+        self.content_splitter.addWidget(self.right_area)
+
     def _setupFilterBar(self, parent: QtWidgets.QWidget):
         self.filter_bar = QtWidgets.QWidget()
         self.filter_layout = QtWidgets.QHBoxLayout(self.filter_bar)
         self.filter_layout.setContentsMargins(0, 0, 0, 0)
         self.filter_layout.setSpacing(12)
+
+        self.filter_button = QtWidgets.QPushButton()
+        self.filter_layout.addWidget(self.filter_button)
 
         self.table_label = QtWidgets.QLabel()
         self.filter_layout.addWidget(self.table_label)
@@ -70,30 +127,7 @@ class UiDataPage(QObject):
         self.search_input.setPlaceholderText(self.tr("Search..."))
         self.filter_layout.addWidget(self.search_input)
 
-        self.filter_button = QtWidgets.QPushButton()
-        self.filter_layout.addWidget(self.filter_button)
-
-        self.filter_layout.addStretch()
-
-        self.root_layout.addWidget(self.filter_bar)
-
-    def _setupContentSplitter(self, parent: QtWidgets.QWidget):
-        self.content_splitter = QtWidgets.QSplitter(Qt.Horizontal)
-
-        self.group_tree_widget = QtWidgets.QWidget()
-        self.group_tree_widget.setObjectName("groupTreeWidget")
-        self.group_tree_layout = QtWidgets.QVBoxLayout(self.group_tree_widget)
-        self.group_tree_layout.setContentsMargins(0, 0, 0, 0)
-        self.group_tree_layout.setSpacing(0)
-        self.content_splitter.addWidget(self.group_tree_widget)
-
-        self._setupTableView(parent)
-        self.content_splitter.addWidget(self.table_view)
-
-        self.content_splitter.setStretchFactor(0, 0)
-        self.content_splitter.setStretchFactor(1, 1)
-
-        self.root_layout.addWidget(self.content_splitter, stretch=1)
+        self.right_area_layout.addWidget(self.filter_bar)
 
     def _setupTableView(self, parent: QtWidgets.QWidget):
         self.table_view = QtWidgets.QTableView()

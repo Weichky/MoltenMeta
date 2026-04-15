@@ -192,7 +192,9 @@ class AddDialog(QtWidgets.QDialog):
                 input_widget.setObjectName(field.name)
                 # Add validator for numeric input
                 validator = QtWidgets.QDoubleValidator()
-                validator.setNotation(QtWidgets.QDoubleValidator.Notation.StandardNotation)
+                validator.setNotation(
+                    QtWidgets.QDoubleValidator.Notation.StandardNotation
+                )
                 input_widget.setValidator(validator)
                 row_layout.addWidget(input_widget, 1)
                 self._form_widgets[field.name] = input_widget
