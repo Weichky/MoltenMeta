@@ -78,3 +78,6 @@ class ModuleManager:
         if package_name not in self._module_infos:
             raise KeyError(f"Module not found: {package_name}")
         return self._module_infos[package_name].get("all_methods", [])
+
+    def getModuleConfig(self, package_name: str) -> dict | None:
+        return self._module_infos.get(package_name)

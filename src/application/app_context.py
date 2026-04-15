@@ -5,6 +5,7 @@ from domain.settings import Settings
 from application.service.core_db_service import CoreDbService
 from application.service.user_db_service import UserDbService
 from application.service.module_service import ModuleService
+from application.service.unified_data_query_service import UnifiedDataQueryService
 
 
 class AppContext:
@@ -17,6 +18,7 @@ class AppContext:
         core_db: CoreDbService | None = None,
         user_db: UserDbService | None = None,
         modules: ModuleService | None = None,
+        unified_data: UnifiedDataQueryService | None = None,
     ):
         self.log = log
         self.settings = settings
@@ -25,3 +27,4 @@ class AppContext:
         self.core_db = core_db
         self.user_db = user_db
         self.modules = modules
+        self.unified_data = unified_data

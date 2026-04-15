@@ -19,8 +19,12 @@ class DataPage(QtWidgets.QWidget):
         self.ui.retranslateUi()
 
         from .controller import DataController
+        from .group_tree import GroupTreeWidget
 
-        self.controller = DataController(self.ui, context)
+        self.group_tree = GroupTreeWidget(context, self.ui.group_tree_widget)
+        self.ui.group_tree_layout.addWidget(self.group_tree)
+
+        self.controller = DataController(self.ui, context, self.group_tree)
         self.controller.connectSignals()
 
         self.i18n_service.language_changed.connect(self.retranslateUi)

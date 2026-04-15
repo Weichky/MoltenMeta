@@ -10,6 +10,9 @@ from domain import (
     PropertyValueSnapshot,
     PropertyValueConditionSnapshot,
     MetaSnapshot,
+    ComputationCacheSnapshot,
+    PropertyTagSnapshot,
+    DataGroupSnapshot,
 )
 from typing import List
 
@@ -176,9 +179,11 @@ class PropertyValuesRepository(BaseRepository[PropertyValueSnapshot]):
             property_id {dialect.getIntegerType()} NOT NULL,
             method_id {dialect.getIntegerType()},
             value {dialect.getRealType()} NOT NULL,
+            group_id {dialect.getIntegerType()},
             FOREIGN KEY (system_id) REFERENCES systems(id) ON DELETE CASCADE,
             FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE RESTRICT,
-            FOREIGN KEY (method_id) REFERENCES methods(id) ON DELETE SET NULL
+            FOREIGN KEY (method_id) REFERENCES methods(id) ON DELETE SET NULL,
+            FOREIGN KEY (group_id) REFERENCES data_groups(id) ON DELETE SET NULL
         )
         """
 
@@ -193,6 +198,19 @@ class PropertyValuesRepository(BaseRepository[PropertyValueSnapshot]):
         placeholder = self.dialect.getPlaceholder()
         sql = f"SELECT * FROM property_values WHERE property_id = {placeholder}"
         cursor = self.connection.execute(sql, [property_id])
+        rows = cursor.fetchall()
+        return [PropertyValueSnapshot.fromRow(row) for row in rows]
+
+    def findByGroupId(self, group_id: int) -> List[PropertyValueSnapshot]:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT * FROM property_values WHERE group_id = {placeholder}"
+        cursor = self.connection.execute(sql, [group_id])
+        rows = cursor.fetchall()
+        return [PropertyValueSnapshot.fromRow(row) for row in rows]
+
+    def findAll(self) -> List[PropertyValueSnapshot]:
+        sql = "SELECT * FROM property_values"
+        cursor = self.connection.execute(sql)
         rows = cursor.fetchall()
         return [PropertyValueSnapshot.fromRow(row) for row in rows]
 
@@ -212,6 +230,7 @@ class MetaRepository(BaseRepository[MetaSnapshot]):
             created_at {dialect.getDatetimeType()} DEFAULT CURRENT_TIMESTAMP,
             created_by {dialect.getTextType()},
             source_file {dialect.getTextType()},
+            source_type {dialect.getTextType()} DEFAULT 'imported',
             FOREIGN KEY (value_id) REFERENCES property_values(id) ON DELETE CASCADE
         )
         """
@@ -346,3 +365,223 @@ class PropertyValueConditionsRepository(BaseRepository[PropertyValueConditionSna
             FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE RESTRICT
         )
         """
+
+
+class ComputationCacheRepository(BaseRepository[ComputationCacheSnapshot]):
+    def getTableName(self) -> str:
+        return "computation_cache"
+
+    def getEntityClass(self) -> type[ComputationCacheSnapshot]:
+        return ComputationCacheSnapshot
+
+    def _getCreateTableSql(self) -> str:
+        dialect = self.dialect
+        return f"""
+        CREATE TABLE IF NOT EXISTS computation_cache (
+            id {dialect.getAutoincrementType()},
+            run_id {dialect.getTextType()} NOT NULL UNIQUE,
+            module_id {dialect.getTextType()} NOT NULL,
+            method_name {dialect.getTextType()} NOT NULL,
+            system_id {dialect.getIntegerType()},
+            property_id {dialect.getIntegerType()},
+            value {dialect.getRealType()} NOT NULL,
+            unit {dialect.getTextType()},
+            params_json {dialect.getTextType()},
+            parent_run_id {dialect.getTextType()},
+            is_deleted {dialect.getIntegerType()} DEFAULT 0,
+            group_id {dialect.getIntegerType()},
+            created_at {dialect.getDatetimeType()} DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (system_id) REFERENCES systems(id),
+            FOREIGN KEY (property_id) REFERENCES properties(id),
+            FOREIGN KEY (parent_run_id) REFERENCES computation_cache(run_id),
+            FOREIGN KEY (group_id) REFERENCES data_groups(id) ON DELETE SET NULL
+        )
+        """
+
+    def _getCreateIndexSql(self) -> List[str]:
+        return [
+            "CREATE INDEX IF NOT EXISTS idx_cache_run_id ON computation_cache(run_id)",
+            "CREATE INDEX IF NOT EXISTS idx_cache_module ON computation_cache(module_id)",
+            "CREATE INDEX IF NOT EXISTS idx_cache_parent ON computation_cache(parent_run_id)",
+            "CREATE INDEX IF NOT EXISTS idx_cache_property ON computation_cache(property_id)",
+            "CREATE INDEX IF NOT EXISTS idx_cache_system ON computation_cache(system_id)",
+            "CREATE INDEX IF NOT EXISTS idx_cache_group ON computation_cache(group_id)",
+        ]
+
+    def createTable(self) -> None:
+        super().createTable()
+        for index_sql in self._getCreateIndexSql():
+            self.connection.execute(index_sql)
+        self.connection.commit()
+
+    def findByRunId(self, run_id: str) -> List[ComputationCacheSnapshot]:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT * FROM computation_cache WHERE run_id = {placeholder} AND is_deleted = 0"
+        cursor = self.connection.execute(sql, [run_id])
+        rows = cursor.fetchall()
+        return [ComputationCacheSnapshot.fromRow(row) for row in rows]
+
+    def findByModuleId(self, module_id: str) -> List[ComputationCacheSnapshot]:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT * FROM computation_cache WHERE module_id = {placeholder} AND is_deleted = 0"
+        cursor = self.connection.execute(sql, [module_id])
+        rows = cursor.fetchall()
+        return [ComputationCacheSnapshot.fromRow(row) for row in rows]
+
+    def findByParentRunId(self, parent_run_id: str) -> List[ComputationCacheSnapshot]:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT * FROM computation_cache WHERE parent_run_id = {placeholder} AND is_deleted = 0"
+        cursor = self.connection.execute(sql, [parent_run_id])
+        rows = cursor.fetchall()
+        return [ComputationCacheSnapshot.fromRow(row) for row in rows]
+
+    def findByPropertyId(self, property_id: int) -> List[ComputationCacheSnapshot]:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT * FROM computation_cache WHERE property_id = {placeholder} AND is_deleted = 0"
+        cursor = self.connection.execute(sql, [property_id])
+        rows = cursor.fetchall()
+        return [ComputationCacheSnapshot.fromRow(row) for row in rows]
+
+    def findByGroupId(self, group_id: int) -> List[ComputationCacheSnapshot]:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT * FROM computation_cache WHERE group_id = {placeholder} AND is_deleted = 0"
+        cursor = self.connection.execute(sql, [group_id])
+        rows = cursor.fetchall()
+        return [ComputationCacheSnapshot.fromRow(row) for row in rows]
+
+    def findAll(self) -> List[ComputationCacheSnapshot]:
+        sql = "SELECT * FROM computation_cache WHERE is_deleted = 0"
+        cursor = self.connection.execute(sql)
+        rows = cursor.fetchall()
+        return [ComputationCacheSnapshot.fromRow(row) for row in rows]
+
+    def softDeleteByRunId(self, run_id: str) -> int:
+        placeholder = self.dialect.getPlaceholder()
+        sql = (
+            f"UPDATE computation_cache SET is_deleted = 1 WHERE run_id = {placeholder}"
+        )
+        cursor = self.connection.execute(sql, [run_id])
+        self.connection.commit()
+        return cursor.rowCount
+
+    def countActive(self) -> int:
+        sql = "SELECT COUNT(*) FROM computation_cache WHERE is_deleted = 0"
+        cursor = self.connection.execute(sql)
+        result = cursor.fetchone()
+        return result.get("count") or result.get("COUNT(*)") or 0
+
+
+class PropertyTagsRepository(BaseRepository[PropertyTagSnapshot]):
+    def getTableName(self) -> str:
+        return "property_tags"
+
+    def getEntityClass(self) -> type[PropertyTagSnapshot]:
+        return PropertyTagSnapshot
+
+    def _getCreateTableSql(self) -> str:
+        dialect = self.dialect
+        return f"""
+        CREATE TABLE IF NOT EXISTS property_tags (
+            id {dialect.getAutoincrementType()},
+            property_id {dialect.getIntegerType()} NOT NULL,
+            tag {dialect.getTextType()} NOT NULL,
+            created_at {dialect.getDatetimeType()} DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
+            UNIQUE(property_id, tag)
+        )
+        """
+
+    def _getCreateIndexSql(self) -> List[str]:
+        return [
+            "CREATE INDEX IF NOT EXISTS idx_tags_property ON property_tags(property_id)",
+            "CREATE INDEX IF NOT EXISTS idx_tags_tag ON property_tags(tag)",
+        ]
+
+    def createTable(self) -> None:
+        super().createTable()
+        for index_sql in self._getCreateIndexSql():
+            self.connection.execute(index_sql)
+        self.connection.commit()
+
+    def findByPropertyId(self, property_id: int) -> List[PropertyTagSnapshot]:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT * FROM property_tags WHERE property_id = {placeholder}"
+        cursor = self.connection.execute(sql, [property_id])
+        rows = cursor.fetchall()
+        return [PropertyTagSnapshot.fromRow(row) for row in rows]
+
+    def findByTag(self, tag: str) -> List[PropertyTagSnapshot]:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT * FROM property_tags WHERE tag = {placeholder}"
+        cursor = self.connection.execute(sql, [tag])
+        rows = cursor.fetchall()
+        return [PropertyTagSnapshot.fromRow(row) for row in rows]
+
+    def addTag(self, property_id: int, tag: str) -> int:
+        placeholder = self.dialect.getPlaceholder()
+        dialect = self.dialect
+
+        if dialect.supportsInsertOrReplace():
+            sql = f"INSERT OR IGNORE INTO property_tags (property_id, tag) VALUES ({placeholder}, {placeholder})"
+        else:
+            sql = f"INSERT INTO property_tags (property_id, tag) VALUES ({placeholder}, {placeholder}) ON CONFLICT DO NOTHING"
+
+        cursor = self.connection.execute(sql, [property_id, tag])
+        self.connection.commit()
+        self._logger.debug(f"Added tag '{tag}' to property_id {property_id}")
+        return cursor.rowCount
+
+    def addTags(self, property_id: int, tags: List[str]) -> int:
+        total = 0
+        for tag in tags:
+            total += self.addTag(property_id, tag)
+        return total
+
+    def removeTag(self, property_id: int, tag: str) -> bool:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"DELETE FROM property_tags WHERE property_id = {placeholder} AND tag = {placeholder}"
+        cursor = self.connection.execute(sql, [property_id, tag])
+        self.connection.commit()
+        return cursor.rowCount > 0
+
+    def getPropertyIdsByTag(self, tag: str) -> List[int]:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT property_id FROM property_tags WHERE tag = {placeholder}"
+        cursor = self.connection.execute(sql, [tag])
+        rows = cursor.fetchall()
+        return [row["property_id"] for row in rows]
+
+
+class DataGroupsRepository(BaseRepository[DataGroupSnapshot]):
+    def getTableName(self) -> str:
+        return "data_groups"
+
+    def getEntityClass(self) -> type[DataGroupSnapshot]:
+        return DataGroupSnapshot
+
+    def _getCreateTableSql(self) -> str:
+        dialect = self.dialect
+        return f"""
+        CREATE TABLE IF NOT EXISTS data_groups (
+            id {dialect.getAutoincrementType()},
+            name {dialect.getTextType()} NOT NULL UNIQUE,
+            priority {dialect.getIntegerType()} NOT NULL DEFAULT 0,
+            created_at {dialect.getDatetimeType()} DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+
+    def findByName(self, name: str) -> DataGroupSnapshot | None:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT * FROM data_groups WHERE name = {placeholder}"
+        cursor = self.connection.execute(sql, [name])
+        row = cursor.fetchone()
+
+        if row:
+            return DataGroupSnapshot.fromRow(row)
+        return None
+
+    def findAll(self) -> List[DataGroupSnapshot]:
+        sql = "SELECT * FROM data_groups ORDER BY priority DESC, created_at DESC"
+        cursor = self.connection.execute(sql)
+        rows = cursor.fetchall()
+        return [DataGroupSnapshot.fromRow(row) for row in rows]

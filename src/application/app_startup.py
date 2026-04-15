@@ -11,6 +11,7 @@ from domain.settings import Settings
 from application.service.core_db_service import CoreDbService
 from application.service.user_db_service import UserDbService
 from application.service.module_service import ModuleService
+from application.service.unified_data_query_service import UnifiedDataQueryService
 from i18n import I18nService
 
 from gui.appearance.theme import ThemeService
@@ -82,5 +83,11 @@ def initApp(app) -> AppContext:
     )
 
     context.modules = ModuleService(getRuntimePath(), context.log)
+    context.modules.setRepositories(
+        user_db_service.computation_cache_repo,
+        user_db_service.property_tags_repo,
+    )
+
+    context.unified_data = UnifiedDataQueryService(context.log, user_db_service)
 
     return context

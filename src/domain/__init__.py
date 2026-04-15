@@ -11,6 +11,9 @@ from .snapshot.snapshots import (
     PropertyValueSnapshot,
     PropertyValueConditionSnapshot,
     MetaSnapshot,
+    ComputationCacheSnapshot,
+    PropertyTagSnapshot,
+    DataGroupSnapshot,
 )
 
 __all__ = [
@@ -26,4 +29,7 @@ __all__ = [
     "PropertyValueSnapshot",
     "PropertyValueConditionSnapshot",
     "MetaSnapshot",
+    "ComputationCacheSnapshot",
+    "PropertyTagSnapshot",
+    "DataGroupSnapshot",
 ]

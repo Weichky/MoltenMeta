@@ -1,10 +1,11 @@
 from PySide6 import QtWidgets
-from PySide6.QtCore import QObject
+from PySide6.QtCore import QObject, Qt
 
 
 class UiDataPage(QObject):
     DEFAULT_PAGE_SIZE = 1000
     DEFAULT_ROW_COUNT = 100
+    GROUP_TREE_WIDTH = 200
 
     def setupUi(self, dataPage: QtWidgets.QWidget):
         if not dataPage.objectName():
@@ -16,9 +17,7 @@ class UiDataPage(QObject):
 
         self._setupToolbar(dataPage)
         self._setupFilterBar(dataPage)
-        self.root_layout.addStretch()
-        self._setupTableView(dataPage)
-        self.root_layout.addStretch()
+        self._setupContentSplitter(dataPage)
         self._setupStatusBar(dataPage)
 
     def _setupToolbar(self, parent: QtWidgets.QWidget):
@@ -78,6 +77,24 @@ class UiDataPage(QObject):
 
         self.root_layout.addWidget(self.filter_bar)
 
+    def _setupContentSplitter(self, parent: QtWidgets.QWidget):
+        self.content_splitter = QtWidgets.QSplitter(Qt.Horizontal)
+
+        self.group_tree_widget = QtWidgets.QWidget()
+        self.group_tree_widget.setObjectName("groupTreeWidget")
+        self.group_tree_layout = QtWidgets.QVBoxLayout(self.group_tree_widget)
+        self.group_tree_layout.setContentsMargins(0, 0, 0, 0)
+        self.group_tree_layout.setSpacing(0)
+        self.content_splitter.addWidget(self.group_tree_widget)
+
+        self._setupTableView(parent)
+        self.content_splitter.addWidget(self.table_view)
+
+        self.content_splitter.setStretchFactor(0, 0)
+        self.content_splitter.setStretchFactor(1, 1)
+
+        self.root_layout.addWidget(self.content_splitter, stretch=1)
+
     def _setupTableView(self, parent: QtWidgets.QWidget):
         self.table_view = QtWidgets.QTableView()
         self.table_view.setObjectName("dataTableView")
@@ -87,8 +104,6 @@ class UiDataPage(QObject):
         self.table_view.setSizePolicy(
             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
         )
-
-        self.root_layout.addWidget(self.table_view, stretch=1)
 
     def _setupStatusBar(self, parent: QtWidgets.QWidget):
         self.status_bar = QtWidgets.QWidget()

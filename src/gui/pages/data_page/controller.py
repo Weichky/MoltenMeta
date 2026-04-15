@@ -116,9 +116,13 @@ class DataTableModel(QtCore.QAbstractTableModel):
                                     LIMIT {limit} OFFSET {offset}"""
                             )
                             rows = cursor.fetchall()
-                            cursor = conn.execute(f"SELECT COUNT(*) as cnt FROM {self._table_name}")
+                            cursor = conn.execute(
+                                f"SELECT COUNT(*) as cnt FROM {self._table_name}"
+                            )
                             count_result = cursor.fetchone()
-                            self._total_count = count_result["cnt"] if count_result else 0
+                            self._total_count = (
+                                count_result["cnt"] if count_result else 0
+                            )
 
                             start_idx = offset
                             for row in rows:
@@ -131,7 +135,7 @@ class DataTableModel(QtCore.QAbstractTableModel):
                             self._total_count = len(snapshots)
 
                             start_idx = offset
-                            for snapshot in snapshots[offset:offset + limit]:
+                            for snapshot in snapshots[offset : offset + limit]:
                                 record = snapshot.toRecord()
                                 # Add id if available
                                 if snapshot.id is not None:
@@ -323,13 +327,14 @@ class DataTableModel(QtCore.QAbstractTableModel):
 
 
 class DataController(QObject):
-    def __init__(self, ui: UiDataPage, context: AppContext):
+    def __init__(self, ui: UiDataPage, context: AppContext, group_tree=None):
         super().__init__()
         self.ui = ui
         self._context = context
         self._db_manager = context.user_db._db_manager
         self._user_db_service: UserDbService = context.user_db
         self._logger = context.log.getLogger(__name__)
+        self._group_tree = group_tree
 
         self._model: DataTableModel | None = None
 
@@ -344,12 +349,19 @@ class DataController(QObject):
 
     def connectSignals(self):
         self._loadTableList()
+        self._loadGroups()
 
         self.ui.table_combo.currentIndexChanged.connect(self._onTableSelected)
         self.ui.refresh_button.clicked.connect(self._onRefreshClicked)
         self.ui.save_button.clicked.connect(self._onSaveClicked)
         self.ui.cancel_button.clicked.connect(self._onCancelClicked)
         self.ui.add_button.clicked.connect(self._onAddClicked)
+
+        if self._group_tree:
+            self._group_tree.groupSelectionChanged.connect(
+                self._onGroupSelectionChanged
+            )
+            self._group_tree.controller.connectSignals()
 
         self._context.i18n.language_changed.connect(self.ui.retranslateUi)
 
@@ -359,6 +371,18 @@ class DataController(QObject):
         if repo_property:
             return getattr(self._user_db_service, repo_property, None)
         return None
+
+    def _loadGroups(self) -> None:
+        if self._group_tree:
+            try:
+                groups = self._user_db_service.data_groups_repo.findAll()
+                group_tuples = [(g.id, g.name) for g in groups if g.id is not None]
+                self._group_tree.loadGroups(group_tuples)
+            except Exception as e:
+                self._logger.warning(f"Failed to load groups: {e}")
+
+    def _onGroupSelectionChanged(self, group_id: int | None) -> None:
+        pass
 
     def _loadTableList(self) -> None:
         conn = self._db_manager.connection

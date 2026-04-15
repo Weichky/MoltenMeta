@@ -11,6 +11,9 @@ from db.user.repo import (
     MetaRepository,
     UnitsRepository,
     PropertyValueConditionsRepository,
+    ComputationCacheRepository,
+    PropertyTagsRepository,
+    DataGroupsRepository,
 )
 
 from db import DatabaseManager
@@ -49,6 +52,11 @@ class UserDbService(QObject):
         self._property_value_condition_repo = PropertyValueConditionsRepository(
             log_service, db_manager
         )
+        self._computation_cache_repo = ComputationCacheRepository(
+            log_service, db_manager
+        )
+        self._property_tags_repo = PropertyTagsRepository(log_service, db_manager)
+        self._data_groups_repo = DataGroupsRepository(log_service, db_manager)
 
         self._initTables()
 
@@ -63,6 +71,9 @@ class UserDbService(QObject):
         self._property_value_repo.createTable()
         self._meta_repo.createTable()
         self._property_value_condition_repo.createTable()
+        self._computation_cache_repo.createTable()
+        self._property_tags_repo.createTable()
+        self._data_groups_repo.createTable()
 
         if self._symbol_repo.count() == 0:
             defaults = loadDefaultSymbols()
@@ -129,3 +140,15 @@ class UserDbService(QObject):
     @property
     def property_value_condition_repo(self) -> PropertyValueConditionsRepository:
         return self._property_value_condition_repo
+
+    @property
+    def computation_cache_repo(self) -> ComputationCacheRepository:
+        return self._computation_cache_repo
+
+    @property
+    def property_tags_repo(self) -> PropertyTagsRepository:
+        return self._property_tags_repo
+
+    @property
+    def data_groups_repo(self) -> DataGroupsRepository:
+        return self._data_groups_repo
