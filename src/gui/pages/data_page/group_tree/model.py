@@ -135,6 +135,7 @@ class GroupTreeModel(QStandardItemModel):
         self._loaded_groups.add(group_id)
 
     def mimeData(self, indexes: list[QModelIndex]) -> QMimeData | None:
+        # Only DATA nodes are draggable; GROUP/UNGROUPED nodes are not
         data_ids = []
         for index in indexes:
             if not index.isValid():

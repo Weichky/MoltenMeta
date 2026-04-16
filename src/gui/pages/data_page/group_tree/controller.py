@@ -19,12 +19,13 @@ def _translate(context: str, text: str) -> str:
 
 class GroupTreeController(QObject):
     selectionChanged = Signal(object)
+    # PySide6 Signal: use `list` instead of `list[int]` due to type hint registration issues
     dataMoved = Signal(list, object)
 
-    def __init__(self, model, ui, context: AppContext):
+    def __init__(self, model, tree_view, context: AppContext):
         super().__init__()
         self._model = model
-        self._ui = ui
+        self._tree_view = tree_view
         self._context = context
         self._user_db_service = context.user_db
         self._logger = context.log.getLogger(__name__)
@@ -39,21 +40,23 @@ class GroupTreeController(QObject):
         pass
 
     def _connectSignals(self) -> None:
-        self._ui.tree_view.selectionModel().selectionChanged.connect(
+        self._tree_view.selectionModel().selectionChanged.connect(
             self._onSelectionChanged
         )
-        self._ui.tree_view.setContextMenuPolicy(
+        self._tree_view.setContextMenuPolicy(
             QtCore.Qt.ContextMenuPolicy.CustomContextMenu
         )
-        self._ui.tree_view.customContextMenuRequested.connect(self._onContextMenu)
-        self._ui.tree_view.setDragDropMode(QtWidgets.QTreeView.DragDropMode.DragDrop)
-        self._ui.tree_view.setDefaultDropAction(QtCore.Qt.DropAction.MoveAction)
-        self._ui.tree_view.setSelectionMode(
+        self._tree_view.customContextMenuRequested.connect(self._onContextMenu)
+        self._tree_view.setSelectionMode(
             QtWidgets.QTreeView.SelectionMode.ExtendedSelection
         )
-        self._ui.tree_view.setDragEnabled(True)
 
     def loadGroups(self) -> None:
+        # Full reload pattern: after any group membership change (create/delete/move),
+        # we call loadGroups() which rebuilds the entire tree via loadGroupsWithData().
+        # This ensures both the source and destination nodes are correctly refreshed.
+        # Individual node updates (like fetchDataForNode) are insufficient because
+        # data may exist in multiple groups simultaneously during transitions.
         groups = self._user_db_service.data_groups_repo.findAll()
 
         ungrouped_count = self._user_db_service.property_value_repo.countUngrouped()
@@ -128,7 +131,7 @@ class GroupTreeController(QObject):
 
     def _getSelectedDataIds(self) -> list[int]:
         data_ids = []
-        for index in self._ui.tree_view.selectionModel().selectedIndexes():
+        for index in self._tree_view.selectionModel().selectedIndexes():
             node = self._model.getNodeAtIndex(index)
             if node and node.node_type == NodeType.DATA and node.id is not None:
                 data_ids.append(node.id)
@@ -138,14 +141,14 @@ class GroupTreeController(QObject):
         pass
 
     def _onContextMenu(self, pos: QtCore.QPoint) -> None:
-        index = self._ui.tree_view.indexAt(pos)
+        index = self._tree_view.indexAt(pos)
         if not index.isValid():
             return
 
         node = self._model.getNodeAtIndex(index)
         menu = self._context_menu_factory.createForNode(node)
         if menu:
-            menu.exec(self._ui.tree_view.mapToGlobal(pos))
+            menu.exec(self._tree_view.mapToGlobal(pos))
 
     def triggerRename(self) -> None:
         if self._selected_node and self._selected_node.node_type == NodeType.GROUP:
@@ -154,8 +157,8 @@ class GroupTreeController(QObject):
             ):
                 node = self._model.getNodeAtIndex(n)
                 if node is self._selected_node:
-                    self._ui.tree_view.setCurrentIndex(n)
-                    self._ui.tree_view.edit(n)
+                    self._tree_view.setCurrentIndex(n)
+                    self._tree_view.edit(n)
                     break
 
     def triggerDelete(self) -> None:
@@ -166,7 +169,7 @@ class GroupTreeController(QObject):
             return
 
         reply = QtWidgets.QMessageBox.question(
-            self._ui.tree_view,
+            self._tree_view,
             _translate("GroupTree", "Delete Group"),
             _translate(
                 "GroupTree",
@@ -198,7 +201,7 @@ class GroupTreeController(QObject):
         except Exception as e:
             self._logger.error(f"Failed to delete group: {e}")
             QtWidgets.QMessageBox.critical(
-                self._ui.tree_view,
+                self._tree_view,
                 _translate("GroupTree", "Error"),
                 _translate("GroupTree", f"Failed to delete group: {e}"),
             )
@@ -233,7 +236,7 @@ class GroupTreeController(QObject):
             return f"System {system_id}"
 
     def _showNewGroupDialog(self) -> str | None:
-        dialog = QtWidgets.QDialog(self._ui.tree_view)
+        dialog = QtWidgets.QDialog(self._tree_view)
         dialog.setWindowTitle(_translate("GroupTree", "New Group"))
         dialog.setMinimumSize(350, 150)
         dialog.setSizePolicy(
@@ -292,7 +295,7 @@ class GroupTreeController(QObject):
 
         if self._user_db_service.data_groups_repo.findByName(name):
             QtWidgets.QMessageBox.warning(
-                self._ui.tree_view,
+                self._tree_view,
                 _translate("GroupTree", "Warning"),
                 _translate("GroupTree", "Group name already exists"),
             )
@@ -311,7 +314,7 @@ class GroupTreeController(QObject):
         except Exception as e:
             self._logger.error(f"Failed to create group: {e}")
             QtWidgets.QMessageBox.critical(
-                self._ui.tree_view,
+                self._tree_view,
                 _translate("GroupTree", "Error"),
                 _translate("GroupTree", f"Failed to create group: {e}"),
             )
@@ -332,7 +335,7 @@ class GroupTreeController(QObject):
         except Exception as e:
             self._logger.error(f"Failed to remove from group: {e}")
             QtWidgets.QMessageBox.critical(
-                self._ui.tree_view,
+                self._tree_view,
                 _translate("GroupTree", "Error"),
                 _translate("GroupTree", f"Failed to remove: {e}"),
             )
@@ -340,7 +343,7 @@ class GroupTreeController(QObject):
     def renameGroup(self, group_id: int, new_name: str) -> bool:
         if self._user_db_service.data_groups_repo.findByName(new_name):
             QtWidgets.QMessageBox.warning(
-                self._ui.tree_view,
+                self._tree_view,
                 _translate("GroupTree", "Warning"),
                 _translate("GroupTree", "Group name already exists"),
             )
@@ -363,7 +366,7 @@ class GroupTreeController(QObject):
         except Exception as e:
             self._logger.error(f"Failed to rename group: {e}")
             QtWidgets.QMessageBox.critical(
-                self._ui.tree_view,
+                self._tree_view,
                 _translate("GroupTree", "Error"),
                 _translate("GroupTree", f"Failed to rename: {e}"),
             )
@@ -382,7 +385,7 @@ class GroupTreeController(QObject):
         except Exception as e:
             self._logger.error(f"Failed to move data: {e}")
             QtWidgets.QMessageBox.critical(
-                self._ui.tree_view,
+                self._tree_view,
                 _translate("GroupTree", "Error"),
                 _translate("GroupTree", f"Failed to move data: {e}"),
             )
@@ -422,7 +425,7 @@ class GroupTreeController(QObject):
             target_group_id = target_node.id
         else:
             QtWidgets.QMessageBox.warning(
-                self._ui.tree_view,
+                self._tree_view,
                 _translate("GroupTree", "Warning"),
                 _translate("GroupTree", "Cannot drop data onto another data item"),
             )

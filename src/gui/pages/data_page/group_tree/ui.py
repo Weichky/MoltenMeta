@@ -11,15 +11,5 @@ class UiGroupTree(QObject):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
 
-        self.tree_view = QtWidgets.QTreeView()
-        self.tree_view.setObjectName("groupTreeView")
-        self.tree_view.setHeaderHidden(True)
-        self.tree_view.setAlternatingRowColors(True)
-        self.tree_view.setEditTriggers(
-            QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers
-        )
-
-        self.layout.addWidget(self.tree_view, stretch=1)
-
     def retranslateUi(self) -> None:
         pass

@@ -70,6 +70,8 @@ class PlotPanel(QtWidgets.QWidget):
         self._ax.grid(True, which="major", alpha=0.3)
         self._ax.grid(True, which="minor", alpha=0.15)
 
+        # gridLabelDensity: show every Nth tick label to reduce clutter.
+        # density=1 shows all labels, density=2 shows every other, etc.
         label_every = max(1, int(gridLabelDensity))
         for i, tick in enumerate(self._ax.xaxis.get_major_ticks()):
             tick.label1.set_visible(i % label_every == 0)
