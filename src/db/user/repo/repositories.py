@@ -448,7 +448,7 @@ class ComputationCacheRepository(BaseRepository[ComputationCacheSnapshot]):
         return f"""
         CREATE TABLE IF NOT EXISTS computation_cache (
             id {dialect.getAutoincrementType()},
-            run_id {dialect.getTextType()} NOT NULL UNIQUE,
+            run_id {dialect.getTextType()} NOT NULL,
             module_id {dialect.getTextType()} NOT NULL,
             method_name {dialect.getTextType()} NOT NULL,
             system_id {dialect.getIntegerType()},
