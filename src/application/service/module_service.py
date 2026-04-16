@@ -58,6 +58,9 @@ class ModuleService:
         parent_run_id = kwargs.get("_parent_run_id")
 
         for value_record in result.get("values", []):
+            # FIXME: This assumes the last key is the output variable name.
+            # Better approach: read output symbol from module config explicitly.
+            # See issue: #weakness-value-extraction
             numeric_key = list(value_record.keys())[-1]
             entry = ComputationCacheSnapshot(
                 run_id=run_id,
