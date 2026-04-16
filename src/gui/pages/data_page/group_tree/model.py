@@ -158,27 +158,6 @@ class GroupTreeModel(QStandardItemModel):
         mime.setData(MIME_DATA_IDS, json.dumps(data_ids).encode())
         return mime
 
-    def addGroupNode(self, group_id: int, name: str, count: int) -> None:
-        group_item = QStandardItem(name)
-        group_item.setData(
-            TreeNodeData(
-                id=group_id,
-                node_type=NodeType.GROUP,
-                name=name,
-                data_count=count,
-            ),
-            Qt.ItemDataRole.UserRole,
-        )
-        group_item.setFlags(
-            Qt.ItemFlag.ItemIsEnabled
-            | Qt.ItemFlag.ItemIsSelectable
-            | Qt.ItemFlag.ItemIsDropEnabled
-            | Qt.ItemFlag.ItemIsEditable
-        )
-        self._root_item.appendRow(group_item)
-        self._item_by_group_id[group_id] = group_item
-        self._loaded_groups.add(group_id)
-
     def removeGroupNode(self, group_id: int) -> None:
         if group_id in self._item_by_group_id:
             row = self._item_by_group_id[group_id].row()
@@ -207,17 +186,6 @@ class GroupTreeModel(QStandardItemModel):
         if item is None:
             return None
         return item.data(Qt.ItemDataRole.UserRole)
-
-    def getUngroupedIndex(self) -> QModelIndex:
-        if None in self._item_by_group_id:
-            return self._item_by_group_id[None].index()
-        return QModelIndex()
-
-    def getNodeById(self, group_id: int | None) -> TreeNodeData | None:
-        if group_id in self._item_by_group_id:
-            item = self._item_by_group_id[group_id]
-            return item.data(Qt.ItemDataRole.UserRole)
-        return None
 
     def isGroupLoaded(self, group_id: int | None) -> bool:
         return group_id in self._loaded_groups

@@ -33,7 +33,6 @@ class GroupTreeController(QObject):
         self._selected_node: TreeNodeData | None = None
         self._selected_data_ids: list[int] = []
         self._context_menu_factory = ContextMenuFactory(self)
-
         self._connectSignals()
 
     def connectSignals(self) -> None:
@@ -136,9 +135,6 @@ class GroupTreeController(QObject):
             if node and node.node_type == NodeType.DATA and node.id is not None:
                 data_ids.append(node.id)
         return data_ids
-
-    def _onExpanded(self, index: QtCore.QModelIndex) -> None:
-        pass
 
     def _onContextMenu(self, pos: QtCore.QPoint) -> None:
         index = self._tree_view.indexAt(pos)

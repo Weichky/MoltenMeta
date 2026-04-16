@@ -38,8 +38,9 @@
 | ✅ Completed | C++ algorithm engine integration (miedema_core.so) |
 | ✅ Completed | matplotlib fully configurable (ColorGenerator, PlotStyleService, Settings Plot Tab) |
 | ✅ Completed | Log window (QtLogHandler integrated in Settings Page) |
-| 🚧 In Progress | Data import (CSV) — menu action exists, logic not wired |
-| 🚧 In Progress | Data export, custom plotting, data groups |
+| ✅ Completed | Data import (CSV) — full implementation with validation |
+| ✅ Completed | Data groups — Group tree with drag-drop and right panel filtering |
+| 🚧 In Progress | Data export, custom plotting |
 | 🚧 In Progress | Report generation (PDF/DOCX) |
 
 ---
@@ -216,6 +217,19 @@ Each page follows the pattern:
 | `ui.py` | Qt UI setup (from Qt Designer) |
 | `widget.py` | Custom widget logic |
 | `controller.py` | Page controller (optional) |
+| `model.py` | Qt data model (optional, for complex pages) |
+
+**Complex pages may contain sub-packages:**
+
+```
+data_page/
+├── ui.py
+├── widget.py
+├── controller.py
+├── model.py
+├── group_tree/      # Feature-specific sub-package
+└── dialogs/        # Dialog sub-package
+```
 
 **Signal/Slot Connections:**
 
@@ -393,6 +407,7 @@ CREATE TABLE property_values (
     system_id    INTEGER NOT NULL,
     property_id  INTEGER NOT NULL,
     method_id    INTEGER,
+    group_id     INTEGER,  -- References data_groups for organization
     value        REAL    NOT NULL,
 
     FOREIGN KEY (system_id)
@@ -405,6 +420,10 @@ CREATE TABLE property_values (
 
     FOREIGN KEY (method_id)
         REFERENCES methods(id)
+        ON DELETE SET NULL,
+
+    FOREIGN KEY (group_id)
+        REFERENCES data_groups(id)
         ON DELETE SET NULL
 );
 
@@ -427,6 +446,18 @@ CREATE TABLE property_value_conditions (
     FOREIGN KEY (unit_id)
         REFERENCES units(id)
         ON DELETE RESTRICT
+);
+```
+
+### Grouping Layer (User Data Organization)
+
+```sql
+-- User-defined groups for organizing data items
+CREATE TABLE data_groups (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    name        TEXT NOT NULL UNIQUE,
+    priority    INTEGER NOT NULL DEFAULT 0,
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
