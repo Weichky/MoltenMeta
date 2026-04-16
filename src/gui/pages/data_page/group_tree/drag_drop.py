@@ -2,11 +2,10 @@ import json
 
 from PySide6.QtCore import QMimeData
 
-from .model import NodeType
+from .model import NodeType, MIME_DATA_IDS
 
 
 MIME_GROUP_NODE = "application/x-moltenmeta-group-node"
-MIME_DATA_IDS = "application/x-moltenmeta-data-ids"
 
 
 def encodeDragData(

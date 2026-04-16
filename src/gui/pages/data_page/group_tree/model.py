@@ -1,11 +1,13 @@
+import json
 from dataclasses import dataclass
 from enum import Enum, auto
 
-from PySide6.QtCore import QModelIndex, Qt
+from PySide6.QtCore import QModelIndex, Qt, QMimeData
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 
 
 PAGE_SIZE = 100
+MIME_DATA_IDS = "application/x-moltenmeta-data-ids"
 
 
 class NodeType(Enum):
@@ -130,7 +132,30 @@ class GroupTreeModel(QStandardItemModel):
                 )
                 group_item.appendRow(data_item)
 
-            self._loaded_groups.add(group_id)
+        self._loaded_groups.add(group_id)
+
+    def mimeData(self, indexes: list[QModelIndex]) -> QMimeData | None:
+        data_ids = []
+        for index in indexes:
+            if not index.isValid():
+                continue
+            item = self.itemFromIndex(index)
+            if item is None:
+                continue
+            node_data = item.data(Qt.ItemDataRole.UserRole)
+            if (
+                node_data
+                and node_data.node_type == NodeType.DATA
+                and node_data.id is not None
+            ):
+                data_ids.append(node_data.id)
+
+        if not data_ids:
+            return None
+
+        mime = QMimeData()
+        mime.setData(MIME_DATA_IDS, json.dumps(data_ids).encode())
+        return mime
 
     def addGroupNode(self, group_id: int, name: str, count: int) -> None:
         group_item = QStandardItem(name)
