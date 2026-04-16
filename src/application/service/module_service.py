@@ -58,13 +58,12 @@ class ModuleService:
         parent_run_id = kwargs.get("_parent_run_id")
 
         for value_record in result.get("values", []):
+            numeric_key = list(value_record.keys())[-1]
             entry = ComputationCacheSnapshot(
                 run_id=run_id,
                 module_id=module_id,
                 method_name=method_name,
-                value=value_record.get(
-                    list(value_record.values())[-1] if value_record else "value", 0
-                ),
+                value=value_record[numeric_key],
                 unit=result.get("unit", {}).get("value", ""),
                 params_json=None,
                 parent_run_id=parent_run_id,
