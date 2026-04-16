@@ -462,7 +462,6 @@ class ComputationCacheRepository(BaseRepository[ComputationCacheSnapshot]):
             created_at {dialect.getDatetimeType()} DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (system_id) REFERENCES systems(id),
             FOREIGN KEY (property_id) REFERENCES properties(id),
-            FOREIGN KEY (parent_run_id) REFERENCES computation_cache(run_id),
             FOREIGN KEY (group_id) REFERENCES data_groups(id) ON DELETE SET NULL
         )
         """
