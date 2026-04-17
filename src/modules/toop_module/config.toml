@@ -1,7 +1,7 @@
 [module]
 package_name = "toop_module"
 entry_class = "ToopCalc"
-all_methods = ["calculateSingleProperty", "calculateRange", "calculateCrossSection"]
+all_methods = ["calculateSingleProperty", "calculateRange", "calculateContourData"]
 
 type = "simulation"
 category = "ternary_thermodynamics"
@@ -154,33 +154,29 @@ scatters = [
     {x = "x_B", y = "x_C", z = "Z_ABC"}
 ]
 
-[calculateCrossSection.inputs]
+[calculateContourData.inputs]
 symbol = [
     "elem_A",
     "elem_B",
     "elem_C",
-    "fixed_component",
-    "fixed_value",
+    "plane",
     "n_points"
 ]
 latex = [
     "elem_A",
     "elem_B",
     "elem_C",
-    "fixed",
-    "value",
+    "plane",
     "n_\\text{points}"
 ]
 description = [
     "Element A (solvent)",
     "Element B",
     "Element C",
-    "Fixed component (x_A, x_B, or x_C)",
-    "Value of fixed component",
-    "Number of points"
+    "Projection plane (x_A-x_B, x_A-x_C, x_B-x_C)",
+    "Number of points per axis"
 ]
 unit = [
-    "",
     "",
     "",
     "",
@@ -194,12 +190,11 @@ raw.method_map = [
     ["elem_A", "element_symbol_input"],
     ["elem_B", "element_symbol_input"],
     ["elem_C", "element_symbol_input"],
-    ["fixed_component", "text_input"],
-    ["fixed_value", "float_input"],
+    ["plane", "text_input"],
     ["n_points", "int_input"]
 ]
 
-[calculateCrossSection.outputs]
+[calculateContourData.outputs]
 symbol = [
     "Z_ABC"
 ]
@@ -213,3 +208,7 @@ unit = [
     "kJ/mol"
 ]
 is_collection = true
+
+[calculateContourData.plot]
+plotType = "contour"
+title = "{elem_A}-{elem_B}-{elem_C} System"
