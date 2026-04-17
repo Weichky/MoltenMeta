@@ -72,6 +72,6 @@ py::array_t<double> calculatePropertyList(
 }
 
 PYBIND11_MODULE(toop_algorithm, m) {
-    m.def("calculateSingle", &calculateSingleProperty, "Calculate Z_ABC for a single composition point");
-    m.def("calculate", &calculatePropertyList, "Calculate Z_ABC for an array of composition points");
+    m.def("calculateSingleProperty", &calculateSingleProperty, "Calculate Z_ABC for a single composition point");
+    m.def("calculatePropertyList", &calculatePropertyList, "Calculate Z_ABC for an array of composition points");
 }

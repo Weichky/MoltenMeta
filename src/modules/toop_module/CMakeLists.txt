@@ -78,89 +78,39 @@ set(pybind11_DIR "${PYBIND11_CMAKE_DIR}")
 find_package(pybind11 CONFIG REQUIRED)
 
 # -----------------------------------------------------------------------------
-# 5. AUTO-DETECT C++ SOURCE FILE
+# 5. CONFIGURE OUTPUT DIRECTORY
 # -----------------------------------------------------------------------------
-# This block automatically finds the .cpp file in this directory.
-# The module name will be derived from the source file name.
-# For example: miedema_core.cpp -> module name "miedema_core"
-#
-# file(GLOB ...): Searches for files matching a pattern.
-# "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp" means "all .cpp files in this directory".
-file(GLOB CPP_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
-
-# list(LENGTH ...): Gets the number of items in a list.
-list(LENGTH CPP_FILES _CPP_COUNT)
-
-# Check that exactly one .cpp file was found.
-# If zero or more than one .cpp file exists, abort with an error message.
-# This prevents accidental build failures from having multiple source files.
-if(NOT _CPP_COUNT EQUAL 1)
-    message(FATAL_ERROR "Expected exactly one .cpp file in ${CMAKE_CURRENT_SOURCE_DIR}, found ${_CPP_COUNT}")
-endif()
-
-# list(GET ... 0 ...): Gets the first item (index 0) from the list.
-list(GET CPP_FILES 0 _CPP_SOURCE)
-
-# Extract the module name from the source file path:
-#   1. Remove the ".cpp" extension
-#   2. Remove directory path, keeping only the filename
-# Example: "/path/to/miedema_core.cpp" -> "miedema_core"
-string(REGEX REPLACE "\\.cpp$" "" _MODULE_NAME "${_CPP_SOURCE}")
-string(REGEX REPLACE ".*/" "" _MODULE_NAME "${_MODULE_NAME}")
-
-# Print the detected module name (shows up during cmake ..)
-message(STATUS "Detected module: ${_MODULE_NAME}")
-
-# -----------------------------------------------------------------------------
-# 6. CONFIGURE OUTPUT DIRECTORY
-# -----------------------------------------------------------------------------
-# Tell CMake where to put the compiled library file (.so on Linux/macOS, .pyd on Windows).
-# CMAKE_LIBRARY_OUTPUT_DIRECTORY is the default location.
-# We also set the DEBUG and RELEASE variants to the same location.
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 # -----------------------------------------------------------------------------
-# 7. BUILD THE PYTHON MODULE
+# 6. BUILD MODULES
 # -----------------------------------------------------------------------------
-# pybind11_add_module(): The pybind11 command to create a Python extension module.
-# It takes two arguments:
-#   1. Module name (how you'll import it in Python: import <name>)
-#   2. Source file(s) to compile
-# The module will be linked with Python and pybind11 automatically.
-pybind11_add_module(${_MODULE_NAME} ${_CPP_SOURCE})
+pybind11_add_module(toop_algorithm toop_algorithm.cpp)
+pybind11_add_module(toop_grid toop_grid.cpp)
 
 # -----------------------------------------------------------------------------
-# 8. CONFIGURE LIBRARY PROPERTIES
+# 7. CONFIGURE LIBRARY PROPERTIES
 # -----------------------------------------------------------------------------
-# Platform-specific suffix: .pyd on Windows, .so on Linux/macOS
 if(WIN32)
     set(PLATFORM_SUFFIX ".pyd")
 else()
     set(PLATFORM_SUFFIX ".so")
 endif()
 
-set_target_properties(${_MODULE_NAME} PROPERTIES
-    # Output directory (where to put the .so/.pyd file)
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib
-
-    # Remove any prefix that might be added (e.g., "lib" on Linux).
-    # On Linux, CMake would normally produce "libmiedema_core.so",
-    # but we want just "miedema_core.so".
-    PREFIX ""
-
-    SUFFIX "${PLATFORM_SUFFIX}"
-)
+foreach(_MODULE toop_algorithm toop_grid)
+    set_target_properties(${_MODULE} PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib
+        PREFIX ""
+        SUFFIX "${PLATFORM_SUFFIX}"
+    )
+endforeach()
 
 # =============================================================================
 # RESULT
 # =============================================================================
 # After running cmake .. && make, you should find:
-#   lib/miedema_core.so   (Linux/macOS)
-#   lib/miedema_core.pyd  (Windows)
-#
-# You can then import it in Python:
-#   import miedema_core
-#   core = miedema_core.MiedemaCore(...)
+#   lib/toop_algorithm.so
+#   lib/toop_grid.so
 # =============================================================================

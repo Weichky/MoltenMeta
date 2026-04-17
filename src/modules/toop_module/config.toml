@@ -1,6 +1,215 @@
 [module]
 package_name = "toop_module"
 entry_class = "ToopCalc"
-all_methods = [
-    
+all_methods = ["calculateSingleProperty", "calculateRange", "calculateCrossSection"]
+
+type = "simulation"
+category = "ternary_thermodynamics"
+name = "Toop Module"
+version = "1.0.0"
+author = "Weichky"
+license = "MIT"
+description = "Toop model for predicting ternary thermodynamic properties from binary data"
+
+[calculateSingleProperty.inputs]
+symbol = [
+    "elem_A",
+    "elem_B",
+    "elem_C",
+    "x_B",
+    "x_C",
+    "Z_AB",
+    "Z_AC",
+    "Z_BC"
 ]
+latex = [
+    "elem_A",
+    "elem_B",
+    "elem_C",
+    "x_B",
+    "x_C",
+    "Z_{AB}",
+    "Z_{AC}",
+    "Z_{BC}"
+]
+description = [
+    "Element A (solvent)",
+    "Element B",
+    "Element C",
+    "Mole fraction of B",
+    "Mole fraction of C",
+    "Binary property AB at x_A",
+    "Binary property AC at x_A",
+    "Binary property BC at x_B/(x_B+x_C)"
+]
+unit = [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+]
+
+input_method = "raw"
+
+raw.method_map = [
+    ["elem_A", "element_symbol_input"],
+    ["elem_B", "element_symbol_input"],
+    ["elem_C", "element_symbol_input"],
+    ["x_B", "float_input"],
+    ["x_C", "float_input"],
+    ["Z_AB", "float_input"],
+    ["Z_AC", "float_input"],
+    ["Z_BC", "float_input"]
+]
+
+[calculateSingleProperty.outputs]
+symbol = [
+    "Z_ABC"
+]
+latex = [
+    "Z_{ABC}"
+]
+description = [
+    "Predicted ternary property"
+]
+unit = [
+    "kJ/mol"
+]
+can_be_used_as_input = true
+is_collection = false
+
+[calculateSingleProperty.plot]
+plotType = "scatter_3d"
+title = "{elem_A}-{elem_B}-{elem_C} System"
+
+[calculateSingleProperty.plot.coords]
+scatters = [
+    {x = "x_A", y = "x_B", z = "Z_ABC"},
+    {x = "x_A", y = "x_C", z = "Z_ABC"},
+    {x = "x_B", y = "x_C", z = "Z_ABC"}
+]
+
+[calculateRange.inputs]
+symbol = [
+    "elem_A",
+    "elem_B",
+    "elem_C",
+    "n_points"
+]
+latex = [
+    "elem_A",
+    "elem_B",
+    "elem_C",
+    "n_\\text{points}"
+]
+description = [
+    "Element A (solvent)",
+    "Element B",
+    "Element C",
+    "Number of points per edge"
+]
+unit = [
+    "",
+    "",
+    "",
+    ""
+]
+
+input_method = "raw"
+
+raw.method_map = [
+    ["elem_A", "element_symbol_input"],
+    ["elem_B", "element_symbol_input"],
+    ["elem_C", "element_symbol_input"],
+    ["n_points", "int_input"]
+]
+
+[calculateRange.outputs]
+symbol = [
+    "Z_ABC"
+]
+latex = [
+    "Z_{ABC}"
+]
+description = [
+    "Predicted ternary property"
+]
+unit = [
+    "kJ/mol"
+]
+is_collection = true
+
+[calculateRange.plot]
+plotType = "scatter_3d"
+title = "{elem_A}-{elem_B}-{elem_C} System"
+
+[calculateRange.plot.coords]
+scatters = [
+    {x = "x_A", y = "x_B", z = "Z_ABC"},
+    {x = "x_A", y = "x_C", z = "Z_ABC"},
+    {x = "x_B", y = "x_C", z = "Z_ABC"}
+]
+
+[calculateCrossSection.inputs]
+symbol = [
+    "elem_A",
+    "elem_B",
+    "elem_C",
+    "fixed_component",
+    "fixed_value",
+    "n_points"
+]
+latex = [
+    "elem_A",
+    "elem_B",
+    "elem_C",
+    "fixed",
+    "value",
+    "n_\\text{points}"
+]
+description = [
+    "Element A (solvent)",
+    "Element B",
+    "Element C",
+    "Fixed component (x_A, x_B, or x_C)",
+    "Value of fixed component",
+    "Number of points"
+]
+unit = [
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+]
+
+input_method = "raw"
+
+raw.method_map = [
+    ["elem_A", "element_symbol_input"],
+    ["elem_B", "element_symbol_input"],
+    ["elem_C", "element_symbol_input"],
+    ["fixed_component", "text_input"],
+    ["fixed_value", "float_input"],
+    ["n_points", "int_input"]
+]
+
+[calculateCrossSection.outputs]
+symbol = [
+    "Z_ABC"
+]
+latex = [
+    "Z_{ABC}"
+]
+description = [
+    "Predicted ternary property"
+]
+unit = [
+    "kJ/mol"
+]
+is_collection = true

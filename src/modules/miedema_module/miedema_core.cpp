@@ -61,8 +61,8 @@ class MiedemaCore {
             return f_AB * numerator / denominator;
         }
 
-        // Note: This is an optimized version of the loop.
-        // For clarity, use calculateSingle() in single-value scenarios.
+// Note: This is an optimized version of the loop.
+// For clarity, use calculateSingle() in single-value scenarios.
         py::array_t<double> calculateRange(double x_A_start, double x_A_end, int num) const {
             py::array_t<double> result(num);
             double *ptr = static_cast<double*>(result.request().ptr);
@@ -87,6 +87,34 @@ class MiedemaCore {
                 const double denominator = x_A * VA * term1 + x_B * VB * term2;
 
                 ptr[i] = f_AB * numerator / denominator;
+            }
+
+            return result;
+        }
+
+        py::array_t<double> calculateSingleBatch(py::array_t<double> x_array) const {
+            const ssize_t num = x_array.size();
+            py::array_t<double> result(num);
+            double *ptr_res = static_cast<double*>(result.request().ptr);
+            const double *ptr_x = static_cast<double*>(x_array.request().ptr);
+
+            // Precompute repeated values
+            const double muA_delta = elemA.mu * delta_phi;
+            const double muB_delta = elemB.mu * delta_phi;
+            const double VA = elemA.V_23;
+            const double VB = elemB.V_23;
+
+            for (ssize_t i = 0; i < num; ++i) {
+                const double x_A = ptr_x[i];
+                const double x_B = 1 - x_A;
+
+                const double term1 = 1 + muA_delta * x_B;
+                const double term2 = 1 - muB_delta * x_A;
+
+                const double numerator = x_A * x_B * term1 * term2;
+                const double denominator = x_A * VA * term1 + x_B * VB * term2;
+
+                ptr_res[i] = f_AB * numerator / denominator;
             }
 
             return result;
@@ -137,5 +165,6 @@ PYBIND11_MODULE(miedema_core, m) {
     py::class_<MiedemaCore>(m, "MiedemaCore")
         .def(py::init<ElementProperties, ElementProperties, MiedemaConst>())
         .def("calculateSingle", &MiedemaCore::calculateSingle)
-        .def("calculateRange", &MiedemaCore::calculateRange);
+        .def("calculateRange", &MiedemaCore::calculateRange)
+        .def("calculateSingleBatch", &MiedemaCore::calculateSingleBatch);
 }

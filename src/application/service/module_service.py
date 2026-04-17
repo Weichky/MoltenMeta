@@ -109,3 +109,33 @@ class ModuleService:
             for symbol in outputs.get("symbol", []):
                 if tags:
                     self._property_tags_repo.addTags(symbol, tags)
+
+    def findMethodsByTag(self, tag: str) -> list[tuple[str, str]]:
+        """
+        Find all module methods that have the specified tag in their outputs.
+
+        Args:
+            tag: The tag to search for
+
+        Returns:
+            List of (package_name, method_name) tuples
+        """
+        results = []
+        for module_info in self._manager.list():
+            package_name = module_info.get("package_name")
+            if not package_name:
+                continue
+
+            config = self._manager.getModuleConfig(package_name)
+            if not config:
+                continue
+
+            module_cfg = config.get("module", {})
+            for method_name in module_cfg.get("all_methods", []):
+                method_config = config.get(method_name, {})
+                outputs = method_config.get("outputs", {})
+                tags = outputs.get("tags", [])
+                if tag in tags:
+                    results.append((package_name, method_name))
+
+        return results

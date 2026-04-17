@@ -8,7 +8,8 @@ package_name = "miedema_module"
 entry_class = "MiedemaCalc"
 all_methods = [
     "calculateSingle",
-    "calculateRange"
+    "calculateRange",
+    "calculateSingleBatch"
 ]
 
 # The type determines the domain to which the module belongs,
@@ -165,3 +166,23 @@ title = "Enthalpy of Mixing vs Composition"
 [calculateRange.plot.coords]
 x = "x_A"
 y = ["Delta_H_mix"]
+
+[calculateSingleBatch]
+# Internal method for batch processing, not exposed to UI
+# Used by other modules via Provider pattern
+
+[calculateSingleBatch.inputs]
+symbol = [
+    "elem_A",
+    "elem_B",
+    "x_array"
+]
+
+[calculateSingleBatch.outputs]
+symbol = [
+    "Delta_H_mix"
+]
+tags = [
+    "toop",
+    "binary_data"
+]

@@ -252,6 +252,42 @@ class MiedemaCalc:
             "method": "Miedema",
         }
 
+    def calculateSingleBatch(
+        self, elem_A: int, elem_B: int, x_array: list[float]
+    ) -> dict:
+        """
+        Calculate enthalpy of mixing for an array of compositions.
+
+        This method is designed for batch processing, typically called
+        by other modules (e.g., Toop) via the Provider pattern.
+
+        Args:
+            elem_A: Atomic number of element A
+            elem_B: Atomic number of element B
+            x_array: Array of mole fractions of element A
+
+        Returns:
+            Dictionary containing:
+            - values: Array of {x_A, ΔH_mix} data points
+            - method: "Miedema"
+        """
+        elem_props_A = self._getElementProperties(elem_A)
+        elem_props_B = self._getElementProperties(elem_B)
+        miedema_const = self._getMiedemaConst(elem_A, elem_B)
+
+        core = _miedema_core.MiedemaCore(elem_props_A, elem_props_B, miedema_const)
+        cfg = MODULE_INFO["calculateSingle"]
+        output_symbol = cfg["outputs"]["symbol"][0]
+
+        raw_results = core.calculateSingleBatch(x_array)
+
+        return {
+            "values": [
+                {"x_A": x, output_symbol: v} for x, v in zip(x_array, raw_results)
+            ],
+            "method": "Miedema",
+        }
+
     def _generateXPoints(
         self, x_A_start: float, x_A_end: float, n_points: int
     ) -> list[float]:
