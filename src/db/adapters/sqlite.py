@@ -80,6 +80,7 @@ class SQLiteConnection(DatabaseConnInfo):
         self._connection: sqlite3.Connection | None = None
         self._dialect = SQLiteDialect()
         self._logger = log_service.getLogger(__name__)
+
     def connect(self) -> None:
         if self.config.file_path is None:
             raise ValueError("SQLite requires file_path in config")

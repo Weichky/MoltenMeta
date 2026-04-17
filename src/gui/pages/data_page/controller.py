@@ -23,7 +23,7 @@ class DataController(QObject):
         super().__init__()
         self.ui = ui
         self._context = context
-        self._db_manager = context.user_db._db_manager
+        self._db_manager = context.user_db.db_manager
         self._user_db_service: UserDbService = context.user_db
         self._logger = context.log.getLogger(__name__)
         self._group_tree = group_tree

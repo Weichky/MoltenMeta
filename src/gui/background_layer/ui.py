@@ -4,6 +4,7 @@ from PySide6.QtCore import (
     QObject,
 )
 
+
 class UiBackgroundLayer(QObject):
     def setupUi(self, background_page: QtWidgets.QWidget):
         layout = QtWidgets.QVBoxLayout(background_page)
@@ -13,5 +14,6 @@ class UiBackgroundLayer(QObject):
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         layout.addWidget(self.label)
+
     def retranslateUi(self):
         self.label.setText(self.tr("Background Page"))

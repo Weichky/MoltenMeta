@@ -224,7 +224,7 @@ class GroupTreeController(QObject):
 
     def _getSystemLabel(self, system_id: int) -> str:
         try:
-            conn = self._user_db_service._db_manager.connection
+            conn = self._user_db_service.db_manager.connection
             cursor = conn.execute("SELECT label FROM systems WHERE id = ?", [system_id])
             row = cursor.fetchone()
             return row["label"] if row else f"System {system_id}"

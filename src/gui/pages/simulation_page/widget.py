@@ -1,8 +1,6 @@
 from PySide6 import QtWidgets, QtCore
 from PySide6.QtCore import Qt
 
-from domain.settings import Settings
-
 from .ui import UiSimulationPage
 from .controller import SimulationController
 from .plot_panel import PlotPanel
@@ -97,7 +95,7 @@ class SimulationPage(QtWidgets.QWidget):
             self.ui.coordSelector.currentIndexChanged.connect(self._onCoordChanged)
 
     def _applyTheme(self) -> None:
-        settings = Settings(records=self._context.core_db.settings_repo.findAll())
+        settings = self._context.settings
         plot_color_scheme = settings.plot_color_scheme
         if plot_color_scheme == "follow":
             scheme = self._theme_service.scheme
@@ -212,7 +210,7 @@ class SimulationPage(QtWidgets.QWidget):
         config = self._controller.getCurrentConfig()
         module_config = config.get("module", {})
         method_config = config.get(self._current_method, {})
-        settings = Settings(records=self._context.core_db.settings_repo.findAll())
+        settings = self._context.settings
 
         plot_config = self._plot_style_service.buildConfig(
             module_config, method_config, settings

@@ -8,13 +8,13 @@ from PySide6.QtGui import (
     QAction,
 )
 
-class UiMenubar(QObject):
 
+class UiMenubar(QObject):
     def setupUi(self, menubar: QMenuBar):
         # Create menus
         self.menu_file = QMenu(menubar)
         self.menu_file.setObjectName("menuFile")
-        
+
         self.menu_edit = QMenu(menubar)
         self.menu_edit.setObjectName("menuEdit")
 
@@ -23,7 +23,7 @@ class UiMenubar(QObject):
 
         self.menu_session = QMenu(menubar)
         self.menu_session.setObjectName("menuSession")
-        
+
         self.menu_window = QMenu(menubar)
         self.menu_window.setObjectName("menuWindow")
 
@@ -32,7 +32,7 @@ class UiMenubar(QObject):
 
         self.menu_database = QMenu(self.menu_data)
         self.menu_database.setObjectName("menuDatabase")
-        
+
         self.menu_simulation = QMenu(menubar)
         self.menu_simulation.setObjectName("menuSimulation")
 
@@ -46,13 +46,13 @@ class UiMenubar(QObject):
         ## File menu actions
         self.action_new = QAction(menubar)
         self.action_new.setObjectName("actionNew")
-        
+
         self.action_open = QAction(menubar)
         self.action_open.setObjectName("actionOpen")
-        
+
         self.action_close = QAction(menubar)
         self.action_close.setObjectName("actionClose")
-        
+
         self.action_save = QAction(menubar)
         self.action_save.setObjectName("actionSave")
 
@@ -61,25 +61,25 @@ class UiMenubar(QObject):
 
         self.action_import_file = QAction(menubar)
         self.action_import_file.setObjectName("actionImportFile")
-        
+
         self.action_export_file = QAction(menubar)
         self.action_export_file.setObjectName("actionExportFile")
-        
+
         self.action_print = QAction(menubar)
         self.action_print.setObjectName("actionPrint")
-        
+
         self.action_exit = QAction(menubar)
         self.action_exit.setObjectName("actionExit")
         ## Edit menu actions
         self.action_undo = QAction(menubar)
         self.action_undo.setObjectName("actionUndo")
-        
+
         self.action_redo = QAction(menubar)
         self.action_redo.setObjectName("actionRedo")
-        
+
         self.action_cut = QAction(menubar)
         self.action_cut.setObjectName("actionCut")
-        
+
         self.action_copy = QAction(menubar)
         self.action_copy.setObjectName("actionCopy")
 
@@ -88,7 +88,7 @@ class UiMenubar(QObject):
 
         self.action_delete = QAction(menubar)
         self.action_delete.setObjectName("actionDelete")
-        
+
         self.action_rename = QAction(menubar)
         self.action_rename.setObjectName("actionRename")
 
@@ -97,7 +97,7 @@ class UiMenubar(QObject):
 
         self.action_move_down = QAction(menubar)
         self.action_move_down.setObjectName("actionMoveDown")
-        
+
         self.action_show = QAction(menubar)
         self.action_show.setObjectName("actionShow")
 
@@ -107,20 +107,20 @@ class UiMenubar(QObject):
         ## View menu actions
         self.action_zoom_in = QAction(menubar)
         self.action_zoom_in.setObjectName("actionZoomIn")
-        
+
         self.action_zoom_out = QAction(menubar)
         self.action_zoom_out.setObjectName("actionZoomOut")
-        
+
         self.action_filter = QAction(menubar)
         self.action_filter.setObjectName("actionFilter")
-        
+
         self.action_reload_data = QAction(menubar)
         self.action_reload_data.setObjectName("actionReloadData")
 
         ## Database submenu actions
         self.action_import_database = QAction(menubar)
         self.action_import_database.setObjectName("actionImportDatabase")
-        
+
         self.action_backup_database = QAction(menubar)
         self.action_backup_database.setObjectName("actionBackupDatabase")
 
@@ -134,10 +134,10 @@ class UiMenubar(QObject):
         ## Help menu actions
         self.action_manual = QAction(menubar)
         self.action_manual.setObjectName("actionManual")
-        
+
         self.action_settings = QAction(menubar)
         self.action_settings.setObjectName("actionSettings")
-        
+
         self.action_about = QAction(menubar)
         self.action_about.setObjectName("actionAbout")
 
@@ -152,7 +152,7 @@ class UiMenubar(QObject):
         menubar.addAction(self.menu_simulation.menuAction())
         menubar.addAction(self.menu_tools.menuAction())
         menubar.addAction(self.menu_help.menuAction())
-        
+
         # Add actions to menus
         ## File menu
         self.menu_file.addAction(self.action_new)
@@ -168,7 +168,7 @@ class UiMenubar(QObject):
         self.menu_file.addAction(self.action_print)
         self.menu_file.addSeparator()
         self.menu_file.addAction(self.action_exit)
-        
+
         ## Edit menu
         self.menu_edit.addAction(self.action_undo)
         self.menu_edit.addAction(self.action_redo)

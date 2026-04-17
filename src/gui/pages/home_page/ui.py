@@ -3,12 +3,11 @@ from PySide6.QtCore import QObject
 
 
 class Tile(QtWidgets.QPushButton):
-
     def __init__(self, title: str, parent=None):
         super().__init__(title, parent)
 
         self.setMinimumSize(120, 80)
-        
+
     def setTitle(self, title):
         self.setText(title)
 
@@ -37,7 +36,12 @@ class UiHomePage(QObject):
         self.grid = QtWidgets.QGridLayout(self.grid_container)
         self.grid.setSpacing(12)
 
-        tile_names = [self.tr("Project"), self.tr("Database"), self.tr("Simulation"), self.tr("Settings")]
+        tile_names = [
+            self.tr("Project"),
+            self.tr("Database"),
+            self.tr("Simulation"),
+            self.tr("Settings"),
+        ]
         self.tiles = [Tile(name) for name in tile_names]
 
         positions = [(0, 0), (0, 1), (1, 0), (1, 1)]
@@ -65,15 +69,20 @@ class UiHomePage(QObject):
 
     def retranslateUi(self):
         welcome_text = self.tr("Welcome")
-        self.title.setText("<h1>"+welcome_text+"</h1>")
+        self.title.setText("<h1>" + welcome_text + "</h1>")
 
-        software_description = (self.tr(
+        software_description = self.tr(
             'Molten Meta provides an integrated environment for the input, management, prediction, and analysis of thermodynamic data for liquid alloys, offering excellent compatibility and scalability.<br><br>Project Repository: <a href="https://github.com/Weichky/MoltenMeta">https://github.com/Weichky/MoltenMeta</a>'
-        ))
+        )
 
-        self.description.setText("<h6>"+software_description+"</h6>")
-            
+        self.description.setText("<h6>" + software_description + "</h6>")
+
         # Translate tiles
-        tile_titles = [self.tr("Project"), self.tr("Data"), self.tr("Simulation"), self.tr("Settings")]
+        tile_titles = [
+            self.tr("Project"),
+            self.tr("Data"),
+            self.tr("Simulation"),
+            self.tr("Settings"),
+        ]
         for tile, title in zip(self.tiles, tile_titles):
             tile.setText(title)

@@ -1,3 +1,3 @@
 from .widget import HomePage
 
-__all__ = ['HomePage']
+__all__ = ["HomePage"]

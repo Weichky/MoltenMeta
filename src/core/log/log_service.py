@@ -4,6 +4,7 @@ import logging
 
 from .log import getLogLevelMap
 
+
 class LogService(QObject):
     log_level_changed = Signal()
 
@@ -13,11 +14,11 @@ class LogService(QObject):
     def getLogger(self, name: str) -> logging.Logger:
         return logging.getLogger(name)
 
-    def setupLogging(self, level = logging.DEBUG) -> None:
+    def setupLogging(self, level=logging.DEBUG) -> None:
         logging.basicConfig(
             level=level,
             format="[%(levelname)s](%(name)s)|%(asctime)s|%(message)s",
-        )        
+        )
 
     def setLogLevel(self, level: str) -> None:
         level_map = getLogLevelMap()

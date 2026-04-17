@@ -60,6 +60,7 @@ class SettingsController(QObject):
         super().__init__()
         self.i18n_service = context.i18n
         self.ui = ui
+        self._context = context
         self._log_service = context.log
         self._settings_repo = context.core_db.settings_repo
         self._theme_service = theme_service
@@ -126,15 +127,19 @@ class SettingsController(QObject):
         # Connect to self.ui instead of self.
         self.i18n_service.language_changed.connect(self.ui.retranslateUi)
 
+    def _saveAndReload(self, snapshots: list[SettingsSnapshot]) -> None:
+        self._settings_repo.upsert(snapshots)
+        self._context.core_db.reloadSettings()
+
     def _onLanguageChanged(self, index: int):
         language = self.ui.lang_combo.itemData(index)
         self.i18n_service.setLanguage(language)
-        self._settings_repo.upsert([SettingsSnapshot("locale", "language", language)])
+        self._saveAndReload([SettingsSnapshot("locale", "language", language)])
 
     def _onLogLevelChanged(self, index: int):
         level = self.ui.log_level_combo.itemData(index)
         self._log_service.setLogLevel(level)
-        self._settings_repo.upsert([SettingsSnapshot("log", "level", level)])
+        self._saveAndReload([SettingsSnapshot("log", "level", level)])
         self._log_service.getLogger(__name__).debug(f"Log level changed to {level}")
 
     def _onThemeModeChanged(self, index: int):
@@ -143,16 +148,16 @@ class SettingsController(QObject):
         snapshots = [SettingsSnapshot("appearance", "theme_mode", mode)]
         if mode != "system":
             snapshots.append(SettingsSnapshot("appearance", "scheme", mode))
-        self._settings_repo.upsert(snapshots)
+        self._saveAndReload(snapshots)
 
     def _onThemeColorChanged(self, index: int):
         color = self.ui.theme_color_combo.itemData(index)
         self._theme_service.setTheme(color)
-        self._settings_repo.upsert([SettingsSnapshot("appearance", "theme", color)])
+        self._saveAndReload([SettingsSnapshot("appearance", "theme", color)])
 
     def _onDensityScaleChanged(self, value: int):
         self._theme_service.updateDensityScale(value)
-        self._settings_repo.upsert(
+        self._saveAndReload(
             [SettingsSnapshot("appearance", "density_scale", str(value))]
         )
 
@@ -204,7 +209,7 @@ class SettingsController(QObject):
 
     def _onColorschemeChanged(self, index: int):
         scheme = self.ui.palette_combo.itemData(index)
-        self._settings_repo.upsert([SettingsSnapshot("plot", "colorscheme", scheme)])
+        self._saveAndReload([SettingsSnapshot("plot", "colorscheme", scheme)])
         if scheme == "custom":
             self._showCustomColorDialog()
         self._updatePlotPreview()
@@ -258,45 +263,43 @@ class SettingsController(QObject):
         snapshots.append(SettingsSnapshot("plot", "custom_primary", colors[0]))
         if len(colors) > 1:
             snapshots.append(SettingsSnapshot("plot", "custom_secondary", colors[1]))
-        self._settings_repo.upsert(snapshots)
+        self._saveAndReload(snapshots)
 
     def _onColorAlgorithmChanged(self, index: int):
         algorithm = self.ui.algorithm_combo.itemData(index)
-        self._settings_repo.upsert(
-            [SettingsSnapshot("plot", "color_algorithm", algorithm)]
-        )
+        self._saveAndReload([SettingsSnapshot("plot", "color_algorithm", algorithm)])
         self._updatePlotPreview()
         self.plot_settings_changed.emit()
 
     def _onColorSchemeChanged(self, index: int):
         scheme = self.ui.color_scheme_combo.itemData(index)
-        self._settings_repo.upsert([SettingsSnapshot("plot", "colorScheme", scheme)])
+        self._saveAndReload([SettingsSnapshot("plot", "colorScheme", scheme)])
         self.plot_settings_changed.emit()
 
     def _onLineStyleChanged(self, index: int):
         style = self.ui.line_style_combo.itemData(index)
-        self._settings_repo.upsert([SettingsSnapshot("plot", "lineStyle", style)])
+        self._saveAndReload([SettingsSnapshot("plot", "lineStyle", style)])
         self._updatePlotPreview()
         self.plot_settings_changed.emit()
 
     def _onMarkerChanged(self, index: int):
         marker = self.ui.marker_combo.itemData(index)
-        self._settings_repo.upsert([SettingsSnapshot("plot", "marker", marker)])
+        self._saveAndReload([SettingsSnapshot("plot", "marker", marker)])
         self._updatePlotPreview()
         self.plot_settings_changed.emit()
 
     def _onLineWidthChanged(self, value: float):
-        self._settings_repo.upsert([SettingsSnapshot("plot", "lineWidth", str(value))])
+        self._saveAndReload([SettingsSnapshot("plot", "lineWidth", str(value))])
         self._updatePlotPreview()
         self.plot_settings_changed.emit()
 
     def _onMarkerSizeChanged(self, value: float):
-        self._settings_repo.upsert([SettingsSnapshot("plot", "markerSize", str(value))])
+        self._saveAndReload([SettingsSnapshot("plot", "markerSize", str(value))])
         self._updatePlotPreview()
         self.plot_settings_changed.emit()
 
     def _onGridChanged(self, checked: bool):
-        self._settings_repo.upsert(
+        self._saveAndReload(
             [SettingsSnapshot("plot", "grid", "true" if checked else "false")]
         )
         self._updatePlotPreview()
@@ -304,48 +307,36 @@ class SettingsController(QObject):
 
     def _onGridModeChanged(self, index: int):
         mode = self.ui.grid_mode_combo.itemData(index)
-        self._settings_repo.upsert([SettingsSnapshot("plot", "gridMode", mode)])
+        self._saveAndReload([SettingsSnapshot("plot", "gridMode", mode)])
         self._updatePlotPreview()
         self.plot_settings_changed.emit()
 
     def _onGridDensityChanged(self, value: float):
-        self._settings_repo.upsert(
-            [SettingsSnapshot("plot", "gridDensity", str(value))]
-        )
+        self._saveAndReload([SettingsSnapshot("plot", "gridDensity", str(value))])
         self._updatePlotPreview()
         self.plot_settings_changed.emit()
 
     def _onGridLabelDensityChanged(self, value: float):
-        self._settings_repo.upsert(
-            [SettingsSnapshot("plot", "gridLabelDensity", str(value))]
-        )
+        self._saveAndReload([SettingsSnapshot("plot", "gridLabelDensity", str(value))])
         self._updatePlotPreview()
         self.plot_settings_changed.emit()
 
     def _onTitleFontSizeChanged(self, value: int):
-        self._settings_repo.upsert(
-            [SettingsSnapshot("plot", "titleFontSize", str(value))]
-        )
+        self._saveAndReload([SettingsSnapshot("plot", "titleFontSize", str(value))])
         self._updatePlotPreview()
         self.plot_settings_changed.emit()
 
     def _onLabelFontSizeChanged(self, value: int):
-        self._settings_repo.upsert(
-            [SettingsSnapshot("plot", "labelFontSize", str(value))]
-        )
+        self._saveAndReload([SettingsSnapshot("plot", "labelFontSize", str(value))])
         self._updatePlotPreview()
         self.plot_settings_changed.emit()
 
     def _onTickFontSizeChanged(self, value: int):
-        self._settings_repo.upsert(
-            [SettingsSnapshot("plot", "tickFontSize", str(value))]
-        )
+        self._saveAndReload([SettingsSnapshot("plot", "tickFontSize", str(value))])
         self._updatePlotPreview()
         self.plot_settings_changed.emit()
 
     def _onLegendFontSizeChanged(self, value: int):
-        self._settings_repo.upsert(
-            [SettingsSnapshot("plot", "legendFontSize", str(value))]
-        )
+        self._saveAndReload([SettingsSnapshot("plot", "legendFontSize", str(value))])
         self._updatePlotPreview()
         self.plot_settings_changed.emit()

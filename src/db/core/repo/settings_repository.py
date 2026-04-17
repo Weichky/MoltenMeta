@@ -45,10 +45,7 @@ class SettingsRepository(BaseRepository[SettingsSnapshot]):
     def findBySectionAndKey(self, section: str, key: str) -> SettingsSnapshot | None:
         placeholder = self.dialect.getPlaceholder()
         sql = f"SELECT * FROM settings WHERE section = {placeholder} AND key = {placeholder}"
-        cursor = self.connection.execute(
-            sql, 
-            [section, key]
-        )
+        cursor = self.connection.execute(sql, [section, key])
         row = cursor.fetchone()
 
         if row:

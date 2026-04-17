@@ -64,9 +64,9 @@ class DatabaseTableModel(QtCore.QAbstractTableModel):
 
         self._columns = [row["name"] for row in rows]
 
-        # TODO: Refactor to use a registry-based or configuration-driven approach 
+        # TODO: Refactor to use a registry-based or configuration-driven approach
         # for table-specific column handling instead of hardcoding table names.
-        # Current implementation violates open/closed principle and will lead to 
+        # Current implementation violates open/closed principle and will lead to
         # code bloat as more tables require special handling.
         if self._table_name == "elements":
             # Remove symbol_id column and insert symbol column
@@ -280,7 +280,7 @@ class DatabaseController(QObject):
         super().__init__()
         self.ui = ui
         self._context = context
-        self._db_manager = context.user_db._db_manager
+        self._db_manager = context.user_db.db_manager
         self._logger = context.log.getLogger(__name__)
 
         self._model: DatabaseTableModel | None = None

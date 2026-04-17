@@ -1,7 +1,4 @@
 from .theme_service import ThemeService
-
-ThemeService = ThemeService
-
 from .ads_theme import getAdsStylesheet
 
-getAdsStylesheet = getAdsStylesheet
+__all__ = ["ThemeService", "getAdsStylesheet"]

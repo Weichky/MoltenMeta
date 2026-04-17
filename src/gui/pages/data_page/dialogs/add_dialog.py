@@ -222,7 +222,7 @@ class AddDialog(QtWidgets.QDialog):
         try:
             if fk_table == "symbols":
                 cursor = conn.execute(
-                    f"SELECT id, symbol, name, category FROM symbols ORDER BY category, symbol"
+                    "SELECT id, symbol, name, category FROM symbols ORDER BY category, symbol"
                 )
                 rows = cursor.fetchall()
                 for row in rows:

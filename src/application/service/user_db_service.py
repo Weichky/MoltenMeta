@@ -455,3 +455,7 @@ class UserDbService(QObject):
     @property
     def data_groups_repo(self) -> DataGroupsRepository:
         return self._data_groups_repo
+
+    @property
+    def db_manager(self) -> DatabaseManager:
+        return self._db_manager

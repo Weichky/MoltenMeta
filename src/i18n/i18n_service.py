@@ -4,6 +4,7 @@ from core.fio import getLanguagePackagePath
 
 from catalog import isSupportedLanguage
 
+
 class I18nService(QObject):
     language_changed = Signal()
 

@@ -1,10 +1,6 @@
-from PySide6.QtCore import (
-    QObject
-)
-from PySide6.QtWidgets import (
-    QStatusBar,
-    QWidget
-    )
+from PySide6.QtCore import QObject
+from PySide6.QtWidgets import QStatusBar, QWidget
+
 
 class UiMainWindow(QObject):
     def setupUi(self, mainWindow):
@@ -14,19 +10,18 @@ class UiMainWindow(QObject):
         mainWindow.resize(1200, 800)
         mainWindow.setMinimumSize(800, 600)
 
-        
         # Create central area
         self.centralwidget = QWidget(mainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.centralwidget.setEnabled(True)
         mainWindow.setCentralWidget(self.centralwidget)
-        
+
         # Create status bar
         self.statusBar = QStatusBar(mainWindow)
         self.statusBar.setObjectName("statusBar")
         mainWindow.setStatusBar(self.statusBar)
 
         self.retranslateUi(mainWindow)
-        
+
     def retranslateUi(self, mainWindow):
         mainWindow.setWindowTitle(self.tr("Molten Meta"))

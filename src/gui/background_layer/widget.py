@@ -6,6 +6,7 @@ from i18n import I18nService
 
 from .ui import UiBackgroundLayer
 
+
 class BackgroundLayer(QtWidgets.QWidget):
     def __init__(self, parent, i18nService: I18nService):
         super().__init__(parent)
