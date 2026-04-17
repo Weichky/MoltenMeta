@@ -125,6 +125,8 @@ class PlotPanel(QtWidgets.QWidget):
         config: "PlotStyleConfig",
         x_data: list[float],
         y_data: list[float],
+        x_label: str | None = None,
+        y_label: str | None = None,
     ) -> None:
         style = config.style
         generator = config.colorGenerator
@@ -140,13 +142,21 @@ class PlotPanel(QtWidgets.QWidget):
             linestyle=style.lineStyle,
             markersize=style.markerSize,
         )
+        final_x_label = x_label if x_label is not None else (config.xLabel or config.x)
+        final_y_label = (
+            y_label
+            if y_label is not None
+            else (
+                config.yLabels[0]
+                if config.yLabels
+                else (config.y[0] if config.y else "")
+            )
+        )
         self._ax.set_xlabel(
-            self._wrapLatex(config.xLabel or config.x), fontsize=style.labelFontSize
+            self._wrapLatex(final_x_label), fontsize=style.labelFontSize
         )
         self._ax.set_ylabel(
-            self._wrapLatex(config.yLabels[0])
-            if config.yLabels
-            else (self._wrapLatex(config.y[0]) if config.y else ""),
+            self._wrapLatex(final_y_label),
             fontsize=style.labelFontSize,
         )
         if config.title:
@@ -164,6 +174,8 @@ class PlotPanel(QtWidgets.QWidget):
         config: "PlotStyleConfig",
         x: float,
         y: float,
+        x_label: str | None = None,
+        y_label: str | None = None,
     ) -> None:
         style = config.style
         generator = config.colorGenerator
@@ -178,13 +190,21 @@ class PlotPanel(QtWidgets.QWidget):
             zorder=5,
             marker=style.marker,
         )
+        final_x_label = x_label if x_label is not None else (config.xLabel or config.x)
+        final_y_label = (
+            y_label
+            if y_label is not None
+            else (
+                config.yLabels[0]
+                if config.yLabels
+                else (config.y[0] if config.y else "")
+            )
+        )
         self._ax.set_xlabel(
-            self._wrapLatex(config.xLabel or config.x), fontsize=style.labelFontSize
+            self._wrapLatex(final_x_label), fontsize=style.labelFontSize
         )
         self._ax.set_ylabel(
-            self._wrapLatex(config.yLabels[0])
-            if config.yLabels
-            else (self._wrapLatex(config.y[0]) if config.y else ""),
+            self._wrapLatex(final_y_label),
             fontsize=style.labelFontSize,
         )
         if config.title:

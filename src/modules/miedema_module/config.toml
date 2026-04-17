@@ -96,11 +96,11 @@ is_collection = false
 
 [calculateSingle.plot]
 plotType = "scatter_2d"
-x = "x_A"
-xLabel = "x_A"
-y = ["Delta_H_mix"]
-yLabels = ["\\Delta H_{mix}"]
 title = "Enthalpy of Mixing"
+
+[calculateSingle.plot.coords]
+x = "x_A"
+y = ["Delta_H_mix"]
 
 [calculateRange.inputs]
 symbol = [
@@ -160,8 +160,8 @@ is_collection = true
 
 [calculateRange.plot]
 plotType = "line_2d"
-x = "x_A"
-xLabel = "x_A"
-y = ["Delta_H_mix"]
-yLabels = ["\\Delta H_{mix}"]
 title = "Enthalpy of Mixing vs Composition"
+
+[calculateRange.plot.coords]
+x = "x_A"
+y = ["Delta_H_mix"]

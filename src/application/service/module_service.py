@@ -1,5 +1,6 @@
 from pathlib import Path
 import uuid
+import json
 
 from core.log import LogService
 from framework.module_manager import ModuleManager
@@ -57,21 +58,35 @@ class ModuleService:
         run_id = str(uuid.uuid4())
         parent_run_id = kwargs.get("_parent_run_id")
 
+        dims = result.get("dims", [])
+        units = result.get("units", {})
+
         for value_record in result.get("values", []):
-            # FIXME: This assumes the last key is the output variable name.
-            # Better approach: read output symbol from module config explicitly.
-            # See issue: #weakness-value-extraction
-            numeric_key = list(value_record.keys())[-1]
-            entry = ComputationCacheSnapshot(
-                run_id=run_id,
-                module_id=module_id,
-                method_name=method_name,
-                value=value_record[numeric_key],
-                unit=result.get("units", {}).get(numeric_key, ""),
-                params_json=None,
-                parent_run_id=parent_run_id,
-            )
-            self._computation_cache_repo.insert(entry)
+            if dims:
+                for dim in dims:
+                    if dim in value_record:
+                        entry = ComputationCacheSnapshot(
+                            run_id=run_id,
+                            module_id=module_id,
+                            method_name=method_name,
+                            value=value_record[dim],
+                            unit=units.get(dim, ""),
+                            params_json=json.dumps(value_record),
+                            parent_run_id=parent_run_id,
+                        )
+                        self._computation_cache_repo.insert(entry)
+            else:
+                for key, val in value_record.items():
+                    entry = ComputationCacheSnapshot(
+                        run_id=run_id,
+                        module_id=module_id,
+                        method_name=method_name,
+                        value=val,
+                        unit=units.get(key, ""),
+                        params_json=json.dumps(value_record),
+                        parent_run_id=parent_run_id,
+                    )
+                    self._computation_cache_repo.insert(entry)
 
         self._logger.debug(
             f"Cached {len(result.get('values', []))} results with run_id={run_id}"
