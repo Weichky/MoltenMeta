@@ -122,18 +122,6 @@ class MiedemaCalc:
             r_over_p,
         )
 
-    def _elemIdToSymbol(self, elem_id: int) -> str:
-        """
-        Convert atomic number to element symbol.
-
-        Args:
-            elem_id: Atomic number (1-118)
-
-        Returns:
-            Element symbol string (e.g., "Al", "Si")
-        """
-        return elemIdToSymbol(elem_id)
-
     def calculateSingle(self, elem_A: int, elem_B: int, x_A: float) -> dict:
         """
         Calculate enthalpy of mixing at a single composition.
@@ -169,8 +157,8 @@ class MiedemaCalc:
         inputs_latex = cfg["inputs"]["latex"]
         return {
             "conditions": {
-                "elem_A": self._elemIdToSymbol(elem_A),
-                "elem_B": self._elemIdToSymbol(elem_B),
+                "elem_A": elemIdToSymbol(elem_A),
+                "elem_B": elemIdToSymbol(elem_B),
             },
             "values": [{"x_A": x_A, output_symbol: value}],
             "units": {
@@ -245,8 +233,8 @@ class MiedemaCalc:
 
         return {
             "conditions": {
-                "elem_A": self._elemIdToSymbol(elem_A),
-                "elem_B": self._elemIdToSymbol(elem_B),
+                "elem_A": elemIdToSymbol(elem_A),
+                "elem_B": elemIdToSymbol(elem_B),
             },
             "values": values,
             "units": {

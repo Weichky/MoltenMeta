@@ -22,25 +22,6 @@ with open(_MODULE_DIR / "config.toml", "rb") as _f:
 
 
 class ToopCalc:
-    _OUTPUT_SYMBOL = "follow Z_BC"
-    _OUTPUT_LATEX = MODULE_INFO["calculateSingleProperty"]["outputs"]["latex"][0]
-
-    def _buildOutput(
-        self, elem_A: int, elem_B: int, elem_C: int, values: list[dict]
-    ) -> dict:
-        return {
-            "conditions": {
-                "elem_A": elemIdToSymbol(elem_A),
-                "elem_B": elemIdToSymbol(elem_B),
-                "elem_C": elemIdToSymbol(elem_C),
-            },
-            "values": values,
-            "units": {
-                "x_A": "",
-                "x_B": "",
-                "x_C": "",
-            },
-        }
 
     def calculateSingleProperty(
         self,
@@ -53,4 +34,19 @@ class ToopCalc:
         Z_AC: float,
         Z_BC: float,
     ) -> dict:
+
         x_A = 1 - x_B - x_C
+        value = _toop_algorithm.calculate_single_property(x_B, x_C, Z_AB, Z_AC, Z_BC)
+        
+        cfg = MODULE_INFO["calculateSingleProperty"]
+        output_symbol = cfg["outputs"]["symbol"][0]
+        inputs_latex = cfg["inputs"]["latex"]
+        
+        return {
+            "conditions": {
+                "elem_A": elemIdToSymbol(elem_A),
+                "elem_B": elemIdToSymbol(elem_B),
+                "elem_C": elemIdToSymbol(elem_C),
+            },
+            "values": [{}],
+        }
