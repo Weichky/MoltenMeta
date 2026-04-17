@@ -165,7 +165,7 @@ class SimulationPage(QtWidgets.QWidget):
         module_config = config.get("module", {})
         method_config = config.get(self._current_method, {})
         latex = result.get("latex", {})
-        unit = result.get("unit", {})
+        units = result.get("units", {})
         values = result.get("values", [])
 
         settings = Settings(records=self._context.core_db.settings_repo.findAll())
@@ -177,16 +177,16 @@ class SimulationPage(QtWidgets.QWidget):
         y_keys = plot_config.y
 
         x_label = plot_config.xLabel or latex.get(x_key, x_key)
-        if unit.get(x_key):
-            x_label += f" ({unit[x_key]})"
+        if units.get(x_key):
+            x_label += f" ({units[x_key]})"
 
         y_label = (
             plot_config.yLabels[0]
             if plot_config.yLabels
             else (latex.get(y_keys[0], y_keys[0]) if y_keys else "")
         )
-        if unit.get(y_keys[0]):
-            y_label += f" ({unit[y_keys[0]]})"
+        if units.get(y_keys[0]):
+            y_label += f" ({units[y_keys[0]]})"
 
         plot_color_scheme = settings.plot_color_scheme
         if plot_color_scheme == "follow":
@@ -205,7 +205,9 @@ class SimulationPage(QtWidgets.QWidget):
             y_val = values[0].get(y_keys[0], 0) if y_keys else 0
             self._plot_panel.plotSinglePoint(plot_config, x_val, y_val)
             self.ui.resultLabel.setText(
-                f"{y_keys[0]} = {y_val:.4f} {unit.get(y_keys[0], '')}" if y_keys else ""
+                f"{y_keys[0]} = {y_val:.4f} {units.get(y_keys[0], '')}"
+                if y_keys
+                else ""
             )
         else:
             x_data = [v.get(x_key, 0) for v in values]

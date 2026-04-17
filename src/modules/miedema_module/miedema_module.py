@@ -52,15 +52,6 @@ class MiedemaCalc:
     _Q_OVER_P = 9.4
     _P_MAP: dict[int, float] = {2: 14.1, 1: 12.3, 0: 10.6}
 
-    _OUTPUT_SYMBOL = "Delta_H_mix"
-    _OUTPUT_LATEX = MODULE_INFO["calculateSingle"]["outputs"]["latex"][0]
-    _OUTPUT_UNIT = MODULE_INFO["calculateSingle"]["outputs"]["unit"][0]
-    _INPUT_LATEX = {
-        "elem_A": MODULE_INFO["calculateSingle"]["inputs"]["latex"][0],
-        "elem_B": MODULE_INFO["calculateSingle"]["inputs"]["latex"][1],
-        "x_A": MODULE_INFO["calculateSingle"]["inputs"]["latex"][2],
-    }
-
     def __init__(self):
         self._element_data: dict[int, dict] = {}
         self._loadElementDataFromCSV()
@@ -143,45 +134,6 @@ class MiedemaCalc:
         """
         return elemIdToSymbol(elem_id)
 
-    def _buildOutput(self, elem_A: int, elem_B: int, values: list[dict]) -> dict:
-        """
-        Build standardized output dictionary with complete information.
-
-        The output structure is designed to be self-describing for the
-        plotting and display subsystems:
-        - conditions: Fixed parameters that define the calculation series
-        - values: Array of data points
-        - unit: Units for each variable
-        - latex: LaTeX labels for display
-        - method: Source of the calculation
-
-        Args:
-            elem_A: Atomic number of element A
-            elem_B: Atomic number of element B
-            values: List of {x_A, Delta_H_mix} dictionaries
-
-        Returns:
-            Standardized result dictionary
-        """
-        return {
-            "conditions": {
-                "elem_A": self._elemIdToSymbol(elem_A),
-                "elem_B": self._elemIdToSymbol(elem_B),
-            },
-            "values": values,
-            "unit": {
-                "x_A": "",
-                self._OUTPUT_SYMBOL: self._OUTPUT_UNIT,
-            },
-            "latex": {
-                "elem_A": self._INPUT_LATEX["elem_A"],
-                "elem_B": self._INPUT_LATEX["elem_B"],
-                "x_A": self._INPUT_LATEX["x_A"],
-                self._OUTPUT_SYMBOL: self._OUTPUT_LATEX,
-            },
-            "method": "Miedema",
-        }
-
     def calculateSingle(self, elem_A: int, elem_B: int, x_A: float) -> dict:
         """
         Calculate enthalpy of mixing at a single composition.
@@ -212,9 +164,27 @@ class MiedemaCalc:
         core = _miedema_core.MiedemaCore(elem_props_A, elem_props_B, miedema_const)
         value = core.calculateSingle(x_A)
 
-        return self._buildOutput(
-            elem_A, elem_B, [{"x_A": x_A, self._OUTPUT_SYMBOL: value}]
-        )
+        cfg = MODULE_INFO["calculateSingle"]
+        output_symbol = cfg["outputs"]["symbol"][0]
+        inputs_latex = cfg["inputs"]["latex"]
+        return {
+            "conditions": {
+                "elem_A": self._elemIdToSymbol(elem_A),
+                "elem_B": self._elemIdToSymbol(elem_B),
+            },
+            "values": [{"x_A": x_A, output_symbol: value}],
+            "units": {
+                "x_A": "",
+                output_symbol: cfg["outputs"]["unit"][0],
+            },
+            "latex": {
+                "elem_A": inputs_latex[0],
+                "elem_B": inputs_latex[1],
+                "x_A": inputs_latex[2],
+                output_symbol: cfg["outputs"]["latex"][0],
+            },
+            "method": "Miedema",
+        }
 
     def calculateRange(
         self,
@@ -262,15 +232,35 @@ class MiedemaCalc:
         core = _miedema_core.MiedemaCore(elem_props_A, elem_props_B, miedema_const)
         raw_results = core.calculateRange(x_A_start, x_A_end, n_points)
 
+        cfg = MODULE_INFO["calculateRange"]
+        output_symbol = cfg["outputs"]["symbol"][0]
+        inputs_latex = cfg["inputs"]["latex"]
         values = [
-            {"x_A": x_A, self._OUTPUT_SYMBOL: value}
+            {"x_A": x_A, output_symbol: value}
             for x_A, value in zip(
                 self._generateXPoints(x_A_start, x_A_end, n_points),
                 raw_results,
             )
         ]
 
-        return self._buildOutput(elem_A, elem_B, values)
+        return {
+            "conditions": {
+                "elem_A": self._elemIdToSymbol(elem_A),
+                "elem_B": self._elemIdToSymbol(elem_B),
+            },
+            "values": values,
+            "units": {
+                "x_A": "",
+                output_symbol: cfg["outputs"]["unit"][0],
+            },
+            "latex": {
+                "elem_A": inputs_latex[0],
+                "elem_B": inputs_latex[1],
+                "x_A": inputs_latex[2],
+                output_symbol: cfg["outputs"]["latex"][0],
+            },
+            "method": "Miedema",
+        }
 
     def _generateXPoints(
         self, x_A_start: float, x_A_end: float, n_points: int

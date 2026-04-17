@@ -67,7 +67,7 @@ class ModuleService:
                 module_id=module_id,
                 method_name=method_name,
                 value=value_record[numeric_key],
-                unit=result.get("unit", {}).get("value", ""),
+                unit=result.get("units", {}).get(numeric_key, ""),
                 params_json=None,
                 parent_run_id=parent_run_id,
             )

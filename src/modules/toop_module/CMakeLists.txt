@@ -27,7 +27,7 @@ cmake_minimum_required(VERSION 3.18)
 
 # Define the project name and the programming language(s) used.
 # LANGUAGES CXX means we're using C++.
-# The project name "MiedemaCore" is arbitrary - it doesn't affect the module name.
+# The project name "ToopCore" is arbitrary - it doesn't affect the module name.
 project(ToopCore LANGUAGES CXX)
 
 # -----------------------------------------------------------------------------

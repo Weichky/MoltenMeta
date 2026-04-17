@@ -183,7 +183,7 @@ class InputDialog(QtWidgets.QDialog):
         method_map = self._config.get("raw", {}).get("method_map", [])
         symbols = self._config.get("symbol", [])
         descriptions = self._config.get("description", [])
-        units = self._config.get("unit", [])
+        units = self._config.get("units", [])
 
         self._inputs_layout = QtWidgets.QGridLayout()
         row = 0
