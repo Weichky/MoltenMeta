@@ -268,7 +268,7 @@ class MiedemaCalc:
 
         Returns:
             Dictionary containing:
-            - values: Array of {x_A, ΔH_mix} data points
+            - values: Array of property values (list[float])
             - method: "Miedema"
         """
         elem_props_A = self._getElementProperties(elem_A)
@@ -276,15 +276,11 @@ class MiedemaCalc:
         miedema_const = self._getMiedemaConst(elem_A, elem_B)
 
         core = _miedema_core.MiedemaCore(elem_props_A, elem_props_B, miedema_const)
-        cfg = MODULE_INFO["calculateSingle"]
-        output_symbol = cfg["outputs"]["symbol"][0]
 
         raw_results = core.calculateSingleBatch(x_array)
 
         return {
-            "values": [
-                {"x_A": x, output_symbol: v} for x, v in zip(x_array, raw_results)
-            ],
+            "values": raw_results,
             "method": "Miedema",
         }
 
@@ -309,3 +305,47 @@ class MiedemaCalc:
             return [x_A_start]
         step = (x_A_end - x_A_start) / (n_points - 1)
         return [x_A_start + i * step for i in range(n_points)]
+
+
+class MiedemaProvider:
+    """
+    BinaryDataProvider implementation using Miedema calculations.
+
+    This provider is designed for use by modules like Toop that need
+    binary property data (Z_AB, Z_AC, Z_BC) as input.
+    """
+
+    def __init__(self, module_service):
+        self._module_service = module_service
+
+    def get_values(self, elem_1: int, elem_2: int, x_array: list[float]) -> list[float]:
+        """
+        Get binary property values for an array of compositions.
+
+        Args:
+            elem_1: Atomic number of first element
+            elem_2: Atomic number of second element
+            x_array: Array of mole fractions of elem_1
+
+        Returns:
+            Array of property values corresponding to x_array
+        """
+        result = self._module_service.callMethod(
+            "miedema_module",
+            "calculateSingleBatch",
+            elem_A=elem_1,
+            elem_B=elem_2,
+            x_array=x_array,
+        )
+        return result["values"]
+
+
+def createMiedemaProvider(module_service) -> MiedemaProvider:
+    """
+    Factory function to create a MiedemaProvider.
+
+    Usage:
+        provider = createMiedemaProvider(module_service)
+        toop = ToopCalc(provider)
+    """
+    return MiedemaProvider(module_service)

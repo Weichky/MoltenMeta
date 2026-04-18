@@ -43,8 +43,14 @@ class ModuleService:
             raise AttributeError(
                 f"Module {package_name} does not have method {method_name}"
             )
+
+        skip_cache = kwargs.pop("_skip_cache", False)
+
         self._logger.debug(f"Calling {package_name}.{method_name} with kwargs={kwargs}")
         result = method(**kwargs)
+
+        if skip_cache:
+            return result
 
         if self._computation_cache_repo:
             run_id = self._cacheResult(package_name, method_name, result, kwargs)

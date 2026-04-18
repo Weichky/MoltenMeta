@@ -1,7 +1,7 @@
 [module]
 package_name = "toop_module"
 entry_class = "ToopCalc"
-all_methods = ["calculateSingleProperty", "calculateRange", "calculateContourData"]
+all_methods = ["calculateSingleProperty", "calculateScatter", "calculateContour"]
 
 type = "simulation"
 category = "ternary_thermodynamics"
@@ -93,7 +93,7 @@ scatters = [
     {x = "x_B", y = "x_C", z = "Z_ABC"}
 ]
 
-[calculateRange.inputs]
+[calculateScatter.inputs]
 symbol = [
     "elem_A",
     "elem_B",
@@ -128,7 +128,7 @@ raw.method_map = [
     ["n_points", "int_input"]
 ]
 
-[calculateRange.outputs]
+[calculateScatter.outputs]
 symbol = [
     "Z_ABC"
 ]
@@ -143,18 +143,18 @@ unit = [
 ]
 is_collection = true
 
-[calculateRange.plot]
+[calculateScatter.plot]
 plotType = "scatter_3d"
 title = "{elem_A}-{elem_B}-{elem_C} System"
 
-[calculateRange.plot.coords]
+[calculateScatter.plot.coords]
 scatters = [
     {x = "x_A", y = "x_B", z = "Z_ABC"},
     {x = "x_A", y = "x_C", z = "Z_ABC"},
     {x = "x_B", y = "x_C", z = "Z_ABC"}
 ]
 
-[calculateContourData.inputs]
+[calculateContour.inputs]
 symbol = [
     "elem_A",
     "elem_B",
@@ -194,7 +194,7 @@ raw.method_map = [
     ["n_points", "int_input"]
 ]
 
-[calculateContourData.outputs]
+[calculateContour.outputs]
 symbol = [
     "Z_ABC"
 ]
@@ -209,6 +209,6 @@ unit = [
 ]
 is_collection = true
 
-[calculateContourData.plot]
-plotType = "contour"
+[calculateContour.plot]
+plotType = "contour_triangular"
 title = "{elem_A}-{elem_B}-{elem_C} System"

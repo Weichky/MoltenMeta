@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from PySide6 import QtWidgets
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
+from matplotlib.tri import Triangulation
 import matplotlib as mpl
 import numpy as np
 
@@ -92,6 +93,15 @@ class PlotPanel(QtWidgets.QWidget):
             self._ax.spines["right"].set_color(_DARK_FG)
             self._ax.tick_params(axis="x", colors=_DARK_FG)
             self._ax.tick_params(axis="y", colors=_DARK_FG)
+            if hasattr(self._ax, "zaxis"):
+                self._ax.zaxis.label.set_color(_DARK_FG)
+                self._ax.tick_params(axis="z", colors=_DARK_FG)
+                self._ax.xaxis.pane.fill = False
+                self._ax.yaxis.pane.fill = False
+                self._ax.zaxis.pane.fill = False
+                self._ax.xaxis.pane.set_facecolor(_DARK_BG)
+                self._ax.yaxis.pane.set_facecolor(_DARK_BG)
+                self._ax.zaxis.pane.set_facecolor(_DARK_BG)
         else:
             self._figure.set_facecolor(_LIGHT_BG)
             self._ax.set_facecolor(_LIGHT_BG)
@@ -104,6 +114,9 @@ class PlotPanel(QtWidgets.QWidget):
             self._ax.spines["right"].set_color(_LIGHT_FG)
             self._ax.tick_params(axis="x", colors=_LIGHT_FG)
             self._ax.tick_params(axis="y", colors=_LIGHT_FG)
+            if hasattr(self._ax, "zaxis"):
+                self._ax.zaxis.label.set_color(_LIGHT_FG)
+                self._ax.tick_params(axis="z", colors=_LIGHT_FG)
 
     def setScheme(self, scheme: str) -> None:
         self._setTheme(scheme)
@@ -220,3 +233,285 @@ class PlotPanel(QtWidgets.QWidget):
     def clear(self) -> None:
         self._ax.clear()
         self._canvas.draw()
+
+    def scatter_3d(
+        self,
+        config: "PlotStyleConfig",
+        x_data: list[float],
+        y_data: list[float],
+        z_data: list[float],
+        x_label: str | None = None,
+        y_label: str | None = None,
+        z_label: str | None = None,
+        title: str | None = None,
+    ) -> None:
+        self._figure.clear()
+        self._ax = self._figure.add_subplot(111, projection="3d")
+        self._setTheme(self._current_scheme)
+
+        style = config.style
+        generator = config.colorGenerator
+        color = generator.getColor(0, 1) if generator else style.themeColors.primary
+
+        self._ax.scatter(
+            x_data,
+            y_data,
+            z_data,
+            color=color,
+            s=style.markerSize,
+            marker=style.marker,
+            alpha=0.7,
+        )
+
+        self._ax.set_xlabel(
+            self._wrapLatex(x_label or "x"), fontsize=style.labelFontSize
+        )
+        self._ax.set_ylabel(
+            self._wrapLatex(y_label or "y"), fontsize=style.labelFontSize
+        )
+        self._ax.set_zlabel(
+            self._wrapLatex(z_label or "z"), fontsize=style.labelFontSize
+        )
+
+        if title:
+            self._ax.set_title(self._wrapLatex(title), fontsize=style.titleFontSize)
+
+        self._canvas.draw()
+
+    def contourf(
+        self,
+        config: "PlotStyleConfig",
+        x_mesh: list[list[float]],
+        y_mesh: list[list[float]],
+        z_mesh: list[list[float]],
+        x_label: str | None = None,
+        y_label: str | None = None,
+        title: str | None = None,
+        levels: int = 20,
+    ) -> None:
+        self._ax.clear()
+        self._applyAxisColors()
+
+        style = config.style
+        generator = config.colorGenerator
+
+        import numpy as np
+
+        x_arr = np.array(x_mesh)
+        y_arr = np.array(y_mesh)
+        z_arr = np.array(z_mesh)
+
+        z_min = np.nanmin(z_arr)
+        z_max = np.nanmax(z_arr)
+
+        contour_levels = np.linspace(z_min, z_max, levels)
+        cf = self._ax.contourf(
+            x_arr,
+            y_arr,
+            z_arr,
+            levels=contour_levels,
+            cmap="viridis" if not generator else None,
+            alpha=0.8,
+        )
+
+        if generator:
+            for i, level in enumerate(contour_levels):
+                color = generator.getColor(i, len(contour_levels))
+                self._ax.contour(
+                    x_arr, y_arr, z_arr, levels=[level], colors=[color], linewidths=0.5
+                )
+
+        cbar = self._figure.colorbar(cf, ax=self._ax)
+        cbar.set_label(self._wrapLatex("Z_ABC"), fontsize=style.labelFontSize)
+
+        self._ax.set_xlabel(
+            self._wrapLatex(x_label or "x"), fontsize=style.labelFontSize
+        )
+        self._ax.set_ylabel(
+            self._wrapLatex(y_label or "y"), fontsize=style.labelFontSize
+        )
+
+        if title:
+            self._ax.set_title(self._wrapLatex(title), fontsize=style.titleFontSize)
+
+        self._ax.set_xlim(0, 1)
+        self._ax.set_ylim(0, 1)
+
+        self._canvas.draw()
+
+    def contour_triangular(
+        self,
+        config: "PlotStyleConfig",
+        values: list[dict],
+        levels: int = 20,
+    ) -> None:
+        """
+        Draw contour plot in triangular coordinate system.
+
+        Args:
+            config: Plot style configuration
+            values: List of dicts with x_A, x_B, x_C and Z_ABC
+            levels: Number of contour levels
+        """
+        import numpy as np
+
+        self._figure.clear()
+        self._ax = self._figure.add_subplot(111)
+        self._setTheme(self._current_scheme)
+
+        style = config.style
+        generator = config.colorGenerator
+
+        x_A_arr = np.array([v.get("x_A", 0) for v in values])
+        x_B_arr = np.array([v.get("x_B", 0) for v in values])
+        x_C_arr = np.array([v.get("x_C", 0) for v in values])
+        z_arr = np.array([v.get("Z_ABC", 0) for v in values])
+
+        if len(x_A_arr) == 0 or len(x_B_arr) == 0 or len(x_C_arr) == 0:
+            return
+
+        valid_mask = (
+            ~np.isnan(z_arr)
+            & (x_A_arr >= 0)
+            & (x_A_arr <= 1)
+            & (x_B_arr >= 0)
+            & (x_B_arr <= 1)
+            & (x_C_arr >= 0)
+            & (x_C_arr <= 1)
+            & (x_A_arr + x_B_arr + x_C_arr > 0.99)
+            & (x_A_arr + x_B_arr + x_C_arr < 1.01)
+        )
+
+        if not np.any(valid_mask):
+            return
+
+        x_A_valid = x_A_arr[valid_mask]
+        x_C_valid = x_C_arr[valid_mask]
+        z_valid = z_arr[valid_mask]
+
+        h = np.sqrt(3) / 2
+        x_cart = x_C_valid + 0.5 * x_A_valid
+        y_cart = h * x_A_valid
+
+        triang = Triangulation(x_cart, y_cart)
+
+        z_min = np.min(z_valid)
+        z_max = np.max(z_valid)
+        contour_levels = np.linspace(z_min, z_max, levels)
+
+        if generator:
+            n_colors = len(contour_levels)
+            colors = [generator.getColor(i, n_colors) for i in range(n_colors)]
+            cf = self._ax.tricontourf(
+                triang,
+                z_valid,
+                levels=contour_levels,
+                colors=colors,
+                alpha=0.8,
+            )
+            self._ax.tricontour(
+                triang, z_valid, levels=contour_levels, colors="white", linewidths=0.3
+            )
+        else:
+            cf = self._ax.tricontourf(
+                triang,
+                z_valid,
+                levels=contour_levels,
+                cmap="viridis",
+                alpha=0.8,
+            )
+
+        cbar = self._figure.colorbar(cf, ax=self._ax)
+        cbar.set_label(self._wrapLatex("Z_{ABC}"), fontsize=style.labelFontSize)
+        cbar.ax.tick_params(labelsize=style.tickFontSize)
+
+        self._draw_triangular_axes(style, h)
+
+        if config.title:
+            self._ax.set_title(
+                self._wrapLatex(config.title), fontsize=style.titleFontSize
+            )
+
+        self._canvas.draw()
+
+    def _draw_triangular_axes(self, style, h: float) -> None:
+        """Draw triangular coordinate axes with ticks and labels on all three sides."""
+        self._ax.set_xlim(-0.1, 1.1)
+        self._ax.set_ylim(-0.15, h + 0.2)
+        self._ax.set_aspect("equal")
+        self._ax.axis("off")
+
+        triangle_x = [0, 1, 0.5, 0]
+        triangle_y = [0, 0, h, 0]
+        self._ax.plot(triangle_x, triangle_y, "k-", linewidth=1.0)
+
+        tick_positions = [0.2, 0.4, 0.6, 0.8]
+        tick_length = 0.02
+
+        for t in tick_positions:
+            if t <= 1.0:
+                self._ax.plot([t, t], [-tick_length, tick_length], "k-", linewidth=0.8)
+                self._ax.text(
+                    t,
+                    -0.05,
+                    f"{t:.1f}",
+                    ha="center",
+                    va="top",
+                    fontsize=style.tickFontSize,
+                )
+
+        for i, t in enumerate(tick_positions):
+            if t <= 0.5:
+                x_on_left = t * 0.5
+                y_on_left = t * h
+                dx = -0.02
+                dy = 0
+                self._ax.plot(
+                    [x_on_left - dx, x_on_left + dx],
+                    [y_on_left - dy, y_on_left + dy],
+                    "k-",
+                    linewidth=0.8,
+                )
+                label_x = x_on_left - 0.06
+                label_y = y_on_left
+                self._ax.text(
+                    label_x,
+                    label_y,
+                    f"{1 - t:.1f}",
+                    ha="right",
+                    va="center",
+                    fontsize=style.tickFontSize,
+                )
+
+        for i, t in enumerate(tick_positions):
+            if t <= 0.5:
+                x_on_right = 1 - t * 0.5
+                y_on_right = t * h
+                dx = 0.02
+                dy = 0
+                self._ax.plot(
+                    [x_on_right - dx, x_on_right + dx],
+                    [y_on_right - dy, y_on_right + dy],
+                    "k-",
+                    linewidth=0.8,
+                )
+                label_x = x_on_right + 0.06
+                label_y = y_on_right
+                self._ax.text(
+                    label_x,
+                    label_y,
+                    f"{1 - t:.1f}",
+                    ha="left",
+                    va="center",
+                    fontsize=style.tickFontSize,
+                )
+
+        self._ax.text(
+            0.5, h + 0.1, "A", ha="center", va="bottom", fontsize=style.labelFontSize
+        )
+        self._ax.text(
+            -0.05, -0.05, "B", ha="right", va="top", fontsize=style.labelFontSize
+        )
+        self._ax.text(
+            1.05, -0.05, "C", ha="left", va="top", fontsize=style.labelFontSize
+        )

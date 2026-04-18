@@ -51,6 +51,7 @@ def _buildSymbolInput(parent, hint: str):
 _WIDGET_BUILDERS: dict[str, callable] = {
     "element_id_input": lambda p: _buildSpinBoxWithHint(p, 1, 118, "1-118"),
     "element_symbol_input": lambda p: _buildSymbolInput(p, "e.g. Al, Si"),
+    "text_input": lambda p: _buildSymbolInput(p, "enter value"),
     "int_input": lambda p: _buildSpinBoxWithHint(p, INT32_MIN, INT32_MAX, "integer"),
     "float_input": lambda p: _buildDoubleSpinBoxWithHint(
         p, FLOAT_MIN, FLOAT_MAX, "decimal"
@@ -60,6 +61,7 @@ _WIDGET_BUILDERS: dict[str, callable] = {
 _VALUE_EXTRACTORS: dict[str, callable] = {
     "element_id_input": lambda w: w.value(),
     "element_symbol_input": lambda w: symbolToId(w.text().strip()),
+    "text_input": lambda w: w.text().strip(),
     "int_input": lambda w: w.value(),
     "float_input": lambda w: w.value(),
 }
@@ -216,6 +218,10 @@ class InputDialog(QtWidgets.QDialog):
                 self._inputs_layout.addWidget(container, row, 1)
                 self._raw_widgets[param_name] = spinbox
             elif control_type == "element_symbol_input":
+                widget = _buildSymbolInput(self, hint_text)
+                self._inputs_layout.addWidget(widget, row, 1)
+                self._raw_widgets[param_name] = widget
+            elif control_type == "text_input":
                 widget = _buildSymbolInput(self, hint_text)
                 self._inputs_layout.addWidget(widget, row, 1)
                 self._raw_widgets[param_name] = widget

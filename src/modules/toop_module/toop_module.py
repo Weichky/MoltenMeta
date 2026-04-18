@@ -120,7 +120,7 @@ class ToopCalc:
         x_A_arr, x_B_arr, x_C_arr = _toop_grid.generateTriangularGrid(n_points)
         return list(x_A_arr), list(x_B_arr), list(x_C_arr)
 
-    def calculateRange(
+    def calculateScatter(
         self,
         elem_A: int,
         elem_B: int,
@@ -149,7 +149,7 @@ class ToopCalc:
 
         if not x_A_list:
             return self._emptyResult(
-                elem_A, elem_B, elem_C, MODULE_INFO["calculateRange"]
+                elem_A, elem_B, elem_C, MODULE_INFO["calculateScatter"]
             )
 
         Z_AB_list = self._provider.get_values(elem_A, elem_B, x_A_list)
@@ -178,7 +178,7 @@ class ToopCalc:
             x_B_list, x_C_list, Z_AB_list, Z_AC_list, Z_BC_list
         )
 
-        cfg = MODULE_INFO["calculateRange"]
+        cfg = MODULE_INFO["calculateScatter"]
         output_symbol = cfg["outputs"]["symbol"][0]
 
         values = [
@@ -209,7 +209,7 @@ class ToopCalc:
             "method": "Toop",
         }
 
-    def calculateContourData(
+    def calculateContour(
         self,
         elem_A: int,
         elem_B: int,
@@ -400,6 +400,218 @@ class ToopCalc:
             },
             "dims": ["x_A", "x_B", "x_C", output_symbol],
             "method": "Toop",
+        }
+
+    def calculateScatterWithData(
+        self,
+        elem_A: int,
+        elem_B: int,
+        elem_C: int,
+        n_points: int,
+        Z_AB_list: list[float],
+        Z_AC_list: list[float],
+        Z_BC_list: list[float],
+    ) -> dict:
+        """
+        Calculate Toop model for a triangular grid with direct data input.
+
+        Args:
+            elem_A: Atomic number of element A
+            elem_B: Atomic number of element B
+            elem_C: Atomic number of element C
+            n_points: Number of points per edge
+            Z_AB_list: Pre-computed binary AB values at x_A points
+            Z_AC_list: Pre-computed binary AC values at x_A points
+            Z_BC_list: Pre-computed binary BC values at w_B points
+
+        Returns:
+            Dictionary containing calculation results
+        """
+        if n_points < 0:
+            raise ValueError(f"n_points must be non-negative, got {n_points}")
+
+        if n_points == 0:
+            return self._emptyResult(
+                elem_A, elem_B, elem_C, MODULE_INFO["calculateScatter"]
+            )
+
+        x_A_list, x_B_list, x_C_list = self._generateGrid(n_points)
+
+        if not x_A_list:
+            return self._emptyResult(
+                elem_A, elem_B, elem_C, MODULE_INFO["calculateScatter"]
+            )
+
+        if len(Z_AB_list) != len(x_A_list):
+            raise ValueError(
+                f"Z_AB_list has {len(Z_AB_list)} values, expected {len(x_A_list)}"
+            )
+        if len(Z_AC_list) != len(x_A_list):
+            raise ValueError(
+                f"Z_AC_list has {len(Z_AC_list)} values, expected {len(x_A_list)}"
+            )
+
+        w_B_list = [
+            x_B / (x_B + x_C) if (x_B + x_C) > 0 else 0
+            for x_B, x_C in zip(x_B_list, x_C_list)
+        ]
+        if len(Z_BC_list) != len(w_B_list):
+            raise ValueError(
+                f"Z_BC_list has {len(Z_BC_list)} values, expected {len(w_B_list)}"
+            )
+
+        Z_ABC_list = self.calculatePropertyList(
+            x_B_list, x_C_list, Z_AB_list, Z_AC_list, Z_BC_list
+        )
+
+        cfg = MODULE_INFO["calculateScatter"]
+        output_symbol = cfg["outputs"]["symbol"][0]
+
+        values = [
+            {"x_A": a, "x_B": b, "x_C": c, output_symbol: z}
+            for a, b, c, z in zip(x_A_list, x_B_list, x_C_list, Z_ABC_list)
+        ]
+
+        return {
+            "conditions": {
+                "elem_A": elemIdToSymbol(elem_A),
+                "elem_B": elemIdToSymbol(elem_B),
+                "elem_C": elemIdToSymbol(elem_C),
+            },
+            "values": values,
+            "units": {
+                "x_A": "",
+                "x_B": "",
+                "x_C": "",
+                output_symbol: cfg["outputs"]["unit"][0],
+            },
+            "latex": {
+                "x_A": "x_A",
+                "x_B": "x_B",
+                "x_C": "x_C",
+                output_symbol: cfg["outputs"]["latex"][0],
+            },
+            "dims": ["x_A", "x_B", "x_C", output_symbol],
+            "method": "Toop",
+        }
+
+    def calculateContourWithData(
+        self,
+        elem_A: int,
+        elem_B: int,
+        elem_C: int,
+        plane: str,
+        n_points: int,
+        Z_AB_list: list[float],
+        Z_AC_list: list[float],
+        Z_BC_list: list[float],
+    ) -> dict:
+        """
+        Calculate contour data for x_i-x_j plane with direct data input.
+
+        Args:
+            elem_A: Atomic number of element A
+            elem_B: Atomic number of element B
+            elem_C: Atomic number of element C
+            plane: Projection plane - "x_A-x_B", "x_A-x_C", or "x_B-x_C"
+            n_points: Number of points per axis
+            Z_AB_list: Pre-computed binary AB values at x_A points
+            Z_AC_list: Pre-computed binary AC values at x_A points
+            Z_BC_list: Pre-computed binary BC values at w_B points
+
+        Returns:
+            Dictionary containing meshgrid data for contour plotting
+        """
+        if n_points < 0:
+            raise ValueError(f"n_points must be non-negative, got {n_points}")
+
+        if plane not in ("x_A-x_B", "x_A-x_C", "x_B-x_C"):
+            raise ValueError(f"plane must be x_A-x_B, x_A-x_C, or x_B-x_C, got {plane}")
+
+        if n_points == 0:
+            return {
+                "conditions": {
+                    "elem_A": elemIdToSymbol(elem_A),
+                    "elem_B": elemIdToSymbol(elem_B),
+                    "elem_C": elemIdToSymbol(elem_C),
+                    "plane": plane,
+                },
+                "dims": ["x_A", "x_B", "x_C", "Z_ABC"],
+                "values": [],
+                "latex": {"x_A": "x_A", "x_B": "x_B", "x_C": "x_C", "Z_ABC": "Z_{ABC}"},
+                "units": {"x_A": "", "x_B": "", "x_C": "", "Z_ABC": "kJ/mol"},
+                "x_i": [],
+                "x_j": [],
+                "Z_ABC": [],
+                "plane": plane,
+            }
+
+        x_A_list, x_B_list, x_C_list = self._generateGrid(n_points)
+
+        if not x_A_list:
+            return {
+                "conditions": {
+                    "elem_A": elemIdToSymbol(elem_A),
+                    "elem_B": elemIdToSymbol(elem_B),
+                    "elem_C": elemIdToSymbol(elem_C),
+                    "plane": plane,
+                },
+                "dims": ["x_A", "x_B", "x_C", "Z_ABC"],
+                "values": [],
+                "latex": {"x_A": "x_A", "x_B": "x_B", "x_C": "x_C", "Z_ABC": "Z_{ABC}"},
+                "units": {"x_A": "", "x_B": "", "x_C": "", "Z_ABC": "kJ/mol"},
+                "plane": plane,
+            }
+
+        if len(Z_AB_list) != len(x_A_list):
+            raise ValueError(
+                f"Z_AB_list has {len(Z_AB_list)} values, expected {len(x_A_list)}"
+            )
+        if len(Z_AC_list) != len(x_A_list):
+            raise ValueError(
+                f"Z_AC_list has {len(Z_AC_list)} values, expected {len(x_A_list)}"
+            )
+
+        w_B_list = [
+            x_B / (x_B + x_C) if (x_B + x_C) > 0 else 0
+            for x_B, x_C in zip(x_B_list, x_C_list)
+        ]
+        if len(Z_BC_list) != len(w_B_list):
+            raise ValueError(
+                f"Z_BC_list has {len(Z_BC_list)} values, expected {len(w_B_list)}"
+            )
+
+        Z_ABC_list = self.calculatePropertyList(
+            x_B_list, x_C_list, Z_AB_list, Z_AC_list, Z_BC_list
+        )
+
+        values = [
+            {"x_A": a, "x_B": b, "x_C": c, "Z_ABC": z}
+            for a, b, c, z in zip(x_A_list, x_B_list, x_C_list, Z_ABC_list)
+        ]
+
+        return {
+            "conditions": {
+                "elem_A": elemIdToSymbol(elem_A),
+                "elem_B": elemIdToSymbol(elem_B),
+                "elem_C": elemIdToSymbol(elem_C),
+                "plane": plane,
+            },
+            "dims": ["x_A", "x_B", "x_C", "Z_ABC"],
+            "values": values,
+            "latex": {
+                "x_A": "x_A",
+                "x_B": "x_B",
+                "x_C": "x_C",
+                "Z_ABC": "Z_{ABC}",
+            },
+            "units": {
+                "x_A": "",
+                "x_B": "",
+                "x_C": "",
+                "Z_ABC": "kJ/mol",
+            },
+            "plane": plane,
         }
 
 

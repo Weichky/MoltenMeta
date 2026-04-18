@@ -1,4 +1,5 @@
 import tomllib
+
 from PySide6 import QtWidgets
 
 from core.platform import getRuntimePath
@@ -12,6 +13,7 @@ class SimulationController:
         self._module_service = context.modules
         self._context = context
         self._current_config: dict = {}
+        self._module_widget_cache: dict = {}
 
     def getCategories(self) -> list[str]:
         modules = self._module_service.listModules()
@@ -78,3 +80,43 @@ class SimulationController:
             if m.get("package_name") == package_name:
                 return m
         return None
+
+    def hasModuleWidget(self, package_name: str) -> bool:
+        ui_dir = getRuntimePath() / "modules" / package_name / "ui"
+        if not ui_dir.exists():
+            return False
+        for f in ui_dir.iterdir():
+            if f.name.startswith("widget_") and f.suffix == ".py":
+                return True
+        return False
+
+    def getModuleWidget(
+        self, package_name: str, method_name: str = ""
+    ) -> QtWidgets.QWidget | None:
+        cache_key = f"{package_name}.{method_name}"
+        if cache_key in self._module_widget_cache:
+            return self._module_widget_cache[cache_key]
+
+        try:
+            import sys
+            from importlib import import_module
+
+            runtime_parent = str(getRuntimePath().parent)
+            if runtime_parent not in sys.path:
+                sys.path.insert(0, runtime_parent)
+
+            import_module(f"runtime.modules.{package_name}.ui")
+
+            from runtime.modules.toop_module.ui import create_toop_wizard
+
+            widget = create_toop_wizard(
+                method_name, self._module_service, self._context.user_db
+            )
+            if widget is not None:
+                self._module_widget_cache[cache_key] = widget
+            return widget
+        except Exception as e:
+            self._logger.error(
+                f"Failed to load widget for {package_name}.{method_name}: {e}"
+            )
+            return None

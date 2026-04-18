@@ -68,6 +68,7 @@ class SimulationPage(QtWidgets.QWidget):
         self._current_method: str = ""
         self._result_resolver: ResultResolver | None = None
         self._current_result: dict | None = None
+        self._module_widget: QtWidgets.QWidget | None = None
 
         self.ui = UiSimulationPage()
         self.ui.setupUi(self)
@@ -82,6 +83,14 @@ class SimulationPage(QtWidgets.QWidget):
         self._connectSignals()
         self._populateCategories()
         self._applyTheme()
+
+    def _clearModuleWidget(self) -> None:
+        if self._module_widget is not None:
+            self._module_widget.setParent(None)
+            self._module_widget = None
+
+    def _loadModuleWidget(self) -> None:
+        pass
 
     def _connectSignals(self) -> None:
         self.ui.categoryCombo.currentIndexChanged.connect(self._onCategoryChanged)
@@ -122,6 +131,12 @@ class SimulationPage(QtWidgets.QWidget):
         if index < 0:
             return
         self._current_module = self.ui.moduleCombo.currentData()
+
+        self._clearModuleWidget()
+
+        if self._controller.hasModuleWidget(self._current_module):
+            self._loadModuleWidget()
+
         if self._current_module:
             methods = self._controller.getMethodsByModule(self._current_module)
             self.ui.methodCombo.clear()
@@ -145,10 +160,23 @@ class SimulationPage(QtWidgets.QWidget):
     def _onConfigureClicked(self) -> None:
         if not self._current_module or not self._current_method:
             return
-        accepted, inputs = self._controller.showInputDialog(self._current_method, self)
-        if accepted:
-            self._pending_inputs = inputs
-            self.ui.statusLabel.setText(f"Ready: {len(inputs)} inputs configured")
+
+        if self._controller.hasModuleWidget(self._current_module):
+            dialog = self._controller.getModuleWidget(
+                self._current_module, self._current_method
+            )
+            if dialog is None:
+                self.ui.statusLabel.setText("Error: No wizard for this method")
+                return
+            dialog.resultReady.connect(self._onModuleWidgetResult)
+            dialog.exec()
+        else:
+            accepted, inputs = self._controller.showInputDialog(
+                self._current_method, self
+            )
+            if accepted:
+                self._pending_inputs = inputs
+                self.ui.statusLabel.setText(f"Ready: {len(inputs)} inputs configured")
 
     def _onCalculateClicked(self) -> None:
         if not self._current_module or not self._current_method:
@@ -163,6 +191,16 @@ class SimulationPage(QtWidgets.QWidget):
             result = self._controller.callCalculation(
                 self._current_module, self._current_method, **inputs
             )
+            self._displayResult(result)
+            self.ui.statusLabel.setText("Calculation complete")
+        except Exception as e:
+            self.ui.statusLabel.setText(f"Error: {e}")
+
+    def _onModuleWidgetResult(self, result: dict) -> None:
+        if not self._current_module:
+            return
+
+        try:
             self._displayResult(result)
             self.ui.statusLabel.setText("Calculation complete")
         except Exception as e:
@@ -216,11 +254,6 @@ class SimulationPage(QtWidgets.QWidget):
             module_config, method_config, settings
         )
 
-        x_data = resolved["x_axis"]["data"]
-        y_data = resolved["y_axis"][0]["data"] if resolved["y_axis"] else []
-        x_label = resolved["x_axis"]["label"]
-        y_label = resolved["y_axis"][0]["label"] if resolved["y_axis"] else ""
-
         plot_color_scheme = settings.plot_color_scheme
         if plot_color_scheme == "follow":
             scheme = self._theme_service.scheme
@@ -228,34 +261,79 @@ class SimulationPage(QtWidgets.QWidget):
             scheme = plot_color_scheme
         self._plot_panel.setScheme(scheme)
 
-        is_collection = method_config.get("outputs", {}).get("is_collection", False)
+        plot_type = resolved.get("plot_type", "line_2d")
+        x_data = resolved["x_axis"]["data"]
+        x_label = resolved["x_axis"]["label"]
 
-        if not is_collection:
-            if not x_data or not y_data:
-                self.ui.statusLabel.setText("Error: No result returned")
-                return
-            x_val = x_data[0]
-            y_val = y_data[0]
-            self._plot_panel.plotSinglePoint(
-                plot_config, x_val, y_val, x_label, y_label
-            )
-            self.ui.resultLabel.setText(
-                f"{resolved['y_axis'][0]['key']} = {y_val:.4f} {resolved['y_axis'][0]['unit']}"
-                if resolved["y_axis"]
-                else ""
-            )
-        else:
-            if not x_data or not y_data:
+        if plot_type == "scatter_3d":
+            y_data = resolved["y_axis"][0]["data"] if resolved["y_axis"] else []
+            z_data = resolved["z_axis"]["data"] if resolved["z_axis"] else []
+            y_label = resolved["y_axis"][0]["label"] if resolved["y_axis"] else ""
+            z_label = resolved["z_axis"]["label"] if resolved["z_axis"] else ""
+            if x_data and y_data and z_data:
+                self._plot_panel.scatter_3d(
+                    plot_config, x_data, y_data, z_data, x_label, y_label, z_label
+                )
+                self.ui.resultLabel.setText(f"Scatter 3D: {len(x_data)} points")
+            else:
                 self.ui.statusLabel.setText("Error: Empty result data")
                 return
-            self._plot_panel.plot(plot_config, x_data, y_data, x_label, y_label)
 
-            y_min = min(y_data)
-            idx_min = y_data.index(y_min)
-            x_at_min = x_data[idx_min]
-            self.ui.resultLabel.setText(
-                f"Min: {y_min:.4f} at {resolved['x_axis']['key']}={x_at_min:.2f}"
-            )
+        elif plot_type == "contour":
+            mesh_data = resolved.get("mesh_data", {})
+            x_mesh = mesh_data.get("x_i", [])
+            y_mesh = mesh_data.get("x_j", [])
+            z_mesh = mesh_data.get("Z_ABC", [])
+            y_label = resolved["y_axis"][0]["label"] if resolved["y_axis"] else "x_j"
+            if x_mesh and y_mesh and z_mesh:
+                self._plot_panel.contourf(
+                    plot_config, x_mesh, y_mesh, z_mesh, x_label, y_label
+                )
+                self.ui.resultLabel.setText("Contour plot")
+            else:
+                self.ui.statusLabel.setText("Error: Empty mesh data")
+                return
+
+        elif plot_type == "contour_triangular":
+            values = resolved.get("values", [])
+            if values:
+                self._plot_panel.contour_triangular(plot_config, values)
+                self.ui.resultLabel.setText("Triangular contour plot")
+            else:
+                self.ui.statusLabel.setText("Error: Empty values for triangular plot")
+                return
+
+        else:
+            y_data = resolved["y_axis"][0]["data"] if resolved["y_axis"] else []
+            y_label = resolved["y_axis"][0]["label"] if resolved["y_axis"] else ""
+            is_collection = method_config.get("outputs", {}).get("is_collection", False)
+
+            if not is_collection:
+                if not x_data or not y_data:
+                    self.ui.statusLabel.setText("Error: No result returned")
+                    return
+                x_val = x_data[0]
+                y_val = y_data[0]
+                self._plot_panel.plotSinglePoint(
+                    plot_config, x_val, y_val, x_label, y_label
+                )
+                self.ui.resultLabel.setText(
+                    f"{resolved['y_axis'][0]['key']} = {y_val:.4f} {resolved['y_axis'][0]['unit']}"
+                    if resolved["y_axis"]
+                    else ""
+                )
+            else:
+                if not x_data or not y_data:
+                    self.ui.statusLabel.setText("Error: Empty result data")
+                    return
+                self._plot_panel.plot(plot_config, x_data, y_data, x_label, y_label)
+
+                y_min = min(y_data)
+                idx_min = y_data.index(y_min)
+                x_at_min = x_data[idx_min]
+                self.ui.resultLabel.setText(
+                    f"Min: {y_min:.4f} at {resolved['x_axis']['key']}={x_at_min:.2f}"
+                )
 
         self._updateResultTable(result, resolved)
 
