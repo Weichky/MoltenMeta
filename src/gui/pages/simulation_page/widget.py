@@ -131,6 +131,7 @@ class SimulationPage(QtWidgets.QWidget):
         if index < 0:
             return
         self._current_module = self.ui.moduleCombo.currentData()
+        self._current_method = ""
 
         self._clearModuleWidget()
 
@@ -156,6 +157,7 @@ class SimulationPage(QtWidgets.QWidget):
             )
             self._result_resolver = ResultResolver(method_config.get("plot", {}))
             self._result_resolver.useDefaultCoord()
+            self._current_result = None
             self._setupCoordSelector()
 
     def _onConfigureClicked(self) -> None:
@@ -222,8 +224,12 @@ class SimulationPage(QtWidgets.QWidget):
                 labels = []
                 if coord.get("x"):
                     labels.append(coord["x"])
-                if coord.get("y"):
-                    labels.extend(coord["y"])
+                y_value = coord.get("y", [])
+                if y_value:
+                    if isinstance(y_value, str):
+                        labels.append(y_value)
+                    else:
+                        labels.extend(y_value)
                 if coord.get("z"):
                     labels.append(coord["z"])
                 self.ui.coordSelector.addItem(" × ".join(labels))

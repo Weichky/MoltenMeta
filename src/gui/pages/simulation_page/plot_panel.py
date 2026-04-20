@@ -141,6 +141,8 @@ class PlotPanel(QtWidgets.QWidget):
         x_label: str | None = None,
         y_label: str | None = None,
     ) -> None:
+        self._figure.clear()
+        self._ax = self._figure.add_subplot(111)
         style = config.style
         generator = config.colorGenerator
         self._ax.clear()
@@ -190,6 +192,8 @@ class PlotPanel(QtWidgets.QWidget):
         x_label: str | None = None,
         y_label: str | None = None,
     ) -> None:
+        self._figure.clear()
+        self._ax = self._figure.add_subplot(111)
         style = config.style
         generator = config.colorGenerator
         self._ax.clear()
@@ -289,6 +293,8 @@ class PlotPanel(QtWidgets.QWidget):
         title: str | None = None,
         levels: int = 20,
     ) -> None:
+        self._figure.clear()
+        self._ax = self._figure.add_subplot(111)
         self._ax.clear()
         self._applyAxisColors()
 
