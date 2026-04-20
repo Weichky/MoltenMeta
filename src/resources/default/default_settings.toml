@@ -32,3 +32,19 @@ grid = true
 gridMode = "auto"
 gridDensity = 1.0
 fontSize = 12
+
+[plot.scatter_3d]
+default_coord_index = 0
+xLabel = ""
+yLabel = ""
+zLabel = ""
+
+[plot.contour_triangular]
+height_factor = 0.8660254037844386
+xlim = [-0.1, 1.1]
+ylim = [-0.15, 1.0]
+tick_positions = [0.2, 0.4, 0.6, 0.8]
+tick_length = 0.02
+elem_labels = ["A", "B", "C"]
+colorbar_label = "Z_{ABC}"
+levels = 20

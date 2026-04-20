@@ -155,6 +155,7 @@ class SimulationPage(QtWidgets.QWidget):
                 self._current_method, {}
             )
             self._result_resolver = ResultResolver(method_config.get("plot", {}))
+            self._result_resolver.useDefaultCoord()
             self._setupCoordSelector()
 
     def _onConfigureClicked(self) -> None:

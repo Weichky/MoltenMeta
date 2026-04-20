@@ -343,7 +343,7 @@ class PlotPanel(QtWidgets.QWidget):
         self,
         config: "PlotStyleConfig",
         values: list[dict],
-        levels: int = 20,
+        levels: int | None = None,
     ) -> None:
         """
         Draw contour plot in triangular coordinate system.
@@ -351,7 +351,7 @@ class PlotPanel(QtWidgets.QWidget):
         Args:
             config: Plot style configuration
             values: List of dicts with x_A, x_B, x_C and Z_ABC
-            levels: Number of contour levels
+            levels: Number of contour levels (overrides config if provided)
         """
         import numpy as np
 
@@ -361,6 +361,14 @@ class PlotPanel(QtWidgets.QWidget):
 
         style = config.style
         generator = config.colorGenerator
+        h = config.triangular_height_factor
+        xlim = config.triangular_xlim
+        ylim = config.triangular_ylim
+        tick_positions = config.triangular_tick_positions
+        tick_length = config.triangular_tick_length
+        elem_labels = config.triangular_elem_labels
+        colorbar_label = config.triangular_colorbar_label
+        plot_levels = levels if levels is not None else config.triangular_levels
 
         x_A_arr = np.array([v.get("x_A", 0) for v in values])
         x_B_arr = np.array([v.get("x_B", 0) for v in values])
@@ -389,7 +397,6 @@ class PlotPanel(QtWidgets.QWidget):
         x_C_valid = x_C_arr[valid_mask]
         z_valid = z_arr[valid_mask]
 
-        h = np.sqrt(3) / 2
         x_cart = x_C_valid + 0.5 * x_A_valid
         y_cart = h * x_A_valid
 
@@ -397,7 +404,7 @@ class PlotPanel(QtWidgets.QWidget):
 
         z_min = np.min(z_valid)
         z_max = np.max(z_valid)
-        contour_levels = np.linspace(z_min, z_max, levels)
+        contour_levels = np.linspace(z_min, z_max, plot_levels)
 
         if generator:
             n_colors = len(contour_levels)
@@ -422,10 +429,18 @@ class PlotPanel(QtWidgets.QWidget):
             )
 
         cbar = self._figure.colorbar(cf, ax=self._ax)
-        cbar.set_label(self._wrapLatex("Z_{ABC}"), fontsize=style.labelFontSize)
+        cbar.set_label(self._wrapLatex(colorbar_label), fontsize=style.labelFontSize)
         cbar.ax.tick_params(labelsize=style.tickFontSize)
 
-        self._draw_triangular_axes(style, h)
+        self._draw_triangular_axes(
+            style,
+            h,
+            xlim,
+            ylim,
+            tick_positions,
+            tick_length,
+            elem_labels,
+        )
 
         if config.title:
             self._ax.set_title(
@@ -434,19 +449,25 @@ class PlotPanel(QtWidgets.QWidget):
 
         self._canvas.draw()
 
-    def _draw_triangular_axes(self, style, h: float) -> None:
+    def _draw_triangular_axes(
+        self,
+        style,
+        h: float,
+        xlim: list[float],
+        ylim: list[float],
+        tick_positions: list[float],
+        tick_length: float,
+        elem_labels: list[str],
+    ) -> None:
         """Draw triangular coordinate axes with ticks and labels on all three sides."""
-        self._ax.set_xlim(-0.1, 1.1)
-        self._ax.set_ylim(-0.15, h + 0.2)
+        self._ax.set_xlim(xlim[0], xlim[1])
+        self._ax.set_ylim(ylim[0], ylim[1])
         self._ax.set_aspect("equal")
         self._ax.axis("off")
 
         triangle_x = [0, 1, 0.5, 0]
         triangle_y = [0, 0, h, 0]
         self._ax.plot(triangle_x, triangle_y, "k-", linewidth=1.0)
-
-        tick_positions = [0.2, 0.4, 0.6, 0.8]
-        tick_length = 0.02
 
         for t in tick_positions:
             if t <= 1.0:
@@ -506,12 +527,31 @@ class PlotPanel(QtWidgets.QWidget):
                     fontsize=style.tickFontSize,
                 )
 
+        label_a = elem_labels[0] if len(elem_labels) > 0 else "A"
+        label_b = elem_labels[1] if len(elem_labels) > 1 else "B"
+        label_c = elem_labels[2] if len(elem_labels) > 2 else "C"
+
         self._ax.text(
-            0.5, h + 0.1, "A", ha="center", va="bottom", fontsize=style.labelFontSize
+            0.5,
+            h + 0.1,
+            label_a,
+            ha="center",
+            va="bottom",
+            fontsize=style.labelFontSize,
         )
         self._ax.text(
-            -0.05, -0.05, "B", ha="right", va="top", fontsize=style.labelFontSize
+            xlim[0] - 0.05,
+            -0.05,
+            label_b,
+            ha="right",
+            va="top",
+            fontsize=style.labelFontSize,
         )
         self._ax.text(
-            1.05, -0.05, "C", ha="left", va="top", fontsize=style.labelFontSize
+            xlim[1] + 0.05,
+            -0.05,
+            label_c,
+            ha="left",
+            va="top",
+            fontsize=style.labelFontSize,
         )

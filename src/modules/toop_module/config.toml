@@ -85,8 +85,13 @@ is_collection = false
 [calculateSingleProperty.plot]
 plotType = "scatter_3d"
 title = "{elem_A}-{elem_B}-{elem_C} System"
+default_coord_index = 0
 
 [calculateSingleProperty.plot.coords]
+xLabel = "x_B"
+yLabel = "x_C"
+zLabel = "Z_{ABC}"
+
 scatters = [
     {x = "x_A", y = "x_B", z = "Z_ABC"},
     {x = "x_A", y = "x_C", z = "Z_ABC"},
@@ -146,8 +151,13 @@ is_collection = true
 [calculateScatter.plot]
 plotType = "scatter_3d"
 title = "{elem_A}-{elem_B}-{elem_C} System"
+default_coord_index = 2
 
 [calculateScatter.plot.coords]
+xLabel = "x_B"
+yLabel = "x_C"
+zLabel = "Z_{ABC}"
+
 scatters = [
     {x = "x_A", y = "x_B", z = "Z_ABC"},
     {x = "x_A", y = "x_C", z = "Z_ABC"},

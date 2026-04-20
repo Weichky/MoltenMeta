@@ -25,6 +25,10 @@ class ResultResolver:
         self._plot_type = config.get("plotType", "line_2d")
         coords = config.get("coords", {})
         self._scatters = coords.get("scatters")
+        self._default_coord_index = config.get("default_coord_index", 0)
+        self._x_label_override = coords.get("xLabel", "")
+        self._y_label_override = coords.get("yLabel", "")
+        self._z_label_override = coords.get("zLabel", "")
         self._current_coord_index = 0
 
         if self._scatters is None:
@@ -123,19 +127,29 @@ class ResultResolver:
         units = result.get("units", {})
 
         x_key = coord.get("x", "")
-        y_keys = coord.get("y", [])
+        y_value = coord.get("y", [])
+        if isinstance(y_value, str):
+            y_keys = [y_value]
+        else:
+            y_keys = y_value
         z_key = coord.get("z", "")
 
         x_data = [v.get(x_key, 0) for v in values]
 
-        x_label = latex.get(x_key, x_key)
+        if self._x_label_override:
+            x_label = self._x_label_override
+        else:
+            x_label = latex.get(x_key, x_key)
         x_unit = units.get(x_key, "")
         if x_unit:
             x_label = f"{x_label} ({x_unit})"
 
         y_axis = []
         for y_key in y_keys:
-            y_label = latex.get(y_key, y_key)
+            if self._y_label_override:
+                y_label = self._y_label_override
+            else:
+                y_label = latex.get(y_key, y_key)
             y_unit = units.get(y_key, "")
             if y_unit:
                 y_label = f"{y_label} ({y_unit})"
@@ -150,7 +164,10 @@ class ResultResolver:
 
         z_axis = None
         if z_key:
-            z_label = latex.get(z_key, z_key)
+            if self._z_label_override:
+                z_label = self._z_label_override
+            else:
+                z_label = latex.get(z_key, z_key)
             z_unit = units.get(z_key, "")
             if z_unit:
                 z_label = f"{z_label} ({z_unit})"
@@ -187,7 +204,11 @@ class ResultResolver:
         units = result.get("units", {})
 
         x_key = coord.get("x", "")
-        y_keys = coord.get("y", [])
+        y_value = coord.get("y", [])
+        if isinstance(y_value, str):
+            y_keys = [y_value]
+        else:
+            y_keys = y_value
 
         x_data = [v.get(x_key, 0) for v in values]
 
@@ -230,6 +251,10 @@ class ResultResolver:
     def setCurrentCoord(self, index: int) -> None:
         if 0 <= index < len(self._scatters):
             self._current_coord_index = index
+
+    def useDefaultCoord(self) -> None:
+        if 0 <= self._default_coord_index < len(self._scatters):
+            self._current_coord_index = self._default_coord_index
 
     @property
     def available_coords(self) -> list[dict]:

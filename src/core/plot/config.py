@@ -10,6 +10,15 @@ from catalog import (
     DEFAULT_THEME_PRESET,
     DEFAULT_ALGORITHM,
     ColorAlgorithm,
+    DEFAULT_SCATTER_3D_DEFAULT_COORD_INDEX,
+    DEFAULT_CONTOUR_TRIANGULAR_HEIGHT_FACTOR,
+    DEFAULT_CONTOUR_TRIANGULAR_XLIM,
+    DEFAULT_CONTOUR_TRIANGULAR_YLIM,
+    DEFAULT_CONTOUR_TRIANGULAR_TICK_POSITIONS,
+    DEFAULT_CONTOUR_TRIANGULAR_TICK_LENGTH,
+    DEFAULT_CONTOUR_TRIANGULAR_ELEM_LABELS,
+    DEFAULT_CONTOUR_TRIANGULAR_COLORBAR_LABEL,
+    DEFAULT_CONTOUR_TRIANGULAR_LEVELS,
 )
 
 from core.plot.color import ColorPalette, ColorGenerator, ThemeColors
@@ -29,6 +38,26 @@ class PlotStyleConfig:
     y: list[str] = field(default_factory=list)
     yLabels: list[str] = field(default_factory=list)
     title: str = ""
+    scatter3d_default_coord_index: int = DEFAULT_SCATTER_3D_DEFAULT_COORD_INDEX
+    scatter3d_x_label: str = ""
+    scatter3d_y_label: str = ""
+    scatter3d_z_label: str = ""
+    triangular_height_factor: float = DEFAULT_CONTOUR_TRIANGULAR_HEIGHT_FACTOR
+    triangular_xlim: list[float] = field(
+        default_factory=lambda: DEFAULT_CONTOUR_TRIANGULAR_XLIM.copy()
+    )
+    triangular_ylim: list[float] = field(
+        default_factory=lambda: DEFAULT_CONTOUR_TRIANGULAR_YLIM.copy()
+    )
+    triangular_tick_positions: list[float] = field(
+        default_factory=lambda: DEFAULT_CONTOUR_TRIANGULAR_TICK_POSITIONS.copy()
+    )
+    triangular_tick_length: float = DEFAULT_CONTOUR_TRIANGULAR_TICK_LENGTH
+    triangular_elem_labels: list[str] = field(
+        default_factory=lambda: DEFAULT_CONTOUR_TRIANGULAR_ELEM_LABELS.copy()
+    )
+    triangular_colorbar_label: str = DEFAULT_CONTOUR_TRIANGULAR_COLORBAR_LABEL
+    triangular_levels: int = DEFAULT_CONTOUR_TRIANGULAR_LEVELS
 
 
 def _getDefaultSettings() -> dict:
@@ -271,9 +300,87 @@ class PlotStyleService:
         self, module_config: dict, method_config: dict, settings: "Settings | None"
     ) -> PlotStyleConfig:
         plot_config = method_config.get("plot", {})
+        module_plot_config = module_config.get("plot", {})
+        global_plot = _getDefaultSettings().get("plot", {})
         style = self.buildStyle(module_config, method_config, settings)
         theme = style.themeColors or ColorPalette.getThemeColors(DEFAULT_THEME_PRESET)
         generator = ColorGenerator(theme, style.algorithm)
+
+        scatter3d_global = global_plot.get("scatter_3d", {})
+        triangular_global = global_plot.get("contour_triangular", {})
+
+        scatter3d_default_coord_index = (
+            plot_config.get("default_coord_index")
+            or module_plot_config.get("default_coord_index")
+            or scatter3d_global.get("default_coord_index")
+            or DEFAULT_SCATTER_3D_DEFAULT_COORD_INDEX
+        )
+        scatter3d_x_label = (
+            plot_config.get("xLabel")
+            or module_plot_config.get("xLabel")
+            or scatter3d_global.get("xLabel")
+            or ""
+        )
+        scatter3d_y_label = (
+            plot_config.get("yLabel")
+            or module_plot_config.get("yLabel")
+            or scatter3d_global.get("yLabel")
+            or ""
+        )
+        scatter3d_z_label = (
+            plot_config.get("zLabel")
+            or module_plot_config.get("zLabel")
+            or scatter3d_global.get("zLabel")
+            or ""
+        )
+        triangular_height_factor = (
+            plot_config.get("height_factor")
+            or module_plot_config.get("height_factor")
+            or triangular_global.get("height_factor")
+            or DEFAULT_CONTOUR_TRIANGULAR_HEIGHT_FACTOR
+        )
+        triangular_xlim = (
+            plot_config.get("xlim")
+            or module_plot_config.get("xlim")
+            or triangular_global.get("xlim")
+            or DEFAULT_CONTOUR_TRIANGULAR_XLIM
+        )
+        triangular_ylim = (
+            plot_config.get("ylim")
+            or module_plot_config.get("ylim")
+            or triangular_global.get("ylim")
+            or DEFAULT_CONTOUR_TRIANGULAR_YLIM
+        )
+        triangular_tick_positions = (
+            plot_config.get("tick_positions")
+            or module_plot_config.get("tick_positions")
+            or triangular_global.get("tick_positions")
+            or DEFAULT_CONTOUR_TRIANGULAR_TICK_POSITIONS
+        )
+        triangular_tick_length = (
+            plot_config.get("tick_length")
+            or module_plot_config.get("tick_length")
+            or triangular_global.get("tick_length")
+            or DEFAULT_CONTOUR_TRIANGULAR_TICK_LENGTH
+        )
+        triangular_elem_labels = (
+            plot_config.get("elem_labels")
+            or module_plot_config.get("elem_labels")
+            or triangular_global.get("elem_labels")
+            or DEFAULT_CONTOUR_TRIANGULAR_ELEM_LABELS
+        )
+        triangular_colorbar_label = (
+            plot_config.get("colorbar_label")
+            or module_plot_config.get("colorbar_label")
+            or triangular_global.get("colorbar_label")
+            or DEFAULT_CONTOUR_TRIANGULAR_COLORBAR_LABEL
+        )
+        triangular_levels = (
+            plot_config.get("levels")
+            or module_plot_config.get("levels")
+            or triangular_global.get("levels")
+            or DEFAULT_CONTOUR_TRIANGULAR_LEVELS
+        )
 
         return PlotStyleConfig(
             plotType=plot_config.get("plotType", DEFAULT_PLOT_TYPE),
@@ -284,4 +391,16 @@ class PlotStyleService:
             y=plot_config.get("y", []),
             yLabels=plot_config.get("yLabels", []),
             title=plot_config.get("title", ""),
+            scatter3d_default_coord_index=scatter3d_default_coord_index,
+            scatter3d_x_label=scatter3d_x_label,
+            scatter3d_y_label=scatter3d_y_label,
+            scatter3d_z_label=scatter3d_z_label,
+            triangular_height_factor=triangular_height_factor,
+            triangular_xlim=triangular_xlim,
+            triangular_ylim=triangular_ylim,
+            triangular_tick_positions=triangular_tick_positions,
+            triangular_tick_length=triangular_tick_length,
+            triangular_elem_labels=triangular_elem_labels,
+            triangular_colorbar_label=triangular_colorbar_label,
+            triangular_levels=triangular_levels,
         )
