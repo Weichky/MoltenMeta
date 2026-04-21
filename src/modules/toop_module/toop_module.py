@@ -411,6 +411,8 @@ class ToopCalc:
         Z_AB_list: list[float],
         Z_AC_list: list[float],
         Z_BC_list: list[float],
+        z_latex: str = "",
+        z_unit: str = "",
     ) -> dict:
         """
         Calculate Toop model for a triangular grid with direct data input.
@@ -423,6 +425,8 @@ class ToopCalc:
             Z_AB_list: Pre-computed binary AB values at x_A points
             Z_AC_list: Pre-computed binary AC values at x_A points
             Z_BC_list: Pre-computed binary BC values at w_B points
+            z_latex: LaTeX symbol for z-axis property
+            z_unit: Unit for z-axis property
 
         Returns:
             Dictionary containing calculation results
@@ -466,6 +470,8 @@ class ToopCalc:
 
         cfg = MODULE_INFO["calculateScatter"]
         output_symbol = cfg["outputs"]["symbol"][0]
+        final_latex = z_latex if z_latex else cfg["outputs"]["latex"][0]
+        final_unit = z_unit if z_unit else cfg["outputs"]["unit"][0]
 
         values = [
             {"x_A": a, "x_B": b, "x_C": c, output_symbol: z}
@@ -483,13 +489,13 @@ class ToopCalc:
                 "x_A": "",
                 "x_B": "",
                 "x_C": "",
-                output_symbol: cfg["outputs"]["unit"][0],
+                output_symbol: final_unit,
             },
             "latex": {
                 "x_A": "x_A",
                 "x_B": "x_B",
                 "x_C": "x_C",
-                output_symbol: cfg["outputs"]["latex"][0],
+                output_symbol: final_latex,
             },
             "dims": ["x_A", "x_B", "x_C", output_symbol],
             "method": "Toop",

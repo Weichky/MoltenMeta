@@ -277,9 +277,18 @@ class SimulationPage(QtWidgets.QWidget):
             z_data = resolved["z_axis"]["data"] if resolved["z_axis"] else []
             y_label = resolved["y_axis"][0]["label"] if resolved["y_axis"] else ""
             z_label = resolved["z_axis"]["label"] if resolved["z_axis"] else ""
+            conditions = resolved.get("conditions", {})
+            title = resolved.get("title", "")
             if x_data and y_data and z_data:
                 self._plot_panel.scatter_3d(
-                    plot_config, x_data, y_data, z_data, x_label, y_label, z_label
+                    plot_config,
+                    x_data,
+                    y_data,
+                    z_data,
+                    x_label,
+                    y_label,
+                    z_label,
+                    title,
                 )
                 self.ui.resultLabel.setText(f"Scatter 3D: {len(x_data)} points")
             else:
@@ -303,8 +312,17 @@ class SimulationPage(QtWidgets.QWidget):
 
         elif plot_type == "contour_triangular":
             values = resolved.get("values", [])
+            conditions = resolved.get("conditions", {})
+            title = resolved.get("title", "")
+            z_label = (
+                resolved.get("z_axis", {}).get("label", "")
+                if resolved.get("z_axis")
+                else ""
+            )
             if values:
-                self._plot_panel.contour_triangular(plot_config, values)
+                self._plot_panel.contour_triangular(
+                    plot_config, values, conditions, title, z_label
+                )
                 self.ui.resultLabel.setText("Triangular contour plot")
             else:
                 self.ui.statusLabel.setText("Error: Empty values for triangular plot")

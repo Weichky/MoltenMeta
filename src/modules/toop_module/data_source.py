@@ -21,6 +21,11 @@ class DataSource(ABC):
     def unit(self) -> str:
         """返回单位，如 'kJ/mol'"""
 
+    @property
+    @abstractmethod
+    def latex(self) -> str:
+        """返回 LaTeX 符号，如 '\\Delta H_{mix}'"""
+
     @abstractmethod
     def get_value(self, elem_1: int, elem_2: int, x: float) -> float:
         """单点查询"""
@@ -37,11 +42,15 @@ class ModuleDataSource(DataSource):
         module_name: str,
         method_name: str,
         output_symbol: str,
+        latex: str = "",
+        unit: str = "",
     ):
         self._ms = module_service
         self._module = module_name
         self._method = method_name
         self._output_symbol = output_symbol
+        self._latex = latex
+        self._unit = unit
 
     @property
     def source_type(self) -> str:
@@ -53,7 +62,11 @@ class ModuleDataSource(DataSource):
 
     @property
     def unit(self) -> str:
-        return ""
+        return self._unit
+
+    @property
+    def latex(self) -> str:
+        return self._latex
 
     def get_value(self, elem_1: int, elem_2: int, x: float) -> float:
         result = self._ms.callMethod(
@@ -79,9 +92,10 @@ class ModuleDataSource(DataSource):
 
 
 class DatabaseDataSource(DataSource):
-    def __init__(self, db_record: dict, unit: str):
+    def __init__(self, db_record: dict, unit: str = "", latex: str = ""):
         self._record = db_record
         self._unit = unit
+        self._latex = latex
 
     @property
     def source_type(self) -> str:
@@ -94,6 +108,10 @@ class DatabaseDataSource(DataSource):
     @property
     def unit(self) -> str:
         return self._unit
+
+    @property
+    def latex(self) -> str:
+        return self._latex
 
     def get_value(self, elem_1: int, elem_2: int, x: float) -> float:
         return self._record.get("value", 0.0)

@@ -156,7 +156,6 @@ default_coord_index = 2
 [calculateScatter.plot.coords]
 xLabel = "x_B"
 yLabel = "x_C"
-zLabel = "Z_{ABC}"
 
 scatters = [
     {x = "x_A", y = "x_B", z = "Z_ABC"},

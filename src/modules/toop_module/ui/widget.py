@@ -202,8 +202,19 @@ class ToopWizardDialog(QDialog):
         ]
         Z_BC_list = Z_BC_source.get_values(elem_b, elem_c, w_B_list)
 
+        z_latex = Z_AB_source.latex
+        z_unit = Z_AB_source.unit
+
         result = toop.calculateScatterWithData(
-            elem_a, elem_b, elem_c, n_points, Z_AB_list, Z_AC_list, Z_BC_list
+            elem_a,
+            elem_b,
+            elem_c,
+            n_points,
+            Z_AB_list,
+            Z_AC_list,
+            Z_BC_list,
+            z_latex,
+            z_unit,
         )
 
         return result

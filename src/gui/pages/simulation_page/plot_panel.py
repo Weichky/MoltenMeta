@@ -129,7 +129,13 @@ class PlotPanel(QtWidgets.QWidget):
             return text
         if text.startswith("$") and text.endswith("$"):
             return text
-        if any(c in text for c in ("\\", "^", "_", "{")):
+        if text.count("_") >= 2:
+            return text
+        if "_" in text:
+            return f"${text}$"
+        if "\\" in text:
+            return f"${text}$"
+        if "^" in text or "{" in text:
             return f"${text}$"
         return text
 
@@ -349,6 +355,9 @@ class PlotPanel(QtWidgets.QWidget):
         self,
         config: "PlotStyleConfig",
         values: list[dict],
+        conditions: dict | None = None,
+        title: str | None = None,
+        z_label: str | None = None,
         levels: int | None = None,
     ) -> None:
         """
@@ -357,6 +366,9 @@ class PlotPanel(QtWidgets.QWidget):
         Args:
             config: Plot style configuration
             values: List of dicts with x_A, x_B, x_C and Z_ABC
+            conditions: Dict with elem_A, elem_B, elem_C symbols
+            title: Plot title (overrides config.title if provided)
+            z_label: Z-axis label (overrides config if provided)
             levels: Number of contour levels (overrides config if provided)
         """
         import numpy as np
@@ -372,9 +384,18 @@ class PlotPanel(QtWidgets.QWidget):
         ylim = config.triangular_ylim
         tick_positions = config.triangular_tick_positions
         tick_length = config.triangular_tick_length
-        elem_labels = config.triangular_elem_labels
-        colorbar_label = config.triangular_colorbar_label
         plot_levels = levels if levels is not None else config.triangular_levels
+
+        if conditions:
+            elem_labels = [
+                conditions.get("elem_A", "A"),
+                conditions.get("elem_B", "B"),
+                conditions.get("elem_C", "C"),
+            ]
+        else:
+            elem_labels = config.triangular_elem_labels
+
+        final_colorbar_label = z_label if z_label else config.triangular_colorbar_label
 
         x_A_arr = np.array([v.get("x_A", 0) for v in values])
         x_B_arr = np.array([v.get("x_B", 0) for v in values])
@@ -435,7 +456,9 @@ class PlotPanel(QtWidgets.QWidget):
             )
 
         cbar = self._figure.colorbar(cf, ax=self._ax)
-        cbar.set_label(self._wrapLatex(colorbar_label), fontsize=style.labelFontSize)
+        cbar.set_label(
+            self._wrapLatex(final_colorbar_label), fontsize=style.labelFontSize
+        )
         cbar.ax.tick_params(labelsize=style.tickFontSize)
 
         self._draw_triangular_axes(
@@ -448,9 +471,10 @@ class PlotPanel(QtWidgets.QWidget):
             elem_labels,
         )
 
-        if config.title:
+        final_title = title if title else config.title
+        if final_title:
             self._ax.set_title(
-                self._wrapLatex(config.title), fontsize=style.titleFontSize
+                self._wrapLatex(final_title), fontsize=style.titleFontSize
             )
 
         self._canvas.draw()

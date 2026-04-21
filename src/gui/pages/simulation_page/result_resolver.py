@@ -17,6 +17,8 @@ class ResolvedData(TypedDict):
     current_coord_index: int
     plot_type: str
     mesh_data: dict | None
+    conditions: dict
+    title: str
 
 
 class ResultResolver:
@@ -30,6 +32,7 @@ class ResultResolver:
         self._y_label_override = coords.get("yLabel", "")
         self._z_label_override = coords.get("zLabel", "")
         self._current_coord_index = 0
+        self._title_template = config.get("title", "")
 
         if self._scatters is None:
             single_coord = {
@@ -37,6 +40,13 @@ class ResultResolver:
                 "y": coords.get("y", []),
             }
             self._scatters = [single_coord]
+
+    def _replaceTitlePlaceholders(self, title: str, conditions: dict) -> str:
+        for key, value in conditions.items():
+            placeholder = "{" + key + "}"
+            if placeholder in title:
+                title = title.replace(placeholder, str(value))
+        return title
 
     def resolve(self, result: dict) -> ResolvedData | None:
         if self._plot_type == "contour":
@@ -84,6 +94,10 @@ class ResultResolver:
             "current_coord_index": 0,
             "plot_type": "contour",
             "mesh_data": mesh_data,
+            "conditions": result.get("conditions", {}),
+            "title": self._replaceTitlePlaceholders(
+                self._title_template, result.get("conditions", {})
+            ),
         }
 
     def _resolve_contour_triangular(self, result: dict) -> ResolvedData | None:
@@ -115,6 +129,10 @@ class ResultResolver:
             "current_coord_index": 0,
             "plot_type": "contour_triangular",
             "values": result.get("values", []),
+            "conditions": result.get("conditions", {}),
+            "title": self._replaceTitlePlaceholders(
+                self._title_template, result.get("conditions", {})
+            ),
         }
 
     def _resolve_scatter_3d(self, result: dict) -> ResolvedData | None:
@@ -192,6 +210,10 @@ class ResultResolver:
             "current_coord_index": self._current_coord_index,
             "plot_type": "scatter_3d",
             "mesh_data": None,
+            "conditions": result.get("conditions", {}),
+            "title": self._replaceTitlePlaceholders(
+                self._title_template, result.get("conditions", {})
+            ),
         }
 
     def _resolve_2d(self, result: dict) -> ResolvedData | None:
@@ -246,6 +268,10 @@ class ResultResolver:
             "current_coord_index": self._current_coord_index,
             "plot_type": self._plot_type,
             "mesh_data": None,
+            "conditions": result.get("conditions", {}),
+            "title": self._replaceTitlePlaceholders(
+                self._title_template, result.get("conditions", {})
+            ),
         }
 
     def setCurrentCoord(self, index: int) -> None:

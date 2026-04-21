@@ -7,7 +7,6 @@ __all__ = ["ToopCalc", "ToopDataSourceDiscovery", "register_data_sources"]
 
 
 def _create_miedema_source(module_service) -> ModuleDataSource:
-    """Factory function for Miedema module data source."""
     return ModuleDataSource(
         module_service,
         module_name="miedema_module",
