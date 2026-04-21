@@ -1,24 +1,12 @@
 from .toop_module import ToopCalc
-from .data_source_registry import DataSourceRegistry
-from .data_source import ModuleDataSource
 from .data_source_discovery import ToopDataSourceDiscovery
 
-__all__ = ["ToopCalc", "ToopDataSourceDiscovery", "register_data_sources"]
+__all__ = ["ToopCalc", "ToopDataSourceDiscovery", "registerDataSources"]
 
 
-def _create_miedema_source(module_service) -> ModuleDataSource:
-    return ModuleDataSource(
-        module_service,
-        module_name="miedema_module",
-        method_name="calculateSingleBatch",
-        output_symbol="Delta_H_mix",
-    )
+def registerDataSources() -> None:
+    """Register data sources provided by this module."""
+    pass
 
 
-def register_data_sources() -> None:
-    """Register all data sources provided by this module."""
-    DataSourceRegistry.register("binary_data", _create_miedema_source)
-    DataSourceRegistry.register("thermodynamic", _create_miedema_source)
-
-
-register_data_sources()
+registerDataSources()

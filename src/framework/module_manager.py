@@ -21,6 +21,7 @@ class ModuleManager:
             sys.path.insert(0, runtime_parent)
 
     def _discover(self, modules_dir: Path) -> None:
+        """Scan modules directory, load config.toml and instantiate module entry classes."""
         if not modules_dir.exists():
             self._logger.warning(f"Modules directory does not exist: {modules_dir}")
             return
@@ -50,7 +51,7 @@ class ModuleManager:
                 instance = cls()
 
                 self._modules[package_name] = instance
-                self._module_infos[package_name] = config["module"]
+                self._module_infos[package_name] = config
 
                 self._logger.info(f"Loaded module: {package_name} ({entry_class})")
             except Exception as e:
@@ -64,12 +65,12 @@ class ModuleManager:
     def list(self) -> list[dict]:
         return [
             {
-                "package_name": info["package_name"],
-                "name": info.get("name", info["package_name"]),
-                "type": info.get("type", ""),
-                "category": info.get("category", ""),
-                "version": info.get("version", ""),
-                "description": info.get("description", ""),
+                "package_name": info["module"]["package_name"],
+                "name": info["module"].get("name", info["module"]["package_name"]),
+                "type": info["module"].get("type", ""),
+                "category": info["module"].get("category", ""),
+                "version": info["module"].get("version", ""),
+                "description": info["module"].get("description", ""),
             }
             for info in self._module_infos.values()
         ]
@@ -77,7 +78,7 @@ class ModuleManager:
     def getMethods(self, package_name: str) -> list[str]:
         if package_name not in self._module_infos:
             raise KeyError(f"Module not found: {package_name}")
-        return self._module_infos[package_name].get("all_methods", [])
+        return self._module_infos[package_name]["module"].get("all_methods", [])
 
     def getModuleConfig(self, package_name: str) -> dict | None:
         return self._module_infos.get(package_name)

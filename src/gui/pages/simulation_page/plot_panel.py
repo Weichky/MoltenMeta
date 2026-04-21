@@ -1,3 +1,4 @@
+import logging
 from typing import TYPE_CHECKING
 
 from PySide6 import QtWidgets
@@ -15,6 +16,8 @@ _DARK_BG = "#232323"
 _LIGHT_BG = "#fafafa"
 _DARK_FG = "#ffffff"
 _LIGHT_FG = "#323232"
+
+logging.getLogger("matplotlib").setLevel(logging.WARNING)
 
 
 class PlotPanel(QtWidgets.QWidget):
@@ -125,19 +128,21 @@ class PlotPanel(QtWidgets.QWidget):
         self._setTheme(self._current_scheme)
 
     def _wrapLatex(self, text: str) -> str:
+        """Validate latex syntax by test-rendering, return original if invalid."""
         if not text:
             return text
-        if text.startswith("$") and text.endswith("$"):
+        if not any(c in text for c in ("\\", "^", "_", "{")):
             return text
-        if text.count("_") >= 2:
+        from matplotlib.figure import Figure
+
+        fig = Figure()
+        ax = fig.add_subplot(111)
+        try:
+            ax.set_xlabel(f"${text}$")
+            ax.set_ylabel(f"${text}$")
+        except Exception:
             return text
-        if "_" in text:
-            return f"${text}$"
-        if "\\" in text:
-            return f"${text}$"
-        if "^" in text or "{" in text:
-            return f"${text}$"
-        return text
+        return f"${text}$"
 
     def plot(
         self,
@@ -255,6 +260,7 @@ class PlotPanel(QtWidgets.QWidget):
         z_label: str | None = None,
         title: str | None = None,
     ) -> None:
+        """Render 3D scatter plot with ternary composition coordinates."""
         self._figure.clear()
         self._ax = self._figure.add_subplot(111, projection="3d")
         self._setTheme(self._current_scheme)
@@ -299,6 +305,7 @@ class PlotPanel(QtWidgets.QWidget):
         title: str | None = None,
         levels: int = 20,
     ) -> None:
+        """Render filled contour plot with color bar and optional custom generator."""
         self._figure.clear()
         self._ax = self._figure.add_subplot(111)
         self._ax.clear()

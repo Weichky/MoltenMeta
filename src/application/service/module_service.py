@@ -37,6 +37,7 @@ class ModuleService:
             raise
 
     def callMethod(self, package_name: str, method_name: str, **kwargs) -> dict:
+        """Invoke a method on a module with caching support."""
         module = self.getModule(package_name)
         method = getattr(module, method_name, None)
         if method is None:
@@ -46,7 +47,6 @@ class ModuleService:
 
         skip_cache = kwargs.pop("_skip_cache", False)
 
-        self._logger.debug(f"Calling {package_name}.{method_name} with kwargs={kwargs}")
         result = method(**kwargs)
 
         if skip_cache:
@@ -58,9 +58,13 @@ class ModuleService:
 
         return result
 
+    def getModuleConfig(self, package_name: str) -> dict | None:
+        return self._manager.getModuleConfig(package_name)
+
     def _cacheResult(
         self, module_id: str, method_name: str, result: dict, kwargs: dict
     ) -> str:
+        """Persist computation result to cache with dimension-aware snapshot creation."""
         run_id = str(uuid.uuid4())
         parent_run_id = kwargs.get("_parent_run_id")
 
@@ -94,13 +98,13 @@ class ModuleService:
                     )
                     self._computation_cache_repo.insert(entry)
 
-        self._logger.debug(
-            f"Cached {len(result.get('values', []))} results with run_id={run_id}"
-        )
+        # self._logger.debug(
+        #     f"Cached {len(result.get('values', []))} results with run_id={run_id}"
+        # )
         return run_id
 
     def registerModuleTags(self, package_name: str):
-        """Register tags from module config."""
+        """Extract tags from module config outputs and register them for symbol-based lookup."""
         if not self._property_tags_repo:
             return
 

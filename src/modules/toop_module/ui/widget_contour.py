@@ -81,9 +81,9 @@ class ToopContourWizardDialog(QDialog):
     def _update_sources(self):
         elem_a, elem_b, elem_c = self._element_page.get_elements()
 
-        sources_ab = self._discovery.find_sources("thermodynamic", elem_a, elem_b)
-        sources_ac = self._discovery.find_sources("thermodynamic", elem_a, elem_c)
-        sources_bc = self._discovery.find_sources("thermodynamic", elem_b, elem_c)
+        sources_ab = self._discovery.findSources("thermodynamic", elem_a, elem_b)
+        sources_ac = self._discovery.findSources("thermodynamic", elem_a, elem_c)
+        sources_bc = self._discovery.findSources("thermodynamic", elem_b, elem_c)
 
         if sources_ab:
             self._sources["Z_AB"] = sources_ab[0]
@@ -95,7 +95,32 @@ class ToopContourWizardDialog(QDialog):
     def _on_elements_changed(self):
         self._update_sources()
 
+    def _getOutputLatexUnit(self, source) -> tuple[str, str]:
+        """Query latex and unit for a DataSource by resolving its output symbol against module config."""
+        if source is None:
+            return "", ""
+        module_name = source.source_name
+        output_symbol = source.output_symbol
+        config = self._ms.getModuleConfig(module_name)
+        if not config:
+            return "", ""
+        module_cfg = config.get("module", {})
+        all_methods = module_cfg.get("all_methods", [])
+        for method_name in all_methods:
+            method_config = config.get(method_name, {})
+            outputs = method_config.get("outputs", {})
+            symbols = outputs.get("symbol", [])
+            latex_list = outputs.get("latex", [])
+            units = outputs.get("unit", [])
+            for i, sym in enumerate(symbols):
+                if sym == output_symbol:
+                    latex = latex_list[i] if i < len(latex_list) else ""
+                    unit = units[i] if i < len(units) else ""
+                    return latex, unit
+        return "", ""
+
     def _on_calculate(self):
+        """Gather inputs and invoke Toop contour calculation."""
         from ..toop_module import ToopCalc
 
         elem_a, elem_b, elem_c = self._element_page.get_elements()
@@ -127,8 +152,19 @@ class ToopContourWizardDialog(QDialog):
         ]
         Z_BC_list = Z_BC_source.get_values(elem_b, elem_c, w_B_list)
 
+        z_latex, z_unit = self._getOutputLatexUnit(Z_AB_source)
+
         result = toop.calculateContourWithData(
-            elem_a, elem_b, elem_c, plane, n_points, Z_AB_list, Z_AC_list, Z_BC_list
+            elem_a,
+            elem_b,
+            elem_c,
+            plane,
+            n_points,
+            Z_AB_list,
+            Z_AC_list,
+            Z_BC_list,
+            z_latex,
+            z_unit,
         )
 
         self.resultReady.emit(result)

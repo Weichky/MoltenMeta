@@ -411,8 +411,8 @@ class ToopCalc:
         Z_AB_list: list[float],
         Z_AC_list: list[float],
         Z_BC_list: list[float],
-        z_latex: str = "",
-        z_unit: str = "",
+        z_latex: str,
+        z_unit: str,
     ) -> dict:
         """
         Calculate Toop model for a triangular grid with direct data input.
@@ -470,8 +470,8 @@ class ToopCalc:
 
         cfg = MODULE_INFO["calculateScatter"]
         output_symbol = cfg["outputs"]["symbol"][0]
-        final_latex = z_latex if z_latex else cfg["outputs"]["latex"][0]
-        final_unit = z_unit if z_unit else cfg["outputs"]["unit"][0]
+        final_latex = z_latex
+        final_unit = z_unit
 
         values = [
             {"x_A": a, "x_B": b, "x_C": c, output_symbol: z}
@@ -511,6 +511,8 @@ class ToopCalc:
         Z_AB_list: list[float],
         Z_AC_list: list[float],
         Z_BC_list: list[float],
+        z_latex: str,
+        z_unit: str,
     ) -> dict:
         """
         Calculate contour data for x_i-x_j plane with direct data input.
@@ -524,6 +526,8 @@ class ToopCalc:
             Z_AB_list: Pre-computed binary AB values at x_A points
             Z_AC_list: Pre-computed binary AC values at x_A points
             Z_BC_list: Pre-computed binary BC values at w_B points
+            z_latex: LaTeX symbol for z-axis property
+            z_unit: Unit for z-axis property
 
         Returns:
             Dictionary containing meshgrid data for contour plotting
@@ -534,6 +538,10 @@ class ToopCalc:
         if plane not in ("x_A-x_B", "x_A-x_C", "x_B-x_C"):
             raise ValueError(f"plane must be x_A-x_B, x_A-x_C, or x_B-x_C, got {plane}")
 
+        output_symbol = "Z_ABC"
+        final_latex = z_latex
+        final_unit = z_unit
+
         if n_points == 0:
             return {
                 "conditions": {
@@ -542,13 +550,18 @@ class ToopCalc:
                     "elem_C": elemIdToSymbol(elem_C),
                     "plane": plane,
                 },
-                "dims": ["x_A", "x_B", "x_C", "Z_ABC"],
+                "dims": ["x_A", "x_B", "x_C", output_symbol],
                 "values": [],
-                "latex": {"x_A": "x_A", "x_B": "x_B", "x_C": "x_C", "Z_ABC": "Z_{ABC}"},
-                "units": {"x_A": "", "x_B": "", "x_C": "", "Z_ABC": "kJ/mol"},
+                "latex": {
+                    "x_A": "x_A",
+                    "x_B": "x_B",
+                    "x_C": "x_C",
+                    output_symbol: final_latex,
+                },
+                "units": {"x_A": "", "x_B": "", "x_C": "", output_symbol: final_unit},
                 "x_i": [],
                 "x_j": [],
-                "Z_ABC": [],
+                output_symbol: [],
                 "plane": plane,
             }
 
@@ -603,19 +616,19 @@ class ToopCalc:
                 "elem_C": elemIdToSymbol(elem_C),
                 "plane": plane,
             },
-            "dims": ["x_A", "x_B", "x_C", "Z_ABC"],
+            "dims": ["x_A", "x_B", "x_C", output_symbol],
             "values": values,
             "latex": {
                 "x_A": "x_A",
                 "x_B": "x_B",
                 "x_C": "x_C",
-                "Z_ABC": "Z_{ABC}",
+                output_symbol: final_latex,
             },
             "units": {
                 "x_A": "",
                 "x_B": "",
                 "x_C": "",
-                "Z_ABC": "kJ/mol",
+                output_symbol: final_unit,
             },
             "plane": plane,
         }

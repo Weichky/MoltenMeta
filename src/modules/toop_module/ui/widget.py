@@ -15,7 +15,7 @@ class ToopWizardDialog(QDialog):
 
     def __init__(self, module_service, user_db_service, parent=None):
         super().__init__(parent)
-        self.setWindowTitle(self.tr("Toop 模型配置"))
+        self.setWindowTitle(self.tr("Toop Model Configuration"))
         self.setMinimumSize(500, 400)
         self._ms = module_service
         self._user_db = user_db_service
@@ -35,7 +35,7 @@ class ToopWizardDialog(QDialog):
 
         main_layout = QVBoxLayout(self)
 
-        title = QLabel(self.tr("Toop 模型配置"))
+        title = QLabel(self.tr("Toop Model Configuration"))
         title.setStyleSheet("font-size: 16pt; font-weight: bold;")
         main_layout.addWidget(title)
 
@@ -46,13 +46,13 @@ class ToopWizardDialog(QDialog):
         self._stacked.addWidget(self._element_page)
 
         self._z_ab_page = DataSourceSelectionPage(
-            self.tr("Z_AB 数据源 (A-B 二元系)"), "Z_AB"
+            self.tr("Z_AB Data Source (A-B Binary)"), "Z_AB"
         )
         self._z_ac_page = DataSourceSelectionPage(
-            self.tr("Z_AC 数据源 (A-C 二元系)"), "Z_AC"
+            self.tr("Z_AC Data Source (A-C Binary)"), "Z_AC"
         )
         self._z_bc_page = DataSourceSelectionPage(
-            self.tr("Z_BC 数据源 (B-C 二元系)"), "Z_BC"
+            self.tr("Z_BC Data Source (B-C Binary)"), "Z_BC"
         )
         self._options_page = CalculationOptionsPage()
 
@@ -62,10 +62,10 @@ class ToopWizardDialog(QDialog):
         self._stacked.addWidget(self._options_page)
 
         button_layout = QHBoxLayout()
-        self._cancel_btn = QPushButton(self.tr("取消"))
-        self._prev_btn = QPushButton(self.tr("上一步"))
-        self._next_btn = QPushButton(self.tr("下一步"))
-        self._calc_btn = QPushButton(self.tr("计算"))
+        self._cancel_btn = QPushButton(self.tr("Cancel"))
+        self._prev_btn = QPushButton(self.tr("Previous"))
+        self._next_btn = QPushButton(self.tr("Next"))
+        self._calc_btn = QPushButton(self.tr("Calculate"))
 
         self._prev_btn.setEnabled(False)
         self._calc_btn.setVisible(False)
@@ -94,9 +94,9 @@ class ToopWizardDialog(QDialog):
     def _update_sources(self):
         elem_a, elem_b, elem_c = self._element_page.get_elements()
 
-        sources_ab = self._discovery.find_sources("thermodynamic", elem_a, elem_b)
-        sources_ac = self._discovery.find_sources("thermodynamic", elem_a, elem_c)
-        sources_bc = self._discovery.find_sources("thermodynamic", elem_b, elem_c)
+        sources_ab = self._discovery.findSources("thermodynamic", elem_a, elem_b)
+        sources_ac = self._discovery.findSources("thermodynamic", elem_a, elem_c)
+        sources_bc = self._discovery.findSources("thermodynamic", elem_b, elem_c)
 
         self._z_ab_page.set_sources(sources_ab)
         self._z_ac_page.set_sources(sources_ac)
@@ -146,8 +146,8 @@ class ToopWizardDialog(QDialog):
         ):
             QMessageBox.warning(
                 self,
-                self.tr("警告"),
-                self.tr("请为所有数据源选择数据源"),
+                self.tr("Warning"),
+                self.tr("Please select data sources for all inputs"),
             )
             return
 
@@ -166,7 +166,32 @@ class ToopWizardDialog(QDialog):
             "sources": self._sources.copy(),
         }
 
+    def _getOutputLatexUnit(self, source) -> tuple[str, str]:
+        """Query latex and unit for a DataSource by resolving its output symbol against module config."""
+        if source is None:
+            return "", ""
+        module_name = source.source_name
+        output_symbol = source.output_symbol
+        config = self._ms.getModuleConfig(module_name)
+        if not config:
+            return "", ""
+        module_cfg = config.get("module", {})
+        all_methods = module_cfg.get("all_methods", [])
+        for method_name in all_methods:
+            method_config = config.get(method_name, {})
+            outputs = method_config.get("outputs", {})
+            symbols = outputs.get("symbol", [])
+            latex_list = outputs.get("latex", [])
+            units = outputs.get("unit", [])
+            for i, sym in enumerate(symbols):
+                if sym == output_symbol:
+                    latex = latex_list[i] if i < len(latex_list) else ""
+                    unit = units[i] if i < len(units) else ""
+                    return latex, unit
+        return "", ""
+
     def calculate(self, inputs: dict) -> dict:
+        """Execute Toop calculation using provided binary data sources."""
         from ..toop_module import ToopCalc
 
         elem_a = inputs["elem_A"]
@@ -202,8 +227,7 @@ class ToopWizardDialog(QDialog):
         ]
         Z_BC_list = Z_BC_source.get_values(elem_b, elem_c, w_B_list)
 
-        z_latex = Z_AB_source.latex
-        z_unit = Z_AB_source.unit
+        z_latex, z_unit = self._getOutputLatexUnit(Z_AB_source)
 
         result = toop.calculateScatterWithData(
             elem_a,

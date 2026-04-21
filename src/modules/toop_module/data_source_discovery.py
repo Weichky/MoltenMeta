@@ -14,12 +14,12 @@ class ToopDataSourceDiscovery:
         self._user_db = user_db_service
         self._unified_query = None
 
-    def _get_unified_query(self):
+    def _getUnifiedQuery(self):
         if self._unified_query is None:
             return None
         return self._unified_query
 
-    def find_sources(self, tag: str, elem_1: int, elem_2: int) -> list:
+    def findSources(self, tag: str, elem_1: int, elem_2: int) -> list:
         """
         Discover all available data sources for the given tag and element pair.
 
@@ -31,19 +31,19 @@ class ToopDataSourceDiscovery:
         Returns:
             List of DataSource objects
         """
-        from .data_source_registry import DataSourceRegistry
+        from framework.data_source_registry import DataSourceRegistry
 
         sources = []
 
-        module_sources = DataSourceRegistry.find_by_tag(tag, self._ms)
+        module_sources = DataSourceRegistry.findByTag(tag, self._ms)
         sources.extend(module_sources)
 
-        db_sources = self._find_db_sources(tag, elem_1, elem_2)
+        db_sources = self._findDbSources(tag, elem_1, elem_2)
         sources.extend(db_sources)
 
         return sources
 
-    def _find_db_sources(self, tag: str, elem_1: int, elem_2: int) -> list:
+    def _findDbSources(self, tag: str, elem_1: int, elem_2: int) -> list:
         """
         Find database records matching the tag and element pair.
 

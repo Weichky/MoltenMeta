@@ -182,6 +182,12 @@ symbol = [
 symbol = [
     "Delta_H_mix"
 ]
+latex = [
+    "\\Delta H_{mix}"
+]
+unit = [
+    "kJ/mol"
+]
 tags = [
     "toop",
     "binary_data"
