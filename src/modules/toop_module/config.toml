@@ -12,50 +12,11 @@ license = "MIT"
 description = "Toop model for predicting ternary thermodynamic properties from binary data"
 
 [calculateSingleProperty.inputs]
-symbol = [
-    "elem_A",
-    "elem_B",
-    "elem_C",
-    "x_B",
-    "x_C",
-    "Z_AB",
-    "Z_AC",
-    "Z_BC"
-]
-latex = [
-    "elem_A",
-    "elem_B",
-    "elem_C",
-    "x_B",
-    "x_C",
-    "Z_{AB}",
-    "Z_{AC}",
-    "Z_{BC}"
-]
-description = [
-    "Element A (solvent)",
-    "Element B",
-    "Element C",
-    "Mole fraction of B",
-    "Mole fraction of C",
-    "Binary property AB at x_A",
-    "Binary property AC at x_A",
-    "Binary property BC at x_B/(x_B+x_C)"
-]
-unit = [
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    ""
-]
-
+symbol = ["elem_A", "elem_B", "elem_C", "x_B", "x_C", "Z_AB", "Z_AC", "Z_BC"]
 input_method = "raw"
 
-raw.method_map = [
+[calculateSingleProperty.inputs.raw]
+method_map = [
     ["elem_A", "element_symbol_input"],
     ["elem_B", "element_symbol_input"],
     ["elem_C", "element_symbol_input"],
@@ -66,21 +27,49 @@ raw.method_map = [
     ["Z_BC", "float_input"]
 ]
 
+[calculateSingleProperty.inputs.latex]
+elem_A = "elem_A"
+elem_B = "elem_B"
+elem_C = "elem_C"
+x_B = "x_B"
+x_C = "x_C"
+Z_AB = "Z_{AB}"
+Z_AC = "Z_{AC}"
+Z_BC = "Z_{BC}"
+
+[calculateSingleProperty.inputs.description]
+elem_A = "Element A (solvent)"
+elem_B = "Element B"
+elem_C = "Element C"
+x_B = "Mole fraction of B"
+x_C = "Mole fraction of C"
+Z_AB = "Binary property AB at x_A"
+Z_AC = "Binary property AC at x_A"
+Z_BC = "Binary property BC at x_B/(x_B+x_C)"
+
+[calculateSingleProperty.inputs.unit]
+elem_A = ""
+elem_B = ""
+elem_C = ""
+x_B = ""
+x_C = ""
+Z_AB = ""
+Z_AC = ""
+Z_BC = ""
+
 [calculateSingleProperty.outputs]
-symbol = [
-    "Z_ABC"
-]
-latex = [
-    "Z_{ABC}"
-]
-description = [
-    "Predicted ternary property"
-]
-unit = [
-    "kJ/mol"
-]
+symbol = ["Z_ABC"]
 can_be_used_as_input = true
 is_collection = false
+
+[calculateSingleProperty.outputs.latex]
+Z_ABC = "Z_{ABC}"
+
+[calculateSingleProperty.outputs.description]
+Z_ABC = "Predicted ternary property"
+
+[calculateSingleProperty.outputs.unit]
+Z_ABC = "kJ/mol"
 
 [calculateSingleProperty.plot]
 plotType = "scatter_3d"
@@ -99,54 +88,47 @@ scatters = [
 ]
 
 [calculateScatter.inputs]
-symbol = [
-    "elem_A",
-    "elem_B",
-    "elem_C",
-    "n_points"
-]
-latex = [
-    "elem_A",
-    "elem_B",
-    "elem_C",
-    "n_\\text{points}"
-]
-description = [
-    "Element A (solvent)",
-    "Element B",
-    "Element C",
-    "Number of points per edge"
-]
-unit = [
-    "",
-    "",
-    "",
-    ""
-]
-
+symbol = ["elem_A", "elem_B", "elem_C", "n_points"]
 input_method = "raw"
 
-raw.method_map = [
+[calculateScatter.inputs.raw]
+method_map = [
     ["elem_A", "element_symbol_input"],
     ["elem_B", "element_symbol_input"],
     ["elem_C", "element_symbol_input"],
     ["n_points", "int_input"]
 ]
 
+[calculateScatter.inputs.latex]
+elem_A = "elem_A"
+elem_B = "elem_B"
+elem_C = "elem_C"
+n_points = "n_\\text{points}"
+
+[calculateScatter.inputs.description]
+elem_A = "Element A (solvent)"
+elem_B = "Element B"
+elem_C = "Element C"
+n_points = "Number of points per edge"
+
+[calculateScatter.inputs.unit]
+elem_A = ""
+elem_B = ""
+elem_C = ""
+n_points = ""
+
 [calculateScatter.outputs]
-symbol = [
-    "Z_ABC"
-]
-latex = [
-    "Z_{ABC}"
-]
-description = [
-    "Predicted ternary property"
-]
-unit = [
-    "kJ/mol"
-]
+symbol = ["Z_ABC"]
 is_collection = true
+
+[calculateScatter.outputs.latex]
+Z_ABC = "Z_{ABC}"
+
+[calculateScatter.outputs.description]
+Z_ABC = "Predicted ternary property"
+
+[calculateScatter.outputs.unit]
+Z_ABC = "kJ/mol"
 
 [calculateScatter.plot]
 plotType = "scatter_3d"
@@ -164,38 +146,11 @@ scatters = [
 ]
 
 [calculateContour.inputs]
-symbol = [
-    "elem_A",
-    "elem_B",
-    "elem_C",
-    "plane",
-    "n_points"
-]
-latex = [
-    "elem_A",
-    "elem_B",
-    "elem_C",
-    "plane",
-    "n_\\text{points}"
-]
-description = [
-    "Element A (solvent)",
-    "Element B",
-    "Element C",
-    "Projection plane (x_A-x_B, x_A-x_C, x_B-x_C)",
-    "Number of points per axis"
-]
-unit = [
-    "",
-    "",
-    "",
-    "",
-    ""
-]
-
+symbol = ["elem_A", "elem_B", "elem_C", "plane", "n_points"]
 input_method = "raw"
 
-raw.method_map = [
+[calculateContour.inputs.raw]
+method_map = [
     ["elem_A", "element_symbol_input"],
     ["elem_B", "element_symbol_input"],
     ["elem_C", "element_symbol_input"],
@@ -203,20 +158,39 @@ raw.method_map = [
     ["n_points", "int_input"]
 ]
 
+[calculateContour.inputs.latex]
+elem_A = "elem_A"
+elem_B = "elem_B"
+elem_C = "elem_C"
+plane = "plane"
+n_points = "n_\\text{points}"
+
+[calculateContour.inputs.description]
+elem_A = "Element A (solvent)"
+elem_B = "Element B"
+elem_C = "Element C"
+plane = "Projection plane (x_A-x_B, x_A-x_C, x_B-x_C)"
+n_points = "Number of points per axis"
+
+[calculateContour.inputs.unit]
+elem_A = ""
+elem_B = ""
+elem_C = ""
+plane = ""
+n_points = ""
+
 [calculateContour.outputs]
-symbol = [
-    "Z_ABC"
-]
-latex = [
-    "Z_{ABC}"
-]
-description = [
-    "Predicted ternary property"
-]
-unit = [
-    "kJ/mol"
-]
+symbol = ["Z_ABC"]
 is_collection = true
+
+[calculateContour.outputs.latex]
+Z_ABC = "Z_{ABC}"
+
+[calculateContour.outputs.description]
+Z_ABC = "Predicted ternary property"
+
+[calculateContour.outputs.unit]
+Z_ABC = "kJ/mol"
 
 [calculateContour.plot]
 plotType = "contour_triangular"

@@ -119,7 +119,7 @@ class PlotStyleService:
         method_algorithm_str = method_colorscheme.get("algorithm")
         db_algorithm_str = settings.get("plot", "color_algorithm") if settings else None
 
-        algorithm优先级 = (
+        algorithmPriority = (
             _parseAlgorithm(method_algorithm_str)
             or module_algorithm
             or _parseAlgorithm(db_algorithm_str)
@@ -280,7 +280,7 @@ class PlotStyleService:
         )
 
         return PlotStyle(
-            algorithm=algorithm优先级,
+            algorithm=algorithmPriority,
             themeColors=final_theme,
             lineStyle=lineStyle,
             marker=marker,

@@ -184,16 +184,16 @@ class InputDialog(QtWidgets.QDialog):
     def _setupRawInputs(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
         method_map = self._config.get("raw", {}).get("method_map", [])
         symbols = self._config.get("symbol", [])
-        descriptions = self._config.get("description", [])
-        units = self._config.get("units", [])
+        descriptions = self._config.get("description", {})
+        units = self._config.get("unit", {})
 
         self._inputs_layout = QtWidgets.QGridLayout()
         row = 0
 
         for i, (param_name, control_type) in enumerate(method_map):
             label_name = symbols[i] if i < len(symbols) else param_name
-            hint_text = descriptions[i] if i < len(descriptions) else param_name
-            unit = units[i] if i < len(units) else ""
+            hint_text = descriptions.get(param_name, param_name)
+            unit = units.get(param_name, "")
 
             label_text = label_name
             if unit:

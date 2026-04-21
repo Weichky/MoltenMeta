@@ -185,8 +185,8 @@ class ToopWizardDialog(QDialog):
             units = outputs.get("unit", [])
             for i, sym in enumerate(symbols):
                 if sym == output_symbol:
-                    latex = latex_list[i] if i < len(latex_list) else ""
-                    unit = units[i] if i < len(units) else ""
+                    latex = latex_list.get(sym, "")
+                    unit = units.get(sym, "")
                     return latex, unit
         return "", ""
 

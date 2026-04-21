@@ -3,7 +3,6 @@
 # For more information, please refer to our official documentation.
 
 [module]
-# The package name should be the same as the name of your module's python entry point file (without the .py extension).
 package_name = "miedema_module"
 entry_class = "MiedemaCalc"
 all_methods = [
@@ -12,12 +11,8 @@ all_methods = [
     "calculateSingleBatch"
 ]
 
-# The type determines the domain to which the module belongs,
-# and the category determines the path within that domain.
 type = "simulation"
 category = "enthalpy_of_mixing"
-
-# This name is just for displaying. To clarify the package name, see "package_name"
 name = "Miedema Module"
 version = "1.0.0"
 author = "Weichky"
@@ -25,11 +20,7 @@ license = "MIT"
 description = "Miedema module for calculating enthalpy of mixing"
 
 [data]
-# This is the path to the csv file
 csv = "miedema_element_properties.csv"
-# [WIP]
-# If you don't want to save the data to database, you can set this to false
-# Then every time you run the module, it will read the data from the csv file
 save_to_database = true
 table_name = "miedema_element_properties"
 columns = [
@@ -43,57 +34,46 @@ columns = [
 ]
 
 [calculateSingle.inputs]
-symbol = [
-    "elem_A",
-    "elem_B",
-    "x_A"
-]
-latex = [
-    "elem_A",
-    "elem_B",
-    "x_A"
-]
-description = [
-    "Element A's id (element number in the periodic table)",
-    "Element B's id (element number in the periodic table)",
-    "Mole fraction of element A"
-]
-# You can leave unit empty
-# In this case, we don't automatically specify the unit in the software
-# You have to specify the unit yourself
-unit = [
-    "",
-    "",
-    ""
-]
-
+symbol = ["elem_A", "elem_B", "x_A"]
 input_method = "composition_tool"
 
-composition_tool.mode = "mole_fraction"
-composition_tool.max_components = 2
-composition_tool.map = [
+[calculateSingle.inputs.composition_tool]
+mode = "mole_fraction"
+max_components = 2
+map = [
     ["elem_A", 0],
     ["elem_B", 2],
     ["x_A", 1]
 ]
 
-[calculateSingle.outputs]
-symbol = [
-    "Delta_H_mix"
-]
-latex = [
-    "\\Delta H_{mix}"
-]
-description = [
-    "Enthalpy of mixing"
-]
-unit = [
-    "kJ/mol"
-]
-can_be_used_as_input = true
+[calculateSingle.inputs.latex]
+elem_A = "elem_A"
+elem_B = "elem_B"
+x_A = "x_A"
 
-# Not nessary to specify, just for human readability.
+[calculateSingle.inputs.description]
+elem_A = "Element A's id (element number in the periodic table)"
+elem_B = "Element B's id (element number in the periodic table)"
+x_A = "Mole fraction of element A"
+
+[calculateSingle.inputs.unit]
+elem_A = ""
+elem_B = ""
+x_A = ""
+
+[calculateSingle.outputs]
+symbol = ["Delta_H_mix"]
+can_be_used_as_input = true
 is_collection = false
+
+[calculateSingle.outputs.latex]
+Delta_H_mix = "\\Delta H_{mix}"
+
+[calculateSingle.outputs.description]
+Delta_H_mix = "Enthalpy of mixing"
+
+[calculateSingle.outputs.unit]
+Delta_H_mix = "kJ/mol"
 
 [calculateSingle.plot]
 plotType = "scatter_2d"
@@ -104,38 +84,11 @@ x = "x_A"
 y = ["Delta_H_mix"]
 
 [calculateRange.inputs]
-symbol = [
-    "elem_A",
-    "elem_B",
-    "x_A_start",
-    "x_A_end",
-    "n_points"
-]
-latex = [
-    "elem_A",
-    "elem_B",
-    "x^\\text{start}_A",
-    "x^\\text{end}_A",
-    "n_\\text{points}"
-]
-description = [
-    "Element A's symbol (e.g. Al, Si)",
-    "Element B's symbol (e.g. Al, Si)",
-    "Starting mole fraction of element A",
-    "Ending mole fraction of element A",
-    "Number of points"
-]
-unit = [
-    "",
-    "",
-    "",
-    "",
-    ""
-]
-
+symbol = ["elem_A", "elem_B", "x_A_start", "x_A_end", "n_points"]
 input_method = "raw"
 
-raw.method_map = [
+[calculateRange.inputs.raw]
+method_map = [
     ["elem_A", "element_symbol_input"],
     ["elem_B", "element_symbol_input"],
     ["x_A_start", "float_input"],
@@ -143,21 +96,41 @@ raw.method_map = [
     ["n_points", "int_input"]
 ]
 
+[calculateRange.inputs.latex]
+elem_A = "elem_A"
+elem_B = "elem_B"
+x_A = "x_A"
+x_A_start = "x^\\text{start}_A"
+x_A_end = "x^\\text{end}_A"
+n_points = "n_\\text{points}"
+
+[calculateRange.inputs.description]
+elem_A = "Element A's symbol (e.g. Al, Si)"
+elem_B = "Element B's symbol (e.g. Al, Si)"
+x_A_start = "Starting mole fraction of element A"
+x_A_end = "Ending mole fraction of element A"
+n_points = "Number of points"
+
+[calculateRange.inputs.unit]
+elem_A = ""
+elem_B = ""
+x_A_start = ""
+x_A_end = ""
+n_points = ""
+
 [calculateRange.outputs]
-symbol = [
-    "Delta_H_mix"
-]
-latex = [
-    "\\Delta H_{mix}"
-]
-description = [
-    "Enthalpy of mixing"
-]
-unit = [
-    "kJ/mol"
-]
+symbol = ["Delta_H_mix"]
 can_be_used_as_input = true
 is_collection = true
+
+[calculateRange.outputs.latex]
+Delta_H_mix = "\\Delta H_{mix}"
+
+[calculateRange.outputs.description]
+Delta_H_mix = "Enthalpy of mixing"
+
+[calculateRange.outputs.unit]
+Delta_H_mix = "kJ/mol"
 
 [calculateRange.plot]
 plotType = "line_2d"
@@ -172,23 +145,14 @@ y = ["Delta_H_mix"]
 # Used by other modules via Provider pattern
 
 [calculateSingleBatch.inputs]
-symbol = [
-    "elem_A",
-    "elem_B",
-    "x_array"
-]
+symbol = ["elem_A", "elem_B", "x_array"]
 
 [calculateSingleBatch.outputs]
-symbol = [
-    "Delta_H_mix"
-]
-latex = [
-    "\\Delta H_{mix}"
-]
-unit = [
-    "kJ/mol"
-]
-tags = [
-    "toop",
-    "binary_data"
-]
+symbol = ["Delta_H_mix"]
+tags = ["toop", "binary_data"]
+
+[calculateSingleBatch.outputs.latex]
+Delta_H_mix = "\\Delta H_{mix}"
+
+[calculateSingleBatch.outputs.unit]
+Delta_H_mix = "kJ/mol"
