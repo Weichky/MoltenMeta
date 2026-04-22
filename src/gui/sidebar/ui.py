@@ -1,7 +1,6 @@
 from PySide6.QtCore import (
     Qt,
     QObject,
-    QSize,
 )
 from PySide6.QtWidgets import (
     QDockWidget,
@@ -12,21 +11,18 @@ from PySide6.QtWidgets import (
     QSpacerItem,
     QLayout,
 )
-from PySide6.QtGui import QFont
 
 
 class UiSidebar(QObject):
-    COLLAPSED_WIDTH = 75
-    EXPANDED_WIDTH = 0  # 0 means dynamic
+    COLLAPSED_WIDTH = 64
+    EXPANDED_WIDTH = 200
     BUTTON_HEIGHT = 48
-    ICON_SIZE = 32
+    ICON_SIZE = 24
 
     def setupUi(self, dock: QDockWidget):
-        # Set dock widget properties
         if not dock.objectName():
             dock.setObjectName("sidebar")
 
-        # Set sidebar resizable, but not allowed to dock at top or bottom
         dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         dock.setFeatures(
             QDockWidget.DockWidgetFeature.DockWidgetMovable
@@ -43,22 +39,21 @@ class UiSidebar(QObject):
             | QDockWidget.DockWidgetFeature.DockWidgetMovable
         )
 
-        # Create content widget and layout
         self.contents = QWidget(dock)
         self.contents.setObjectName("dockWidgetContents")
 
         self.verticalLayout = QVBoxLayout(self.contents)
         self.verticalLayout.setObjectName("verticalLayout")
+        self.verticalLayout.setContentsMargins(0, 16, 0, 16)
 
-        # Create sidebar layout
         self.sidebarLayout = QVBoxLayout()
-        self.sidebarLayout.setSpacing(2)
+        self.sidebarLayout.setSpacing(16)
         self.sidebarLayout.setObjectName("sidebarLayout")
         self.sidebarLayout.setSizeConstraint(QLayout.SizeConstraint.SetMaximumSize)
 
-        # Create home button
         self.homeButton = QPushButton(self.contents)
-        self.homeButton.setObjectName("homeButton")
+        self.homeButton.setObjectName("sidebarButton")
+        self.homeButton.setCheckable(True)
 
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -68,9 +63,9 @@ class UiSidebar(QObject):
 
         self.sidebarLayout.addWidget(self.homeButton)
 
-        # Create database button
         self.dataButton = QPushButton(self.contents)
-        self.dataButton.setObjectName("dataButton")
+        self.dataButton.setObjectName("sidebarButton")
+        self.dataButton.setCheckable(True)
 
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -80,9 +75,9 @@ class UiSidebar(QObject):
 
         self.sidebarLayout.addWidget(self.dataButton)
 
-        # Create settings button
         self.settingsButton = QPushButton(self.contents)
-        self.settingsButton.setObjectName("settingsButton")
+        self.settingsButton.setObjectName("sidebarButton")
+        self.settingsButton.setCheckable(True)
 
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -94,13 +89,11 @@ class UiSidebar(QObject):
 
         self.sidebarLayout.addWidget(self.settingsButton)
 
-        # Add vertical spacer
         self.verticalSpacer = QSpacerItem(
             20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
         )
         self.sidebarLayout.addItem(self.verticalSpacer)
 
-        # Create toggle button
         self.toggleButton = QPushButton(self.contents)
         self.toggleButton.setObjectName("toggleButton")
         self.toggleButton.setCheckable(True)
@@ -112,34 +105,14 @@ class UiSidebar(QObject):
 
         self.sidebarLayout.addWidget(self.toggleButton)
 
-        self.sidebarLayout.setStretch(0, 1)
-        self.sidebarLayout.setStretch(1, 1)
-        self.sidebarLayout.setStretch(2, 1)
+        self.sidebarLayout.setStretch(0, 0)
+        self.sidebarLayout.setStretch(1, 0)
+        self.sidebarLayout.setStretch(2, 0)
         self.sidebarLayout.setStretch(3, 1)
-        self.sidebarLayout.setStretch(4, 1)
-        self.sidebarLayout.setStretch(5, 0)
+        self.sidebarLayout.setStretch(4, 0)
 
         self.verticalLayout.addLayout(self.sidebarLayout)
         dock.setWidget(self.contents)
-
-        self._applyButtonStyle()
-
-    def _applyButtonStyle(self):
-        font = QFont()
-        font.setPointSize(14)
-        font.setBold(True)
-
-        buttons = [
-            self.homeButton,
-            self.settingsButton,
-            self.dataButton,
-            self.toggleButton,
-        ]
-        for btn in buttons:
-            btn.setFont(font)
-            btn.setMinimumHeight(self.BUTTON_HEIGHT)
-            btn.setIconSize(QSize(self.ICON_SIZE, self.ICON_SIZE))
-            btn.setStyleSheet("text-align: left; padding-left: 12px;")
 
     def retranslateUi(self, dock: QDockWidget):
         self.homeButton.setText(self.tr("Home"))
@@ -152,15 +125,5 @@ class UiSidebar(QObject):
             sidebar.setMaximumWidth(self.COLLAPSED_WIDTH)
             return
 
-        # Get parent window dimensions
-        parent_width = sidebar.parent().width()
-
-        # Set navigation panel minimum and maximum width based on parent window width
-        # Minimum width is 1/12 of parent window width, but no less than 100 pixels
-        min_width = max(int(parent_width / 12), 100)
-        # Maximum width is 1/4 of parent window width, but no more than 300 pixels
-        max_width = min(int(parent_width / 4), 300)
-
-        # Apply size constraints to sidebar
-        sidebar.setMinimumWidth(min_width)
-        sidebar.setMaximumWidth(max_width)
+        sidebar.setMinimumWidth(self.EXPANDED_WIDTH)
+        sidebar.setMaximumWidth(self.EXPANDED_WIDTH)

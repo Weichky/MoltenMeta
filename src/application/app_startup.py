@@ -81,6 +81,9 @@ def initApp(app) -> AppContext:
         core_db_service.settings.theme_mode,
         core_db_service.settings.density_scale,
     )
+    primary = core_db_service.settings.primary_color or "#C62828"
+    secondary = core_db_service.settings.secondary_color or "#1A1A1A"
+    context.theme.updateThemeColors(primary, secondary)
 
     context.modules = ModuleService(getRuntimePath(), context.log)
     context.modules.setRepositories(

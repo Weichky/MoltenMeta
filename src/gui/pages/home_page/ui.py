@@ -1,18 +1,41 @@
 from PySide6 import QtWidgets, QtCore
+from PySide6.QtGui import QPainter, QPen, QColor
 from PySide6.QtCore import QObject
 
 
 class Tile(QtWidgets.QPushButton):
     def __init__(self, title: str, parent=None):
         super().__init__(title, parent)
+        self.setObjectName("tileButton")
+        self.setCursor(QtCore.Qt.PointingHandCursor)
 
-        self.setMinimumSize(120, 80)
 
-    def setTitle(self, title):
-        self.setText(title)
+class AccentLine(QtWidgets.QFrame):
+    def __init__(self, width: int = 200, parent=None):
+        super().__init__(parent)
+        self.setFixedHeight(3)
+        self.setFixedWidth(width)
+        self.setStyleSheet("background-color: #C62828; border: none;")
+
+
+class RulerWidget(QtWidgets.QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedHeight(12)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setPen(QPen(QColor("#E0E0E0"), 1))
+        painter.drawLine(0, 11, self.width(), 11)
+        for i in range(0, self.width(), 20):
+            painter.drawLine(i, 11, i, 11 - (6 if i % 40 == 0 else 3))
 
 
 class UiHomePage(QObject):
+    BASE_TILE_WIDTH = 70
+    BASE_TILE_HEIGHT = 40
+    BASE_SPACING = 6
+
     def setupUi(self, homePage: QtWidgets.QWidget):
         if not homePage.objectName():
             homePage.setObjectName("homePage")
@@ -20,69 +43,98 @@ class UiHomePage(QObject):
         self.tiles = []
 
         self.root_layout = QtWidgets.QVBoxLayout(homePage)
-        self.root_layout.setSpacing(16)
-        self.root_layout.setContentsMargins(24, 24, 24, 24)
+        self.root_layout.setSpacing(0)
+        self.root_layout.setContentsMargins(80, 64, 80, 64)
 
-        self.root_layout.addStretch()
+        header_widget = QtWidgets.QWidget()
+        header_layout = QtWidgets.QVBoxLayout(header_widget)
+        header_layout.setSpacing(8)
+        header_layout.setContentsMargins(0, 0, 0, 0)
 
-        # ===== Top Title =====
-        self.title = QtWidgets.QLabel()
-        self.title.setAlignment(QtCore.Qt.AlignCenter)
+        self.title_label = QtWidgets.QLabel()
+        self.title_label.setObjectName("heroTitle")
+        header_layout.addWidget(self.title_label)
 
-        self.root_layout.addWidget(self.title)
+        self.accent_line = AccentLine(320)
+        header_layout.addWidget(self.accent_line)
 
-        # ===== Middle 4x4 Grid =====
-        self.grid_container = QtWidgets.QWidget(homePage)
-        self.grid = QtWidgets.QGridLayout(self.grid_container)
-        self.grid.setSpacing(12)
+        self.subtitle_label = QtWidgets.QLabel()
+        self.subtitle_label.setObjectName("heroSubtitle")
+        header_layout.addWidget(self.subtitle_label)
+
+        self.root_layout.addWidget(header_widget)
+
+        self.root_layout.addSpacing(56)
+
+        self.section_label = QtWidgets.QLabel()
+        self.section_label.setObjectName("sectionLabel")
+        self.section_label.setText(self.tr("Quick Access"))
+        self.root_layout.addWidget(self.section_label)
+
+        self.root_layout.addSpacing(32)
+
+        tiles_widget = QtWidgets.QWidget()
+        tiles_layout = QtWidgets.QGridLayout(tiles_widget)
+        tiles_layout.setSpacing(self.BASE_SPACING * 2)
+        tiles_layout.setContentsMargins(0, 0, 0, 0)
+        tiles_layout.setAlignment(QtCore.Qt.AlignLeft)
 
         tile_names = [
-            self.tr("Project"),
-            self.tr("Database"),
-            self.tr("Simulation"),
-            self.tr("Settings"),
-        ]
-        self.tiles = [Tile(name) for name in tile_names]
-
-        positions = [(0, 0), (0, 1), (1, 0), (1, 1)]
-        for tile, (r, c) in zip(self.tiles, positions):
-            self.grid.addWidget(tile, r, c)
-
-        # Center the grid
-        self.grid.setRowStretch(2, 1)
-        self.grid.setColumnStretch(2, 1)
-
-        self.root_layout.addWidget(self.grid_container, alignment=QtCore.Qt.AlignCenter)
-
-        # ===== Bottom Description Text =====
-        self.description = QtWidgets.QLabel()
-        self.description.setWordWrap(True)
-        self.description.setAlignment(QtCore.Qt.AlignCenter)
-
-        # self.website_link = QtWidgets.QLabel('<a href="https://github.com/Weichky/MoltenMeta">https://github.com/Weichky/MoltenMeta</a>')
-        # self.website_link.setOpenExternalLinks(True)
-
-        self.root_layout.addWidget(self.description)
-        # self.root_layout.addWidget(self.website_link)
-
-        self.root_layout.addStretch()
-
-    def retranslateUi(self):
-        welcome_text = self.tr("Welcome")
-        self.title.setText("<h1>" + welcome_text + "</h1>")
-
-        software_description = self.tr(
-            'Molten Meta provides an integrated environment for the input, management, prediction, and analysis of thermodynamic data for liquid alloys, offering excellent compatibility and scalability.<br><br>Project Repository: <a href="https://github.com/Weichky/MoltenMeta">https://github.com/Weichky/MoltenMeta</a>'
-        )
-
-        self.description.setText("<h6>" + software_description + "</h6>")
-
-        # Translate tiles
-        tile_titles = [
             self.tr("Project"),
             self.tr("Data"),
             self.tr("Simulation"),
             self.tr("Settings"),
         ]
-        for tile, title in zip(self.tiles, tile_titles):
-            tile.setText(title)
+        self.tiles = [Tile(name) for name in tile_names]
+
+        for tile in self.tiles:
+            tile.setMinimumSize(self.BASE_TILE_WIDTH, self.BASE_TILE_HEIGHT)
+            tile.setSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+            )
+
+        positions = [(0, 0), (0, 1), (1, 0), (1, 1)]
+        for tile, (r, c) in zip(self.tiles, positions):
+            tiles_layout.addWidget(tile, r, c)
+
+        self.root_layout.addWidget(tiles_widget)
+
+        self.root_layout.addStretch()
+
+        self.description = QtWidgets.QLabel()
+        self.description.setObjectName("description")
+        self.description.setWordWrap(True)
+        self.description.setMaximumWidth(640)
+        self.root_layout.addWidget(self.description)
+
+        self.root_layout.addSpacing(16)
+
+        ruler = RulerWidget()
+        self.root_layout.addWidget(ruler)
+
+        self.root_layout.addSpacing(32)
+
+    def retranslateUi(self):
+        self.title_label.setText("MoltenMeta")
+        self.subtitle_label.setText(self.tr("Material Science Computing Platform"))
+        self.description.setText(
+            self.tr(
+                "Integrated environment for thermodynamic data management, prediction, and analysis of liquid alloys."
+            )
+        )
+
+        tile_names = [
+            self.tr("Project"),
+            self.tr("Data"),
+            self.tr("Simulation"),
+            self.tr("Settings"),
+        ]
+        tile_tooltips = [
+            self.tr("Create and manage projects"),
+            self.tr("Import and organize data"),
+            self.tr("Run thermodynamic calculations"),
+            self.tr("Configure application settings"),
+        ]
+        for tile, name, tooltip in zip(self.tiles, tile_names, tile_tooltips):
+            tile.setText(name)
+            tile.setToolTip(tooltip)

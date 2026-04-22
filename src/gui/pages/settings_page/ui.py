@@ -39,58 +39,37 @@ class UiSettingsPage(QObject):
         self.root_layout.setContentsMargins(0, 0, 0, 0)
         self.root_layout.setSpacing(0)
 
-        # Create resizable splitter
         self.splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
         self.splitter.setObjectName("settingsSplitter")
-        self.splitter.setChildrenCollapsible(
-            False
-        )  # Prevent child widgets from being completely collapsed
+        self.splitter.setChildrenCollapsible(False)
 
-        # ===== Left Navigation Panel =====
         self.nav_panel = QtWidgets.QWidget()
         self.nav_panel.setObjectName("settingsNavPanel")
-        # Set size constraints using relative units
-        self._setupNavPanelConstraints(settingsPage)
+        self.nav_panel.setMinimumWidth(200)
+        self.nav_panel.setMaximumWidth(200)
 
         self.nav_layout = QtWidgets.QVBoxLayout(self.nav_panel)
-        self.nav_layout.setContentsMargins(0, 0, 0, 0)
+        self.nav_layout.setContentsMargins(16, 24, 16, 24)
+        self.nav_layout.setSpacing(8)
 
-        # Create scroll area for sidebar buttons
-        self.nav_scroll = QtWidgets.QScrollArea()
-        self.nav_scroll.setWidgetResizable(True)
-        self.nav_scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.nav_scroll.setObjectName("navScrollArea")
-
-        # Create container widget with buttons
-        self.nav_buttons_widget = QtWidgets.QWidget()
-        self.nav_buttons_layout = QtWidgets.QVBoxLayout(self.nav_buttons_widget)
-        self.nav_buttons_layout.setContentsMargins(0, 0, 0, 0)
-        self.nav_buttons_layout.setSpacing(5)  # Add spacing between navigation buttons
-        self.nav_buttons_layout.setAlignment(QtCore.Qt.AlignTop)  # Align to top
-
-        # Add navigation items
         self.general_button = QtWidgets.QPushButton()
         self.log_button = QtWidgets.QPushButton()
         self.plot_button = QtWidgets.QPushButton()
+
+        self.general_button.setObjectName("sidebarButton")
+        self.log_button.setObjectName("sidebarButton")
+        self.plot_button.setObjectName("sidebarButton")
 
         self.general_button.setCheckable(True)
         self.log_button.setCheckable(True)
         self.plot_button.setCheckable(True)
         self.general_button.setChecked(True)
-        self.log_button.setChecked(False)
-        self.plot_button.setChecked(False)
 
-        self.nav_buttons_layout.addWidget(self.general_button)
-        self.nav_buttons_layout.addWidget(self.log_button)
-        self.nav_buttons_layout.addWidget(self.plot_button)
+        self.nav_layout.addWidget(self.general_button)
+        self.nav_layout.addWidget(self.log_button)
+        self.nav_layout.addWidget(self.plot_button)
+        self.nav_layout.addStretch()
 
-        # Set button container as scroll area widget
-        self.nav_scroll.setWidget(self.nav_buttons_widget)
-
-        # Add scroll area to navigation panel layout
-        self.nav_layout.addWidget(self.nav_scroll)
-
-        # ===== Middle Main Content Area =====
         self.content_area = QtWidgets.QStackedWidget()
         self.content_area.setObjectName("settingsContentArea")
 
@@ -109,129 +88,90 @@ class UiSettingsPage(QObject):
         # Add to splitter
         self.splitter.addWidget(self.nav_panel)
         self.splitter.addWidget(self.content_area)
+        self.splitter.setSizes([200, 600])
 
-        # Set initial size ratio (relative values)
-        self._setupSplitterSizes(settingsPage)
-
-        # Add splitter to main layout
         self.root_layout.addWidget(self.splitter)
-
-        # Connect window resize signal
-        settingsPage.installEventFilter(self._createResizeEventFilter(settingsPage))
-
-    def _setupNavPanelConstraints(self, parent):
-        # Get parent window dimensions
-        parent_width = parent.width()
-
-        # Set navigation panel min/max width based on parent window width
-        # Minimum width is 1/12 of parent window width, but no less than 100 pixels
-        min_width = max(int(parent_width / 12), 100)
-        # Maximum width is 1/4 of parent window width, but no more than 300 pixels
-        max_width = min(int(parent_width / 4), 300)
-
-        self.nav_panel.setMinimumWidth(min_width)
-        self.nav_panel.setMaximumWidth(max_width)
-
-    def _setupSplitterSizes(self, parent):
-        # Get parent window dimensions
-        parent_width = parent.width()
-
-        # Set initial sizes based on parent window width
-        nav_width = max(int(parent_width / 8), 150)
-        content_width = parent_width - nav_width
-
-        self.splitter.setSizes([nav_width, content_width])
-
-    def _createResizeEventFilter(self, parent):
-        ui_self = self
-
-        class ResizeEventFilter(QtCore.QObject):
-            def eventFilter(self, obj, event):
-                if event.type() == QtCore.QEvent.Resize:
-                    # Reset navigation panel constraints when window is resized
-                    ui_self._setupNavPanelConstraints(parent)
-                    ui_self._setupSplitterSizes(parent)
-                return False
-
-        return ResizeEventFilter()
 
     def _createGeneralPage(self) -> QtWidgets.QWidget:
         page = QtWidgets.QWidget()
         page.setObjectName("generalPage")
         page_layout = QtWidgets.QVBoxLayout(page)
-        page_layout.setSpacing(10)
-        page_layout.setContentsMargins(10, 10, 10, 10)
+        page_layout.setSpacing(20)
+        page_layout.setContentsMargins(32, 32, 32, 32)
 
-        # Language settings
-        lang_group = QtWidgets.QGroupBox()
-        lang_group.setObjectName("languageGroup")
-        lang_layout = QtWidgets.QVBoxLayout(lang_group)
+        section_label = QtWidgets.QLabel()
+        section_label.setObjectName("sectionLabel")
+        section_label.setText(self.tr("Language"))
+        page_layout.addWidget(section_label)
 
-        self.lang_label = QtWidgets.QLabel()
-        lang_layout.addWidget(self.lang_label)
+        lang_layout = QtWidgets.QHBoxLayout()
+        lang_layout.setSpacing(12)
 
         self.lang_combo = QtWidgets.QComboBox()
         self.lang_combo.setObjectName("languageCombo")
 
         lang_layout.addWidget(self.lang_combo)
-
         lang_layout.addStretch()
-        page_layout.addWidget(lang_group)
 
         for code, name in getSupportedLanguagesNameMap().items():
             self.lang_combo.addItem(name, code)
 
         language = self._settings.language
-
         self.lang_combo.setCurrentIndex(self.lang_combo.findData(language))
 
-        # Appearance settings
-        appearance_group = QtWidgets.QGroupBox()
-        appearance_group.setObjectName("appearanceGroup")
-        appearance_layout = QtWidgets.QVBoxLayout(appearance_group)
+        page_layout.addLayout(lang_layout)
 
-        self.theme_color_label = QtWidgets.QLabel()
-        appearance_layout.addWidget(self.theme_color_label)
+        self.section_line1 = QtWidgets.QFrame()
+        self.section_line1.setObjectName("dividerLine")
+        self.section_line1.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+        self.section_line1.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
+        self.section_line1.setFixedHeight(1)
+        page_layout.addWidget(self.section_line1)
 
-        self.theme_color_combo = QtWidgets.QComboBox()
-        self.theme_color_combo.setObjectName("themeColorCombo")
-        appearance_layout.addWidget(self.theme_color_combo)
+        appearance_label = QtWidgets.QLabel()
+        appearance_label.setObjectName("sectionLabel")
+        appearance_label.setText(self.tr("Appearance"))
+        page_layout.addWidget(appearance_label)
 
-        for value, translated_text in self.color_translations.items():
-            self.theme_color_combo.addItem(translated_text, value)
+        grid_layout = QtWidgets.QGridLayout()
+        grid_layout.setSpacing(12)
+        grid_layout.setColumnMinimumWidth(0, 100)
 
-        theme_color = self._settings.theme
-        self.theme_color_combo.setCurrentIndex(
-            self.theme_color_combo.findData(theme_color)
+        self.primary_color_input = QtWidgets.QLineEdit()
+        self.primary_color_input.setObjectName("primaryColorInput")
+        self.primary_color_input.setPlaceholderText("#C62828")
+        primary_color = self._settings.primary_color or "#C62828"
+        self.primary_color_input.setText(primary_color)
+        grid_layout.addWidget(QtWidgets.QLabel(self.tr("Primary Color")), 0, 0)
+        grid_layout.addWidget(self.primary_color_input, 0, 1)
+
+        self.secondary_color_input = QtWidgets.QLineEdit()
+        self.secondary_color_input.setObjectName("secondaryColorInput")
+        self.secondary_color_input.setPlaceholderText("#1A1A1A")
+        secondary_color = self._settings.secondary_color or "#1A1A1A"
+        self.secondary_color_input.setText(secondary_color)
+        grid_layout.addWidget(QtWidgets.QLabel(self.tr("Secondary Color")), 1, 0)
+        grid_layout.addWidget(self.secondary_color_input, 1, 1)
+
+        self.density_scale_combo = QtWidgets.QComboBox()
+        self.density_scale_combo.setObjectName("densityScaleCombo")
+        density_options = [
+            (self.tr("50%"), -4),
+            (self.tr("75%"), -3),
+            (self.tr("100%"), -2),
+            (self.tr("125%"), -1),
+            (self.tr("150%"), 0),
+        ]
+        for display, value in density_options:
+            self.density_scale_combo.addItem(display, value)
+        current_density = self._settings.density_scale
+        self.density_scale_combo.setCurrentIndex(
+            self.density_scale_combo.findData(current_density)
         )
+        grid_layout.addWidget(QtWidgets.QLabel(self.tr("Density")), 2, 0)
+        grid_layout.addWidget(self.density_scale_combo, 2, 1)
 
-        self.theme_mode_label = QtWidgets.QLabel()
-        appearance_layout.addWidget(self.theme_mode_label)
-
-        self.theme_mode_combo = QtWidgets.QComboBox()
-        self.theme_mode_combo.setObjectName("themeModeCombo")
-        appearance_layout.addWidget(self.theme_mode_combo)
-
-        for key, translated_text in self.display_mode_translations.items():
-            self.theme_mode_combo.addItem(translated_text, key)
-
-        theme_mode = self._settings.theme_mode
-        self.theme_mode_combo.setCurrentIndex(
-            self.theme_mode_combo.findData(theme_mode)
-        )
-
-        self.density_scale_label = QtWidgets.QLabel()
-        appearance_layout.addWidget(self.density_scale_label)
-
-        self.density_scale_spin = QtWidgets.QSpinBox()
-        self.density_scale_spin.setObjectName("densityScaleSpin")
-        self.density_scale_spin.setRange(-4, 4)
-        self.density_scale_spin.setValue(self._settings.density_scale)
-        appearance_layout.addWidget(self.density_scale_spin)
-
-        appearance_layout.addStretch()
-        page_layout.addWidget(appearance_group)
-
+        page_layout.addLayout(grid_layout)
         page_layout.addStretch()
 
         return page
@@ -240,23 +180,22 @@ class UiSettingsPage(QObject):
         page = QtWidgets.QWidget()
         page.setObjectName("loggingPage")
         page_layout = QtWidgets.QVBoxLayout(page)
-        page_layout.setSpacing(10)
-        page_layout.setContentsMargins(10, 10, 10, 10)
+        page_layout.setSpacing(20)
+        page_layout.setContentsMargins(32, 32, 32, 32)
 
-        log_level_group = QtWidgets.QGroupBox()
-        log_level_group.setObjectName("logLevelGroup")
-        log_level_layout = QtWidgets.QVBoxLayout(log_level_group)
+        section_label = QtWidgets.QLabel()
+        section_label.setObjectName("sectionLabel")
+        section_label.setText(self.tr("Log Level"))
+        page_layout.addWidget(section_label)
 
-        self.log_level_label = QtWidgets.QLabel()
-        log_level_layout.addWidget(self.log_level_label)
+        row_layout = QtWidgets.QHBoxLayout()
+        row_layout.setSpacing(12)
 
         self.log_level_combo = QtWidgets.QComboBox()
         self.log_level_combo.setObjectName("logLevelCombo")
 
-        log_level_layout.addWidget(self.log_level_combo)
-
-        log_level_layout.addStretch()
-        page_layout.addWidget(log_level_group)
+        row_layout.addWidget(self.log_level_combo)
+        row_layout.addStretch()
 
         for level in getLogLevelMap().keys():
             self.log_level_combo.addItem(self.tr(level), level)
@@ -264,16 +203,24 @@ class UiSettingsPage(QObject):
         log_level = self._settings.log_level
         self.log_level_combo.setCurrentIndex(self.log_level_combo.findData(log_level))
 
-        log_display_group = QtWidgets.QGroupBox()
-        log_display_group.setObjectName("logDisplayGroup")
-        log_display_layout = QtWidgets.QVBoxLayout(log_display_group)
+        page_layout.addLayout(row_layout)
+
+        self.section_line1 = QtWidgets.QFrame()
+        self.section_line1.setObjectName("dividerLine")
+        self.section_line1.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+        self.section_line1.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
+        self.section_line1.setFixedHeight(1)
+        page_layout.addWidget(self.section_line1)
+
+        output_label = QtWidgets.QLabel()
+        output_label.setObjectName("sectionLabel")
+        output_label.setText(self.tr("Log Output"))
+        page_layout.addWidget(output_label)
 
         self.log_display = QtWidgets.QTextEdit()
         self.log_display.setObjectName("logDisplay")
         self.log_display.setReadOnly(True)
-        log_display_layout.addWidget(self.log_display)
-
-        page_layout.addWidget(log_display_group)
+        page_layout.addWidget(self.log_display)
 
         return page
 
@@ -281,14 +228,18 @@ class UiSettingsPage(QObject):
         page = QtWidgets.QWidget()
         page.setObjectName("plotPage")
         page_layout = QtWidgets.QVBoxLayout(page)
-        page_layout.setSpacing(10)
-        page_layout.setContentsMargins(10, 10, 10, 10)
+        page_layout.setSpacing(20)
+        page_layout.setContentsMargins(32, 32, 32, 32)
 
-        plot_style_group = QtWidgets.QGroupBox()
-        plot_style_group.setObjectName("plotStyleGroup")
-        plot_style_layout = QtWidgets.QFormLayout(plot_style_group)
+        basic_label = QtWidgets.QLabel()
+        basic_label.setObjectName("sectionLabel")
+        basic_label.setText(self.tr("Basic"))
+        page_layout.addWidget(basic_label)
 
-        self.palette_label = QtWidgets.QLabel()
+        basic_grid = QtWidgets.QGridLayout()
+        basic_grid.setSpacing(12)
+        basic_grid.setColumnMinimumWidth(0, 80)
+
         self.palette_combo = QtWidgets.QComboBox()
         self.palette_combo.setObjectName("paletteCombo")
         self.palette_items = [
@@ -299,9 +250,9 @@ class UiSettingsPage(QObject):
             self.palette_combo.addItem(display, value)
         palette = self._settings.plot_colorscheme or "default"
         self.palette_combo.setCurrentIndex(self.palette_combo.findData(palette))
-        plot_style_layout.addRow(self.palette_label, self.palette_combo)
+        basic_grid.addWidget(QtWidgets.QLabel(self.tr("Palette")), 0, 0)
+        basic_grid.addWidget(self.palette_combo, 0, 1)
 
-        self.algorithm_label = QtWidgets.QLabel()
         self.algorithm_combo = QtWidgets.QComboBox()
         self.algorithm_combo.setObjectName("algorithmCombo")
         self.algorithm_items = [
@@ -313,25 +264,9 @@ class UiSettingsPage(QObject):
             self.algorithm_combo.addItem(display, value)
         algorithm = self._settings.plot_color_algorithm or "linear"
         self.algorithm_combo.setCurrentIndex(self.algorithm_combo.findData(algorithm))
-        plot_style_layout.addRow(self.algorithm_label, self.algorithm_combo)
+        basic_grid.addWidget(QtWidgets.QLabel(self.tr("Algorithm")), 1, 0)
+        basic_grid.addWidget(self.algorithm_combo, 1, 1)
 
-        self.color_scheme_label = QtWidgets.QLabel()
-        self.color_scheme_combo = QtWidgets.QComboBox()
-        self.color_scheme_combo.setObjectName("colorSchemeCombo")
-        self.color_scheme_items = [
-            (self.tr("Follow"), "follow"),
-            (self.tr("Light"), "light"),
-            (self.tr("Dark"), "dark"),
-        ]
-        for display, value in self.color_scheme_items:
-            self.color_scheme_combo.addItem(display, value)
-        color_scheme = self._settings.plot_color_scheme
-        self.color_scheme_combo.setCurrentIndex(
-            self.color_scheme_combo.findData(color_scheme)
-        )
-        plot_style_layout.addRow(self.color_scheme_label, self.color_scheme_combo)
-
-        self.line_style_label = QtWidgets.QLabel()
         self.line_style_combo = QtWidgets.QComboBox()
         self.line_style_combo.setObjectName("lineStyleCombo")
         self.line_style_items = [
@@ -346,9 +281,9 @@ class UiSettingsPage(QObject):
         self.line_style_combo.setCurrentIndex(
             self.line_style_combo.findData(line_style)
         )
-        plot_style_layout.addRow(self.line_style_label, self.line_style_combo)
+        basic_grid.addWidget(QtWidgets.QLabel(self.tr("Line Style")), 5, 0)
+        basic_grid.addWidget(self.line_style_combo, 5, 1)
 
-        self.marker_label = QtWidgets.QLabel()
         self.marker_combo = QtWidgets.QComboBox()
         self.marker_combo.setObjectName("markerCombo")
         self.marker_items = [
@@ -356,40 +291,55 @@ class UiSettingsPage(QObject):
             (self.tr("Square"), "s"),
             (self.tr("Triangle"), "^"),
             (self.tr("Diamond"), "D"),
-            (self.tr("Down Triangle"), "v"),
-            (self.tr("Left Triangle"), "<"),
-            (self.tr("Right Triangle"), ">"),
         ]
         for display, value in self.marker_items:
             self.marker_combo.addItem(display, value)
         marker = self._settings.plot_marker or "o"
         self.marker_combo.setCurrentIndex(self.marker_combo.findData(marker))
-        plot_style_layout.addRow(self.marker_label, self.marker_combo)
+        basic_grid.addWidget(QtWidgets.QLabel(self.tr("Marker")), 4, 0)
+        basic_grid.addWidget(self.marker_combo, 4, 1)
 
-        self.line_width_label = QtWidgets.QLabel()
+        page_layout.addLayout(basic_grid)
+
+        self.section_line1 = QtWidgets.QFrame()
+        self.section_line1.setObjectName("dividerLine")
+        self.section_line1.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+        self.section_line1.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
+        self.section_line1.setFixedHeight(1)
+        page_layout.addWidget(self.section_line1)
+
+        line_label = QtWidgets.QLabel()
+        line_label.setObjectName("sectionLabel")
+        line_label.setText(self.tr("Line & Grid"))
+        page_layout.addWidget(line_label)
+
+        line_grid = QtWidgets.QGridLayout()
+        line_grid.setSpacing(12)
+        line_grid.setColumnMinimumWidth(0, 80)
+
         self.line_width_spin = QtWidgets.QDoubleSpinBox()
         self.line_width_spin.setObjectName("lineWidthSpin")
         self.line_width_spin.setRange(0.5, 10.0)
         self.line_width_spin.setSingleStep(0.5)
         self.line_width_spin.setValue(self._settings.plot_line_width or 2.0)
-        plot_style_layout.addRow(self.line_width_label, self.line_width_spin)
+        line_grid.addWidget(QtWidgets.QLabel(self.tr("Width")), 0, 0)
+        line_grid.addWidget(self.line_width_spin, 0, 1)
 
-        self.marker_size_label = QtWidgets.QLabel()
         self.marker_size_spin = QtWidgets.QDoubleSpinBox()
         self.marker_size_spin.setObjectName("markerSizeSpin")
         self.marker_size_spin.setRange(1.0, 20.0)
         self.marker_size_spin.setSingleStep(0.5)
         self.marker_size_spin.setValue(self._settings.plot_marker_size or 6.0)
-        plot_style_layout.addRow(self.marker_size_label, self.marker_size_spin)
+        line_grid.addWidget(QtWidgets.QLabel(self.tr("Marker Size")), 1, 0)
+        line_grid.addWidget(self.marker_size_spin, 1, 1)
 
         self.grid_check = QtWidgets.QCheckBox()
         self.grid_check.setObjectName("gridCheck")
         self.grid_check.setChecked(
             self._settings.plot_grid if self._settings.plot_grid is not None else True
         )
-        plot_style_layout.addRow(self.grid_check)
+        line_grid.addWidget(self.grid_check, 2, 0, 1, 2)
 
-        self.grid_mode_label = QtWidgets.QLabel()
         self.grid_mode_combo = QtWidgets.QComboBox()
         self.grid_mode_combo.setObjectName("gridModeCombo")
         self.grid_mode_items = [
@@ -401,17 +351,17 @@ class UiSettingsPage(QObject):
             self.grid_mode_combo.addItem(display, value)
         grid_mode = self._settings.plot_grid_mode or "auto"
         self.grid_mode_combo.setCurrentIndex(self.grid_mode_combo.findData(grid_mode))
-        plot_style_layout.addRow(self.grid_mode_label, self.grid_mode_combo)
+        line_grid.addWidget(QtWidgets.QLabel(self.tr("Grid Mode")), 3, 0)
+        line_grid.addWidget(self.grid_mode_combo, 3, 1)
 
-        self.grid_density_label = QtWidgets.QLabel()
         self.grid_density_spin = QtWidgets.QDoubleSpinBox()
         self.grid_density_spin.setObjectName("gridDensitySpin")
         self.grid_density_spin.setDecimals(2)
         self.grid_density_spin.setRange(0.01, 999999)
         self.grid_density_spin.setValue(self._settings.plot_grid_density or 1.0)
-        plot_style_layout.addRow(self.grid_density_label, self.grid_density_spin)
+        line_grid.addWidget(QtWidgets.QLabel(self.tr("Grid Density")), 4, 0)
+        line_grid.addWidget(self.grid_density_spin, 4, 1)
 
-        self.grid_label_density_label = QtWidgets.QLabel()
         self.grid_label_density_spin = QtWidgets.QDoubleSpinBox()
         self.grid_label_density_spin.setObjectName("gridLabelDensitySpin")
         self.grid_label_density_spin.setDecimals(2)
@@ -419,46 +369,68 @@ class UiSettingsPage(QObject):
         self.grid_label_density_spin.setValue(
             self._settings.plot_grid_label_density or 1.0
         )
-        plot_style_layout.addRow(
-            self.grid_label_density_label, self.grid_label_density_spin
-        )
+        line_grid.addWidget(QtWidgets.QLabel(self.tr("Label Density")), 5, 0)
+        line_grid.addWidget(self.grid_label_density_spin, 5, 1)
 
-        self.title_font_size_label = QtWidgets.QLabel()
+        page_layout.addLayout(line_grid)
+
+        self.section_line2 = QtWidgets.QFrame()
+        self.section_line2.setObjectName("dividerLine")
+        self.section_line2.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+        self.section_line2.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
+        self.section_line2.setFixedHeight(1)
+        page_layout.addWidget(self.section_line2)
+
+        typography_label = QtWidgets.QLabel()
+        typography_label.setObjectName("sectionLabel")
+        typography_label.setText(self.tr("Typography"))
+        page_layout.addWidget(typography_label)
+
+        typography_grid = QtWidgets.QGridLayout()
+        typography_grid.setSpacing(12)
+        typography_grid.setColumnMinimumWidth(0, 80)
+
         self.title_font_size_spin = QtWidgets.QSpinBox()
         self.title_font_size_spin.setObjectName("titleFontSizeSpin")
         self.title_font_size_spin.setRange(6, 32)
         self.title_font_size_spin.setValue(self._settings.plot_title_font_size or 14)
-        plot_style_layout.addRow(self.title_font_size_label, self.title_font_size_spin)
+        typography_grid.addWidget(QtWidgets.QLabel(self.tr("Title")), 0, 0)
+        typography_grid.addWidget(self.title_font_size_spin, 0, 1)
 
-        self.label_font_size_label = QtWidgets.QLabel()
         self.label_font_size_spin = QtWidgets.QSpinBox()
         self.label_font_size_spin.setObjectName("labelFontSizeSpin")
         self.label_font_size_spin.setRange(6, 32)
         self.label_font_size_spin.setValue(self._settings.plot_label_font_size or 12)
-        plot_style_layout.addRow(self.label_font_size_label, self.label_font_size_spin)
+        typography_grid.addWidget(QtWidgets.QLabel(self.tr("Label")), 1, 0)
+        typography_grid.addWidget(self.label_font_size_spin, 1, 1)
 
-        self.tick_font_size_label = QtWidgets.QLabel()
         self.tick_font_size_spin = QtWidgets.QSpinBox()
         self.tick_font_size_spin.setObjectName("tickFontSizeSpin")
         self.tick_font_size_spin.setRange(6, 32)
         self.tick_font_size_spin.setValue(self._settings.plot_tick_font_size or 10)
-        plot_style_layout.addRow(self.tick_font_size_label, self.tick_font_size_spin)
+        typography_grid.addWidget(QtWidgets.QLabel(self.tr("Tick")), 2, 0)
+        typography_grid.addWidget(self.tick_font_size_spin, 2, 1)
 
-        self.legend_font_size_label = QtWidgets.QLabel()
         self.legend_font_size_spin = QtWidgets.QSpinBox()
         self.legend_font_size_spin.setObjectName("legendFontSizeSpin")
         self.legend_font_size_spin.setRange(6, 32)
         self.legend_font_size_spin.setValue(self._settings.plot_legend_font_size or 10)
-        plot_style_layout.addRow(
-            self.legend_font_size_label, self.legend_font_size_spin
-        )
+        typography_grid.addWidget(QtWidgets.QLabel(self.tr("Legend")), 3, 0)
+        typography_grid.addWidget(self.legend_font_size_spin, 3, 1)
 
-        page_layout.addWidget(plot_style_group)
+        page_layout.addLayout(typography_grid)
 
-        preview_group = QtWidgets.QGroupBox()
-        preview_group.setObjectName("plotPreviewGroup")
-        preview_layout = QtWidgets.QVBoxLayout(preview_group)
-        preview_layout.setContentsMargins(3, 3, 3, 3)
+        self.section_line3 = QtWidgets.QFrame()
+        self.section_line3.setObjectName("dividerLine")
+        self.section_line3.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+        self.section_line3.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
+        self.section_line3.setFixedHeight(1)
+        page_layout.addWidget(self.section_line3)
+
+        preview_label = QtWidgets.QLabel()
+        preview_label.setObjectName("sectionLabel")
+        preview_label.setText(self.tr("Preview"))
+        page_layout.addWidget(preview_label)
 
         scroll_area = QtWidgets.QScrollArea()
         scroll_area.setObjectName("previewScrollArea")
@@ -484,98 +456,20 @@ class UiSettingsPage(QObject):
         preview_inner_layout.addWidget(self.preview_canvas)
 
         scroll_area.setWidget(preview_widget)
-        preview_layout.addWidget(scroll_area)
-        page_layout.addWidget(preview_group)
+        page_layout.addWidget(scroll_area)
 
         return page
 
     def retranslateUi(self):
-        self.display_mode_translations = {
-            "light": self.tr("Light"),
-            "dark": self.tr("Dark"),
-            "system": self.tr("System"),
-        }
-
-        self.color_translations = {
-            "blue": self.tr("Blue"),
-            "teal": self.tr("Teal"),
-            "amber": self.tr("Amber"),
-            "cyan": self.tr("Cyan"),
-            "red": self.tr("Red"),
-        }
-
-        # Navigation buttons
         self.general_button.setText(self.tr("General"))
         self.log_button.setText(self.tr("Log"))
         self.plot_button.setText(self.tr("Plot"))
-
-        # General settings page
-        self.lang_label.setText(self.tr("Language:"))
-        self.theme_mode_label.setText(self.tr("Display Mode:"))
-        self.theme_color_label.setText(self.tr("Theme Color:"))
-        self.density_scale_label.setText(self.tr("Density Scale:"))
-
-        # Log settings page
-        self.log_level_label.setText(self.tr("Log level:"))
-        log_display_group = self.log_page.findChild(
-            QtWidgets.QWidget, "logDisplayGroup"
-        )
-        if log_display_group:
-            log_display_group.setTitle(self.tr("Log Output"))
-
-        # Plot settings page
-        self.palette_label.setText(self.tr("Palette:"))
-        self.algorithm_label.setText(self.tr("Color Algorithm:"))
-        self.color_scheme_label.setText(self.tr("Color Scheme:"))
-        self.line_style_label.setText(self.tr("Line Style:"))
-        self.marker_label.setText(self.tr("Marker:"))
-        self.line_width_label.setText(self.tr("Line Width:"))
-        self.marker_size_label.setText(self.tr("Marker Size:"))
-        self.title_font_size_label.setText(self.tr("Title Font Size:"))
-        self.label_font_size_label.setText(self.tr("Label Font Size:"))
-        self.tick_font_size_label.setText(self.tr("Tick Font Size:"))
-        self.legend_font_size_label.setText(self.tr("Legend Font Size:"))
-        self.grid_check.setText(self.tr("Show Grid"))
-        self.grid_mode_label.setText(self.tr("Grid Mode:"))
-        self.grid_density_label.setText(self.tr("Grid Density:"))
-        self.grid_label_density_label.setText(self.tr("Grid Label Density:"))
-        preview_group = self.plot_page.findChild(QtWidgets.QWidget, "plotPreviewGroup")
-        if preview_group:
-            preview_group.setTitle(self.tr("Preview"))
-
-        # # Group box titles
-        # for i in range(self.content_area.count()):
-        #     widget = self.content_area.widget(i)
-        #     if widget.objectName() == "generalPage":
-        #         group = widget.findChild(QtWidgets.QGroupBox, "languageGroup")
-        #         if group:
-        #             group.setTitle(self.tr("Language Settings"))
-        #         group = widget.findChild(QtWidgets.QGroupBox, "appearanceGroup")
-        #         if group:
-        #             group.setTitle(self.tr("Appearance Settings"))
-        #     if widget.objectName() == "loggingPage":
-        #         group = widget.findChild(QtWidgets.QGroupBox, "logLevelGroup")
-        #         if group:
-        #             group.setTitle(self.tr("Logging Settings"))
-
-        for i in range(self.theme_mode_combo.count()):
-            data = self.theme_mode_combo.itemData(i)
-            new_text = self.display_mode_translations[data]
-            self.theme_mode_combo.setItemText(i, new_text)
-
-        for i in range(self.theme_color_combo.count()):
-            data = self.theme_color_combo.itemData(i)
-            new_text = self.color_translations[data]
-            self.theme_color_combo.setItemText(i, new_text)
 
         for i, (display, value) in enumerate(self.palette_items):
             self.palette_combo.setItemText(i, self.tr(display))
 
         for i, (display, value) in enumerate(self.algorithm_items):
             self.algorithm_combo.setItemText(i, self.tr(display))
-
-        for i, (display, value) in enumerate(self.color_scheme_items):
-            self.color_scheme_combo.setItemText(i, self.tr(display))
 
         for i, (display, value) in enumerate(self.line_style_items):
             self.line_style_combo.setItemText(i, self.tr(display))

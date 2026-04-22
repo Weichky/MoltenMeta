@@ -1,47 +1,43 @@
-from PySide6.QtCore import QObject, Signal
+from pathlib import Path
+
+from PySide6.QtCore import QObject, Signal, Qt
 from PySide6.QtGui import QPalette, QColor, QStyleHints, QIcon
 from PySide6.QtWidgets import QPushButton
-from PySide6.QtCore import Qt
 
 from core.log import LogService
-from qt_material import QtStyleTools, apply_stylesheet, list_themes
-from resources.qt_material import default_extra
 from .ads_theme import getAdsStylesheet
+from .swiss_style import SwissStyle
 
 
-from pathlib import Path
-import os
+def _convertDensityToScale(density: int) -> float:
+    mapping = {-4: 0.5, -3: 0.75, -2: 1.0, -1: 1.25, 0: 1.5}
+    return mapping.get(density, 1.0)
+
+
+def _getDensityScaleOption(density: int) -> str:
+    mapping = {
+        -4: "50%",
+        -3: "75%",
+        -2: "100%",
+        -1: "125%",
+        0: "150%",
+    }
+    return mapping.get(density, "100%")
 
 
 class InvertedIcon:
-    """Marker class for icons that should be inverted in dark mode.
-
-    This class manages icons that need color inversion when dark theme is active.
-    It applies CSS filter to achieve the inversion effect dynamically.
-    """
+    """Marker class for icons that should be inverted in dark mode."""
 
     def __init__(self, icon_path: str):
         self.icon_path = icon_path
 
     def apply_to_button(self, button: QPushButton, is_dark_mode: bool) -> None:
-        """Apply icon with appropriate CSS filter based on color scheme.
-
-        Args:
-            button: The QPushButton widget to apply the icon to
-            is_dark_mode: True if dark theme is active, False otherwise
-        """
-
-        # Store icon path for future updates
+        """Apply icon with appropriate CSS filter based on color scheme."""
         button.setProperty("icon_path", self.icon_path)
-
-        # Set the icon
         button.setIcon(QIcon(self.icon_path))
 
-        # Apply CSS filter for dark mode inversion
-        # Using filter property to invert icon colors
         if is_dark_mode:
             current_style = button.styleSheet()
-            # Remove any existing icon-filter style first
             if "filter:" in current_style:
                 lines = [
                     line.strip()
@@ -50,15 +46,15 @@ class InvertedIcon:
                 ]
                 current_style = "\n".join(lines)
 
-            # Add invert filter for dark mode
-            button.setStyleSheet(f"""
+            button.setStyleSheet(
+                f"""
                 {current_style}
                 QPushButton {{
                     filter: invert(100%);
                 }}
-            """)
+            """
+            )
         else:
-            # Remove filter for light mode
             current_style = button.styleSheet()
             if "filter:" in current_style:
                 lines = [
@@ -72,7 +68,7 @@ class InvertedIcon:
                     button.setStyleSheet("")
 
 
-class ThemeService(QObject, QtStyleTools):
+class ThemeService(QObject):
     theme_changed = Signal()
 
     def __init__(self, app, log_service: LogService):
@@ -85,28 +81,24 @@ class ThemeService(QObject, QtStyleTools):
         self._density_scale = -3
         self._style_hints: QStyleHints | None = None
         self._inverted_icons: dict[str, InvertedIcon] = {}
-
-    def _createPalette(self, scheme: str) -> QPalette:
-        if scheme == "dark":
-            return self._createDarkPalette()
-        return self._createLightPalette()
+        self._primary_color = "#C62828"
+        self._secondary_color = "#1A1A1A"
 
     def _createLightPalette(self) -> QPalette:
         palette = QPalette()
         palette.setColor(QPalette.Window, QColor(255, 255, 255))
-        palette.setColor(QPalette.WindowText, QColor(50, 50, 50))
-        palette.setColor(QPalette.Base, QColor(250, 250, 250))
-        palette.setColor(QPalette.AlternateBase, QColor(245, 245, 245))
+        palette.setColor(QPalette.WindowText, QColor(26, 26, 26))
+        palette.setColor(QPalette.Base, QColor(255, 255, 255))
+        palette.setColor(QPalette.AlternateBase, QColor(250, 250, 250))
         palette.setColor(QPalette.ToolTipBase, QColor(255, 255, 255))
-        palette.setColor(QPalette.ToolTipText, QColor(50, 50, 50))
-        palette.setColor(QPalette.Text, QColor(50, 50, 50))
-        palette.setColor(QPalette.Button, QColor(240, 240, 240))
-        palette.setColor(QPalette.ButtonText, QColor(50, 50, 50))
+        palette.setColor(QPalette.ToolTipText, QColor(26, 26, 26))
+        palette.setColor(QPalette.Text, QColor(26, 26, 26))
+        palette.setColor(QPalette.Button, QColor(245, 245, 245))
+        palette.setColor(QPalette.ButtonText, QColor(26, 26, 26))
         palette.setColor(QPalette.BrightText, QColor(255, 255, 255))
-        palette.setColor(QPalette.Highlight, QColor(0, 120, 215))
+        palette.setColor(QPalette.Highlight, QColor(198, 40, 40))
         palette.setColor(QPalette.HighlightedText, QColor(255, 255, 255))
-        # palette.setColor(QPalette.Link, QColor(0, 100, 200))
-        palette.setColor(QPalette.PlaceholderText, QColor(150, 150, 150))
+        palette.setColor(QPalette.PlaceholderText, QColor(158, 158, 158))
         return palette
 
     def _createDarkPalette(self) -> QPalette:
@@ -121,15 +113,25 @@ class ThemeService(QObject, QtStyleTools):
         palette.setColor(QPalette.Button, QColor(55, 55, 55))
         palette.setColor(QPalette.ButtonText, QColor(255, 255, 255))
         palette.setColor(QPalette.BrightText, QColor(255, 255, 255))
-        palette.setColor(QPalette.Highlight, QColor(0, 120, 215))
+        palette.setColor(QPalette.Highlight, QColor(198, 40, 40))
         palette.setColor(QPalette.HighlightedText, QColor(255, 255, 255))
         palette.setColor(QPalette.Link, QColor(100, 180, 255))
         palette.setColor(QPalette.PlaceholderText, QColor(160, 160, 160))
         return palette
 
+    def _createPalette(self, scheme: str) -> QPalette:
+        if scheme == "dark":
+            return self._createDarkPalette()
+        return self._createLightPalette()
+
     def _applyNativePalette(self, scheme: str) -> None:
         palette = self._createPalette(scheme)
         self._app.setPalette(palette)
+
+    def updateThemeColors(self, primary: str, secondary: str) -> None:
+        self._primary_color = primary
+        self._secondary_color = secondary
+        self._applyTheme()
 
     def initialize(
         self, theme: str, scheme: str, theme_mode: str, density_scale: int = -3
@@ -138,6 +140,7 @@ class ThemeService(QObject, QtStyleTools):
         self._scheme = scheme
         self._theme_mode = theme_mode
         self._density_scale = density_scale
+        self._density_scale_option = _getDensityScaleOption(density_scale)
 
         if theme_mode == "system":
             self._startSystemThemeWatcher()
@@ -167,10 +170,15 @@ class ThemeService(QObject, QtStyleTools):
         self._applyNativePalette(scheme)
         self._updateInvertedIcons(scheme == "dark")
 
-        theme_xml = f"{scheme}_{self._theme}.xml"
-        extra = dict(default_extra)
-        extra["density_scale"] = str(self._density_scale)
-        self.applyTheme(theme_xml, scheme, extra=extra)
+        ads_style = getAdsStylesheet(self._primary_color, self._secondary_color)
+        swiss_style = SwissStyle.getStylesheet(
+            self._density_scale_option,
+            self._primary_color,
+            self._secondary_color,
+        )
+        self._app.setStyleSheet(ads_style + "\n" + swiss_style)
+
+        self.theme_changed.emit()
 
     def setThemeMode(self, mode: str) -> None:
         old_mode = self._theme_mode
@@ -205,13 +213,16 @@ class ThemeService(QObject, QtStyleTools):
 
     def updateDensityScale(self, scale: int) -> None:
         self._density_scale = scale
-        extra = dict(default_extra)
-        extra["density_scale"] = str(scale)
-        self.applyTheme(
-            f"{self._scheme}_{self._theme}.xml",
-            self._scheme,
-            extra=extra,
-        )
+        self._density_scale_option = _getDensityScaleOption(scale)
+        self._applyTheme()
+
+    @property
+    def density_scale(self) -> int:
+        return self._density_scale
+
+    @property
+    def density_scale_option(self) -> str:
+        return self._density_scale_option
 
     @property
     def theme_mode(self) -> str:
@@ -227,46 +238,18 @@ class ThemeService(QObject, QtStyleTools):
     def theme(self) -> str:
         return self._theme
 
-    def applyTheme(
-        self, theme_xml: str, scheme: str, extra: list | None = None
-    ) -> None:
-        self._logger.debug("Applying theme: %s", theme_xml)
-
-        self._app.setStyleSheet(getAdsStylesheet())
-
-        apply_stylesheet(
-            self._app,
-            theme=theme_xml,
-            invert_secondary=(scheme == "light"),
-            extra=extra if extra is not None else default_extra,
-        )
-
-        self.theme_changed.emit()
-
     def addStyleSheet(self, css: Path) -> None:
         self._logger.debug("Adding stylesheet: %s", css)
 
         stylesheet = self._app.styleSheet()
         with open(css, "r", encoding="utf-8") as f:
-            self._app.setStyleSheet(stylesheet + f.read().format(**os.environ))
+            self._app.setStyleSheet(stylesheet + f.read())
 
     def getThemeList(self) -> list[str]:
-        return list_themes()
+        return ["blue"]
 
     def registerInvertedIcon(self, button, icon_path: str) -> InvertedIcon:
-        """
-        Register an icon that should be inverted in dark mode.
-
-        This method registers a button's icon for automatic color inversion
-        when dark theme is active. The inversion is achieved using CSS filters.
-
-        Args:
-            button: The QPushButton widget to apply the icon to
-            icon_path: Path to the SVG icon file
-
-        Returns:
-            InvertedIcon instance for managing the icon
-        """
+        """Register an icon that should be inverted in dark mode."""
         if icon_path not in self._inverted_icons:
             self._inverted_icons[icon_path] = InvertedIcon(icon_path)
 
@@ -279,13 +262,8 @@ class ThemeService(QObject, QtStyleTools):
         return inverted_icon
 
     def _updateInvertedIcons(self, is_dark_mode: bool) -> None:
-        """Update all registered inverted icons based on color scheme.
-
-        Args:
-            is_dark_mode: True if dark theme should be applied, False otherwise
-        """
+        """Update all registered inverted icons based on color scheme."""
         for icon_obj in self._inverted_icons.values():
-            # Find all buttons using this icon and update them
             for widget in self._app.topLevelWidgets():
                 for button in widget.findChildren(QPushButton):
                     if button.property("icon_path") == icon_obj.icon_path:

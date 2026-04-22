@@ -6,8 +6,46 @@ from PySide6.QtWidgets import (
     QPushButton,
     QStackedWidget,
     QMessageBox,
+    QWidget,
 )
 from PySide6.QtCore import Signal
+
+
+class StepIndicator(QWidget):
+    def __init__(self, steps: list[str], parent=None):
+        super().__init__(parent)
+        self._steps = steps
+        self._current = 0
+        self._circles = []
+        self._lines = []
+        self._setup_ui()
+
+    def _setup_ui(self):
+        layout = QHBoxLayout(self)
+        layout.setSpacing(12)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        for i, step in enumerate(self._steps):
+            circle = QLabel()
+            circle.setFixedSize(12, 12)
+            circle.setObjectName("stepCircle")
+            self._circles.append(circle)
+            layout.addWidget(circle)
+
+            if i < len(self._steps) - 1:
+                line = QLabel()
+                line.setFixedHeight(2)
+                line.setObjectName("stepLine")
+                self._lines.append(line)
+                layout.addWidget(line)
+
+        layout.addStretch()
+
+    def setCurrentStep(self, step: int):
+        self._current = step
+
+    def _updateStyles(self):
+        pass
 
 
 class ToopWizardDialog(QDialog):
@@ -16,7 +54,7 @@ class ToopWizardDialog(QDialog):
     def __init__(self, module_service, user_db_service, parent=None):
         super().__init__(parent)
         self.setWindowTitle(self.tr("Toop Model Configuration"))
-        self.setMinimumSize(500, 400)
+        self.setMinimumSize(600, 500)
         self._ms = module_service
         self._user_db = user_db_service
         self._sources = {"Z_AB": None, "Z_AC": None, "Z_BC": None}
@@ -34,10 +72,23 @@ class ToopWizardDialog(QDialog):
         )
 
         main_layout = QVBoxLayout(self)
+        main_layout.setSpacing(24)
+        main_layout.setContentsMargins(32, 32, 32, 32)
 
         title = QLabel(self.tr("Toop Model Configuration"))
-        title.setStyleSheet("font-size: 16pt; font-weight: bold;")
+        title.setObjectName("wizardTitle")
         main_layout.addWidget(title)
+
+        self._step_indicator = StepIndicator(
+            [
+                self.tr("Elements"),
+                self.tr("Z_AB"),
+                self.tr("Z_AC"),
+                self.tr("Z_BC"),
+                self.tr("Options"),
+            ]
+        )
+        main_layout.addWidget(self._step_indicator)
 
         self._stacked = QStackedWidget()
         main_layout.addWidget(self._stacked)
@@ -45,15 +96,9 @@ class ToopWizardDialog(QDialog):
         self._element_page = ElementSelectionPage()
         self._stacked.addWidget(self._element_page)
 
-        self._z_ab_page = DataSourceSelectionPage(
-            self.tr("Z_AB Data Source (A-B Binary)"), "Z_AB"
-        )
-        self._z_ac_page = DataSourceSelectionPage(
-            self.tr("Z_AC Data Source (A-C Binary)"), "Z_AC"
-        )
-        self._z_bc_page = DataSourceSelectionPage(
-            self.tr("Z_BC Data Source (B-C Binary)"), "Z_BC"
-        )
+        self._z_ab_page = DataSourceSelectionPage(self.tr("Z_AB Data Source"), "Z_AB")
+        self._z_ac_page = DataSourceSelectionPage(self.tr("Z_AC Data Source"), "Z_AC")
+        self._z_bc_page = DataSourceSelectionPage(self.tr("Z_BC Data Source"), "Z_BC")
         self._options_page = CalculationOptionsPage()
 
         self._stacked.addWidget(self._z_ab_page)
@@ -62,10 +107,16 @@ class ToopWizardDialog(QDialog):
         self._stacked.addWidget(self._options_page)
 
         button_layout = QHBoxLayout()
+        button_layout.setSpacing(16)
+
         self._cancel_btn = QPushButton(self.tr("Cancel"))
+        self._cancel_btn.setObjectName("secondary")
         self._prev_btn = QPushButton(self.tr("Previous"))
+        self._prev_btn.setObjectName("secondary")
         self._next_btn = QPushButton(self.tr("Next"))
+        self._next_btn.setObjectName("primary")
         self._calc_btn = QPushButton(self.tr("Calculate"))
+        self._calc_btn.setObjectName("primary")
 
         self._prev_btn.setEnabled(False)
         self._calc_btn.setVisible(False)

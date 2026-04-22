@@ -17,12 +17,13 @@ class Workspace(QtWidgets.QWidget):
 
         # Dock manager
         self.dock_manager = QtAds.CDockManager(self)
-        self.dock_manager.setStyleSheet(getAdsStylesheet())
+        self.dock_manager.setStyleSheet(
+            getAdsStylesheet(
+                context.theme._primary_color, context.theme._secondary_color
+            )
+        )
 
         self.layout().addWidget(self.dock_manager)
-
-        # Listen for theme changes
-        context.theme.theme_changed.connect(self._onThemeChanged)
 
         # Background layer (NOT inside dock_manager)
         self.background = BackgroundLayer(self, context.i18n)
@@ -37,5 +38,14 @@ class Workspace(QtWidgets.QWidget):
             context=context,
         )
 
+        # Listen for theme changes
+        context.theme.theme_changed.connect(self._onThemeChanged)
+
+        self._context = context
+
     def _onThemeChanged(self):
-        self.dock_manager.setStyleSheet(getAdsStylesheet())
+        self.dock_manager.setStyleSheet(
+            getAdsStylesheet(
+                self._context.theme._primary_color, self._context.theme._secondary_color
+            )
+        )

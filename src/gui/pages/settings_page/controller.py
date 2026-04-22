@@ -12,7 +12,6 @@ from domain.snapshot import SettingsSnapshot
 from domain.settings import Settings
 
 from core.plot.config import PlotStyleService
-from core.plot.color import ColorPalette
 from catalog import ColorAlgorithm
 
 from gui.appearance.theme import ThemeService
@@ -92,19 +91,28 @@ class SettingsController(QObject):
             lambda: (self.ui.content_area.setCurrentIndex(2), self._updatePlotPreview())
         )
 
+        self.ui.primary_color_input.returnPressed.connect(
+            lambda: self._onPrimaryColorSubmitted(self.ui.primary_color_input.text())
+        )
+        self.ui.secondary_color_input.returnPressed.connect(
+            lambda: self._onSecondaryColorSubmitted(
+                self.ui.secondary_color_input.text()
+            )
+        )
+
     def connectSignals(self):
         self.ui.lang_combo.currentIndexChanged.connect(self._onLanguageChanged)
         self.ui.log_level_combo.currentIndexChanged.connect(self._onLogLevelChanged)
-        self.ui.theme_mode_combo.currentIndexChanged.connect(self._onThemeModeChanged)
-        self.ui.theme_color_combo.currentIndexChanged.connect(self._onThemeColorChanged)
-        self.ui.density_scale_spin.valueChanged.connect(self._onDensityScaleChanged)
+        self.ui.density_scale_combo.currentIndexChanged.connect(
+            self._onDensityScaleChanged
+        )
+
+        self.ui.primary_color_input.textChanged.connect(self._onPrimaryColorChanged)
+        self.ui.secondary_color_input.textChanged.connect(self._onSecondaryColorChanged)
 
         self.ui.palette_combo.currentIndexChanged.connect(self._onColorschemeChanged)
         self.ui.algorithm_combo.currentIndexChanged.connect(
             self._onColorAlgorithmChanged
-        )
-        self.ui.color_scheme_combo.currentIndexChanged.connect(
-            self._onColorSchemeChanged
         )
         self.ui.line_style_combo.currentIndexChanged.connect(self._onLineStyleChanged)
         self.ui.marker_combo.currentIndexChanged.connect(self._onMarkerChanged)
@@ -142,20 +150,8 @@ class SettingsController(QObject):
         self._saveAndReload([SettingsSnapshot("log", "level", level)])
         self._log_service.getLogger(__name__).debug(f"Log level changed to {level}")
 
-    def _onThemeModeChanged(self, index: int):
-        mode = self.ui.theme_mode_combo.itemData(index)
-        self._theme_service.setThemeMode(mode)
-        snapshots = [SettingsSnapshot("appearance", "theme_mode", mode)]
-        if mode != "system":
-            snapshots.append(SettingsSnapshot("appearance", "scheme", mode))
-        self._saveAndReload(snapshots)
-
-    def _onThemeColorChanged(self, index: int):
-        color = self.ui.theme_color_combo.itemData(index)
-        self._theme_service.setTheme(color)
-        self._saveAndReload([SettingsSnapshot("appearance", "theme", color)])
-
-    def _onDensityScaleChanged(self, value: int):
+    def _onDensityScaleChanged(self, index: int):
+        value = self.ui.density_scale_combo.itemData(index)
         self._theme_service.updateDensityScale(value)
         self._saveAndReload(
             [SettingsSnapshot("appearance", "density_scale", str(value))]
@@ -163,7 +159,16 @@ class SettingsController(QObject):
 
     def _updatePlotPreview(self) -> None:
         settings = Settings(records=self._settings_repo.findAll())
-        colorscheme = self.ui.palette_combo.currentData()
+        primary = (
+            self.ui.primary_color_input.text()
+            or settings.get("plot", "primary_color")
+            or "#C62828"
+        )
+        secondary = (
+            self.ui.secondary_color_input.text()
+            or settings.get("plot", "secondary_color")
+            or "#1A1A1A"
+        )
         algorithm = self.ui.algorithm_combo.currentData()
         line_style = self.ui.line_style_combo.currentData()
         marker = self.ui.marker_combo.currentData()
@@ -177,14 +182,9 @@ class SettingsController(QObject):
         tick_font_size = self.ui.tick_font_size_spin.value()
         legend_font_size = self.ui.legend_font_size_spin.value()
 
-        if colorscheme == "custom":
-            primary = settings.get("plot", "custom_primary") or "#1f77b4"
-            secondary = settings.get("plot", "custom_secondary") or "#ff7f0e"
-            from core.plot.color import ThemeColors
+        from core.plot.color import ThemeColors
 
-            theme = ThemeColors(primary=primary, secondary=secondary)
-        else:
-            theme = ColorPalette.getThemeColors(colorscheme)
+        theme = ThemeColors(primary=primary, secondary=secondary)
 
         algo = ColorAlgorithm(algorithm) if algorithm else ColorAlgorithm.LINEAR
         from core.plot.color import ColorGenerator
@@ -265,15 +265,44 @@ class SettingsController(QObject):
             snapshots.append(SettingsSnapshot("plot", "custom_secondary", colors[1]))
         self._saveAndReload(snapshots)
 
+    def _onPrimaryColorChanged(self, text: str):
+        pass
+
+    def _onSecondaryColorChanged(self, text: str):
+        pass
+
+    def _onPrimaryColorSubmitted(self, text: str):
+        import re
+
+        color_pattern = re.compile(r"^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")
+        if color_pattern.match(text):
+            if len(text) == 4:
+                text = f"#{text[1]}{text[1]}{text[2]}{text[2]}{text[3]}{text[3]}"
+            text = text.upper()
+            self.ui.primary_color_input.setText(text)
+            self._saveAndReload([SettingsSnapshot("appearance", "primary_color", text)])
+            secondary = self.ui.secondary_color_input.text() or "#1A1A1A"
+            self._theme_service.updateThemeColors(text, secondary)
+
+    def _onSecondaryColorSubmitted(self, text: str):
+        import re
+
+        color_pattern = re.compile(r"^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")
+        if color_pattern.match(text):
+            if len(text) == 4:
+                text = f"#{text[1]}{text[1]}{text[2]}{text[2]}{text[3]}{text[3]}"
+            text = text.upper()
+            self.ui.secondary_color_input.setText(text)
+            self._saveAndReload(
+                [SettingsSnapshot("appearance", "secondary_color", text)]
+            )
+            primary = self.ui.primary_color_input.text() or "#C62828"
+            self._theme_service.updateThemeColors(primary, text)
+
     def _onColorAlgorithmChanged(self, index: int):
         algorithm = self.ui.algorithm_combo.itemData(index)
         self._saveAndReload([SettingsSnapshot("plot", "color_algorithm", algorithm)])
         self._updatePlotPreview()
-        self.plot_settings_changed.emit()
-
-    def _onColorSchemeChanged(self, index: int):
-        scheme = self.ui.color_scheme_combo.itemData(index)
-        self._saveAndReload([SettingsSnapshot("plot", "colorScheme", scheme)])
         self.plot_settings_changed.emit()
 
     def _onLineStyleChanged(self, index: int):

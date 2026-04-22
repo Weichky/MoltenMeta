@@ -87,6 +87,15 @@ class Settings:
             return "light"
         return self.get("appearance", "scheme")
 
+    # appearance
+    @property
+    def primary_color(self) -> str | None:
+        return self.get("appearance", "primary_color")
+
+    @property
+    def secondary_color(self) -> str | None:
+        return self.get("appearance", "secondary_color")
+
     # plot
     @property
     def plot_colorscheme(self) -> str | None:

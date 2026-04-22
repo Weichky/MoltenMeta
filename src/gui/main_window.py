@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
     QWidget,
+    QButtonGroup,
 )
 import PySide6QtAds as QtAds
 
@@ -73,6 +74,13 @@ class MainWindow(QMainWindow):
             self.workspace.controller.showSettings
         )
         self.sidebar.ui.dataButton.clicked.connect(self.workspace.controller.showData)
+
+        self._sidebar_button_group = QButtonGroup()
+        self._sidebar_button_group.addButton(self.sidebar.ui.homeButton)
+        self._sidebar_button_group.addButton(self.sidebar.ui.dataButton)
+        self._sidebar_button_group.addButton(self.sidebar.ui.settingsButton)
+        self._sidebar_button_group.setExclusive(True)
+        self.sidebar.ui.homeButton.setChecked(True)
 
         # Connect menubar settings action
         self.menubar.ui.action_settings.triggered.connect(

@@ -6,21 +6,21 @@ from resources import qtads
 
 ADS_STYLESHEET_TEMPLATE = """
 ads--CDockWidgetTab QLabel {{
-    color: palette(Text) !important;
+    color: {secondary_color} !important;
 }}
 
 ads--CDockWidgetTab[activeTab="true"] QLabel,
 ads--CDockWidgetTab[focused="true"] QLabel {{
-    color: palette(HighlightedText) !important;
+    color: {primary_color} !important;
 }}
 
 ads--CDockWidgetTab #dockWidgetTabLabel {{
-    color: palette(Text) !important;
+    color: {secondary_color} !important;
 }}
 
 ads--CDockWidgetTab[activeTab="true"] #dockWidgetTabLabel,
 ads--CDockWidgetTab[focused="true"] #dockWidgetTabLabel {{
-    color: palette(HighlightedText) !important;
+    color: {primary_color} !important;
 }}
 
 #tabsMenuButton {{
@@ -88,17 +88,39 @@ ads--CAutoHideTab {{
 }}
 
 ads--CAutoHideSideBar {{
-    background: palette(Window);
+    background: rgba(250, 250, 250, 200);
+    border: none;
+    border-right: 2px solid {primary_color};
+}}
+
+ads--CDockWidget {{
+    background: rgba(250, 250, 250, 200);
     border: none;
 }}
 
+ads--CDockWidgetTab {{
+    border-bottom: 2px solid {primary_color};
+}}
+
+#dockAreaWidget {{
+    border: none;
+    border-left: 1px solid {primary_color};
+}}
+
 ads--CResizeHandle {{
-    background: palette(Window);
+    background: {primary_color};
+    width: 3px;
 }}
 """
 
 
-def getAdsStylesheet() -> str:
+def getAdsStylesheet(
+    primary_color: str = "#C62828", secondary_color: str = "#1A1A1A"
+) -> str:
     images_dir = Path(files(qtads).joinpath("images"))
     resources_url = images_dir.as_posix()
-    return ADS_STYLESHEET_TEMPLATE.format(resources_url=resources_url)
+    return ADS_STYLESHEET_TEMPLATE.format(
+        resources_url=resources_url,
+        primary_color=primary_color,
+        secondary_color=secondary_color,
+    )
