@@ -161,6 +161,24 @@ class PropertiesRepository(BaseRepository[PropertySnapshot]):
         rows = cursor.fetchall()
         return [PropertySnapshot.fromRow(row) for row in rows]
 
+    def upsert(self, snapshot: PropertySnapshot) -> int:
+        existing = self.findByName(snapshot.name)
+        if existing is not None:
+            record = snapshot.toRecord()
+            record["id"] = existing.id
+            dialect = self.dialect
+            set_clause = ", ".join(
+                [f"{col} = {dialect.getPlaceholder()}" for col in record.keys()]
+            )
+            values = list(record.values())
+            sql = f"UPDATE {self.getTableName()} SET {set_clause} WHERE id = {dialect.getPlaceholder()}"
+            values.append(existing.id)
+            self.connection.execute(sql, values)
+            self.connection.commit()
+            return existing.id
+        else:
+            return self.insert(snapshot)
+
 
 class MethodsRepository(BaseRepository[MethodSnapshot]):
     def getTableName(self) -> str:
@@ -410,6 +428,18 @@ class UnitsRepository(BaseRepository[UnitSnapshot]):
         if row:
             return UnitSnapshot.fromRow(row)
         return None
+
+    def upsertBySymbolId(self, symbol_id: int) -> int:
+        placeholder = self.dialect.getPlaceholder()
+        sql = f"SELECT id FROM {self.getTableName()} WHERE symbol_id = {placeholder}"
+        cursor = self.connection.execute(sql, [symbol_id])
+        row = cursor.fetchone()
+        if row:
+            return row["id"]
+        sql = f"INSERT INTO {self.getTableName()} (symbol_id) VALUES ({placeholder})"
+        cursor = self.connection.execute(sql, [symbol_id])
+        self.connection.commit()
+        return cursor.lastRowId
 
 
 class PropertyValueConditionsRepository(BaseRepository[PropertyValueConditionSnapshot]):

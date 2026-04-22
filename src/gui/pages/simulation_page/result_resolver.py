@@ -143,6 +143,17 @@ class ResultResolver:
         values = result.get("values", [])
         latex = result.get("latex", {})
         units = result.get("units", {})
+        dims = result.get("dims", [])
+        main_dim = result.get("main_dim")
+
+        def _resolve_key(coord_key: str, fallback_key: str | None) -> str:
+            if coord_key in dims and (not values or coord_key in values[0]):
+                return coord_key
+            if fallback_key and fallback_key in dims:
+                return fallback_key
+            if main_dim and main_dim in dims:
+                return main_dim
+            return coord_key
 
         x_key = coord.get("x", "")
         y_value = coord.get("y", [])
@@ -151,6 +162,10 @@ class ResultResolver:
         else:
             y_keys = y_value
         z_key = coord.get("z", "")
+
+        x_key = _resolve_key(x_key, None)
+        y_keys = [_resolve_key(k, dims[1] if len(dims) > 1 else None) for k in y_keys]
+        z_key = _resolve_key(z_key, main_dim)
 
         x_data = [v.get(x_key, 0) for v in values]
 
@@ -205,7 +220,7 @@ class ResultResolver:
             },
             "y_axis": y_axis,
             "z_axis": z_axis,
-            "dims": result.get("dims", []),
+            "dims": dims,
             "available_coords": self._scatters,
             "current_coord_index": self._current_coord_index,
             "plot_type": "scatter_3d",
@@ -224,6 +239,17 @@ class ResultResolver:
         values = result.get("values", [])
         latex = result.get("latex", {})
         units = result.get("units", {})
+        dims = result.get("dims", [])
+        main_dim = result.get("main_dim")
+
+        def _resolve_key(coord_key: str, fallback_key: str | None) -> str:
+            if coord_key in dims and (not values or coord_key in values[0]):
+                return coord_key
+            if fallback_key and fallback_key in dims:
+                return fallback_key
+            if main_dim and main_dim in dims:
+                return main_dim
+            return coord_key
 
         x_key = coord.get("x", "")
         y_value = coord.get("y", [])
@@ -231,6 +257,9 @@ class ResultResolver:
             y_keys = [y_value]
         else:
             y_keys = y_value
+
+        x_key = _resolve_key(x_key, dims[1] if len(dims) > 1 else None)
+        y_keys = [_resolve_key(k, main_dim) for k in y_keys]
 
         x_data = [v.get(x_key, 0) for v in values]
 
@@ -263,7 +292,7 @@ class ResultResolver:
             },
             "y_axis": y_axis,
             "z_axis": None,
-            "dims": result.get("dims", []),
+            "dims": dims,
             "available_coords": self._scatters,
             "current_coord_index": self._current_coord_index,
             "plot_type": self._plot_type,

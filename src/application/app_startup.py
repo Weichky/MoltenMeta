@@ -86,7 +86,11 @@ def initApp(app) -> AppContext:
     context.modules.setRepositories(
         user_db_service.computation_cache_repo,
         user_db_service.property_tags_repo,
+        user_db_service.symbol_repo,
+        user_db_service.unit_repo,
+        user_db_service.property_repo,
     )
+    context.modules.registerAllModulesProperties()
 
     context.unified_data = UnifiedDataQueryService(context.log, user_db_service)
 

@@ -172,6 +172,7 @@ class MiedemaCalc:
                 output_symbol: cfg["outputs"]["latex"][output_symbol],
             },
             "dims": ["x_A", output_symbol],
+            "main_dim": output_symbol,
             "method": "Miedema",
         }
 
@@ -249,6 +250,7 @@ class MiedemaCalc:
                 output_symbol: cfg["outputs"]["latex"][output_symbol],
             },
             "dims": ["x_A", output_symbol],
+            "main_dim": output_symbol,
             "method": "Miedema",
         }
 

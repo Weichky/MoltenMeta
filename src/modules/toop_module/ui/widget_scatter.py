@@ -86,17 +86,18 @@ class ToopScatterWizardDialog(QDialog):
     def _on_elements_changed(self):
         self._update_sources()
 
-    def _getOutputLatexUnit(self, source) -> tuple[str, str]:
+    def _getOutputSymbolLatexUnit(self, source) -> tuple[str, str, str]:
+        """Query symbol, latex and unit for a DataSource by resolving its output symbol against module config."""
         if source is None:
-            return "", ""
+            return "", "", ""
         module_name = source.source_name
         output_symbol = source.output_symbol
         config = self._ms.getModuleConfig(module_name)
         if not config:
-            return "", ""
+            return "", "", ""
         module_cfg = config.get("module")
         if module_cfg is None:
-            return "", ""
+            return "", "", ""
         all_methods = module_cfg.get("all_methods", [])
         for method_name in all_methods:
             method_config = config.get(method_name, {})
@@ -108,8 +109,8 @@ class ToopScatterWizardDialog(QDialog):
                 if sym == output_symbol:
                     latex = latex_list.get(sym, "")
                     unit = units.get(sym, "")
-                    return latex, unit
-        return "", ""
+                    return output_symbol, latex, unit
+        return "", "", ""
 
     def _on_calculate(self):
         """Gather inputs and invoke Toop scatter calculation."""
@@ -143,7 +144,7 @@ class ToopScatterWizardDialog(QDialog):
         ]
         Z_BC_list = Z_BC_source.get_values(elem_b, elem_c, w_B_list)
 
-        z_latex, z_unit = self._getOutputLatexUnit(Z_AB_source)
+        z_symbol, z_latex, z_unit = self._getOutputSymbolLatexUnit(Z_AB_source)
 
         result = toop.calculateScatterWithData(
             elem_a,
@@ -155,6 +156,17 @@ class ToopScatterWizardDialog(QDialog):
             Z_BC_list,
             z_latex,
             z_unit,
+            z_symbol,
+        )
+
+        self._ms.cacheResult(
+            "toop_module",
+            "calculateScatter",
+            result,
+            elem_A=elem_a,
+            elem_B=elem_b,
+            elem_C=elem_c,
+            n_points=n_points,
         )
 
         self.resultReady.emit(result)

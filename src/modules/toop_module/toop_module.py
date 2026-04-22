@@ -84,6 +84,7 @@ class ToopCalc:
                 output_symbol: cfg["outputs"]["latex"][output_symbol],
             },
             "dims": ["x_A", "x_B", "x_C", output_symbol],
+            "main_dim": output_symbol,
             "method": "Toop",
         }
 
@@ -107,7 +108,7 @@ class ToopCalc:
         result = _toop_algorithm.calculatePropertyList(
             x_B_arr, x_C_arr, Z_AB_arr, Z_AC_arr, Z_BC_arr
         )
-        return result
+        return result.tolist()
 
     def _generateGrid(
         self, n_points: int
@@ -126,6 +127,7 @@ class ToopCalc:
         elem_B: int,
         elem_C: int,
         n_points: int = 50,
+        z_symbol: str | None = None,
     ) -> dict:
         """
         Calculate Toop model for a triangular grid.
@@ -135,6 +137,7 @@ class ToopCalc:
             elem_B: Atomic number of element B
             elem_C: Atomic number of element C
             n_points: Number of points per edge (total ~ n_points^2/2)
+            z_symbol: Output symbol name (e.g. "Delta_H_mix"). If None, uses config default.
 
         Returns:
             Dictionary containing calculation results
@@ -149,7 +152,11 @@ class ToopCalc:
 
         if not x_A_list:
             return self._emptyResult(
-                elem_A, elem_B, elem_C, MODULE_INFO["calculateScatter"]
+                elem_A,
+                elem_B,
+                elem_C,
+                MODULE_INFO["calculateScatter"],
+                extra_conditions={"output_symbol": z_symbol} if z_symbol else None,
             )
 
         Z_AB_list = self._provider.get_values(elem_A, elem_B, x_A_list)
@@ -179,10 +186,10 @@ class ToopCalc:
         )
 
         cfg = MODULE_INFO["calculateScatter"]
-        output_symbol = cfg["outputs"]["symbol"][0]
+        output_symbol = z_symbol or cfg["outputs"]["symbol"][0]
 
         values = [
-            {"x_A": a, "x_B": b, "x_C": c, output_symbol: z}
+            {output_symbol: z, "x_A": a, "x_B": b, "x_C": c}
             for a, b, c, z in zip(x_A_list, x_B_list, x_C_list, Z_ABC_list)
         ]
 
@@ -197,15 +204,22 @@ class ToopCalc:
                 "x_A": "",
                 "x_B": "",
                 "x_C": "",
-                output_symbol: cfg["outputs"]["unit"][output_symbol],
+                output_symbol: cfg["outputs"]["unit"].get(
+                    output_symbol,
+                    cfg["outputs"]["unit"].get(cfg["outputs"]["symbol"][0], ""),
+                ),
             },
             "latex": {
                 "x_A": "x_A",
                 "x_B": "x_B",
                 "x_C": "x_C",
-                output_symbol: cfg["outputs"]["latex"][output_symbol],
+                output_symbol: cfg["outputs"]["latex"].get(
+                    output_symbol,
+                    cfg["outputs"]["latex"].get(cfg["outputs"]["symbol"][0], ""),
+                ),
             },
             "dims": ["x_A", "x_B", "x_C", output_symbol],
+            "main_dim": output_symbol,
             "method": "Toop",
         }
 
@@ -374,7 +388,12 @@ class ToopCalc:
         extra_conditions: dict | None = None,
     ) -> dict:
         """Return an empty result structure for edge cases."""
-        output_symbol = cfg["outputs"]["symbol"][0]
+        fallback_symbol = cfg["outputs"]["symbol"][0]
+        output_symbol = (
+            extra_conditions.get("output_symbol", fallback_symbol)
+            if extra_conditions
+            else fallback_symbol
+        )
         conditions = {
             "elem_A": elemIdToSymbol(elem_A),
             "elem_B": elemIdToSymbol(elem_B),
@@ -390,15 +409,20 @@ class ToopCalc:
                 "x_A": "",
                 "x_B": "",
                 "x_C": "",
-                output_symbol: cfg["outputs"]["unit"][output_symbol],
+                output_symbol: cfg["outputs"]["unit"].get(
+                    output_symbol, cfg["outputs"]["unit"].get(fallback_symbol, "")
+                ),
             },
             "latex": {
                 "x_A": "x_A",
                 "x_B": "x_B",
                 "x_C": "x_C",
-                output_symbol: cfg["outputs"]["latex"][output_symbol],
+                output_symbol: cfg["outputs"]["latex"].get(
+                    output_symbol, cfg["outputs"]["latex"].get(fallback_symbol, "")
+                ),
             },
             "dims": ["x_A", "x_B", "x_C", output_symbol],
+            "main_dim": output_symbol,
             "method": "Toop",
         }
 
@@ -413,6 +437,7 @@ class ToopCalc:
         Z_BC_list: list[float],
         z_latex: str,
         z_unit: str,
+        z_symbol: str | None = None,
     ) -> dict:
         """
         Calculate Toop model for a triangular grid with direct data input.
@@ -427,6 +452,7 @@ class ToopCalc:
             Z_BC_list: Pre-computed binary BC values at w_B points
             z_latex: LaTeX symbol for z-axis property
             z_unit: Unit for z-axis property
+            z_symbol: Output symbol name (e.g. "Delta_H_mix"). If None, uses config default.
 
         Returns:
             Dictionary containing calculation results
@@ -434,16 +460,29 @@ class ToopCalc:
         if n_points < 0:
             raise ValueError(f"n_points must be non-negative, got {n_points}")
 
+        cfg = MODULE_INFO["calculateScatter"]
+        output_symbol = z_symbol or cfg["outputs"]["symbol"][0]
+        final_latex = z_latex
+        final_unit = z_unit
+
         if n_points == 0:
             return self._emptyResult(
-                elem_A, elem_B, elem_C, MODULE_INFO["calculateScatter"]
+                elem_A,
+                elem_B,
+                elem_C,
+                MODULE_INFO["calculateScatter"],
+                extra_conditions={"output_symbol": output_symbol},
             )
 
         x_A_list, x_B_list, x_C_list = self._generateGrid(n_points)
 
-        if not x_A_list:
+        if not x_A_list or len(x_A_list) < 3:
             return self._emptyResult(
-                elem_A, elem_B, elem_C, MODULE_INFO["calculateScatter"]
+                elem_A,
+                elem_B,
+                elem_C,
+                MODULE_INFO["calculateScatter"],
+                extra_conditions={"output_symbol": output_symbol},
             )
 
         if len(Z_AB_list) != len(x_A_list):
@@ -468,13 +507,17 @@ class ToopCalc:
             x_B_list, x_C_list, Z_AB_list, Z_AC_list, Z_BC_list
         )
 
-        cfg = MODULE_INFO["calculateScatter"]
-        output_symbol = cfg["outputs"]["symbol"][0]
-        final_latex = z_latex
-        final_unit = z_unit
+        if not Z_ABC_list or len(Z_ABC_list) != len(x_A_list):
+            return self._emptyResult(
+                elem_A,
+                elem_B,
+                elem_C,
+                MODULE_INFO["calculateScatter"],
+                extra_conditions={"output_symbol": output_symbol},
+            )
 
         values = [
-            {"x_A": a, "x_B": b, "x_C": c, output_symbol: z}
+            {output_symbol: z, "x_A": a, "x_B": b, "x_C": c}
             for a, b, c, z in zip(x_A_list, x_B_list, x_C_list, Z_ABC_list)
         ]
 
@@ -498,6 +541,7 @@ class ToopCalc:
                 output_symbol: final_latex,
             },
             "dims": ["x_A", "x_B", "x_C", output_symbol],
+            "main_dim": output_symbol,
             "method": "Toop",
         }
 
@@ -513,6 +557,7 @@ class ToopCalc:
         Z_BC_list: list[float],
         z_latex: str,
         z_unit: str,
+        z_symbol: str | None = None,
     ) -> dict:
         """
         Calculate contour data for x_i-x_j plane with direct data input.
@@ -528,6 +573,7 @@ class ToopCalc:
             Z_BC_list: Pre-computed binary BC values at w_B points
             z_latex: LaTeX symbol for z-axis property
             z_unit: Unit for z-axis property
+            z_symbol: Output symbol name (e.g. "Delta_H_mix"). If None, uses config default.
 
         Returns:
             Dictionary containing meshgrid data for contour plotting
@@ -538,7 +584,8 @@ class ToopCalc:
         if plane not in ("x_A-x_B", "x_A-x_C", "x_B-x_C"):
             raise ValueError(f"plane must be x_A-x_B, x_A-x_C, or x_B-x_C, got {plane}")
 
-        output_symbol = "Z_ABC"
+        cfg = MODULE_INFO["calculateContour"]
+        output_symbol = z_symbol or cfg["outputs"]["symbol"][0]
         final_latex = z_latex
         final_unit = z_unit
 
@@ -551,6 +598,7 @@ class ToopCalc:
                     "plane": plane,
                 },
                 "dims": ["x_A", "x_B", "x_C", output_symbol],
+                "main_dim": output_symbol,
                 "values": [],
                 "latex": {
                     "x_A": "x_A",
@@ -564,6 +612,105 @@ class ToopCalc:
                 output_symbol: [],
                 "plane": plane,
             }
+
+        x_A_list, x_B_list, x_C_list = self._generateGrid(n_points)
+
+        if not x_A_list or len(x_A_list) < 3:
+            return {
+                "conditions": {
+                    "elem_A": elemIdToSymbol(elem_A),
+                    "elem_B": elemIdToSymbol(elem_B),
+                    "elem_C": elemIdToSymbol(elem_C),
+                    "plane": plane,
+                },
+                "dims": ["x_A", "x_B", "x_C", output_symbol],
+                "main_dim": output_symbol,
+                "values": [],
+                "latex": {
+                    "x_A": "x_A",
+                    "x_B": "x_B",
+                    "x_C": "x_C",
+                    output_symbol: final_latex,
+                },
+                "units": {"x_A": "", "x_B": "", "x_C": "", output_symbol: final_unit},
+                "plane": plane,
+            }
+
+        if len(Z_AB_list) != len(x_A_list):
+            raise ValueError(
+                f"Z_AB_list has {len(Z_AB_list)} values, expected {len(x_A_list)}"
+            )
+        if len(Z_AC_list) != len(x_A_list):
+            raise ValueError(
+                f"Z_AC_list has {len(Z_AC_list)} values, expected {len(x_A_list)}"
+            )
+
+        w_B_list = [
+            x_B / (x_B + x_C) if (x_B + x_C) > 0 else 0
+            for x_B, x_C in zip(x_B_list, x_C_list)
+        ]
+        if len(Z_BC_list) != len(w_B_list):
+            raise ValueError(
+                f"Z_BC_list has {len(Z_BC_list)} values, expected {len(w_B_list)}"
+            )
+
+        Z_ABC_list = self.calculatePropertyList(
+            x_B_list, x_C_list, Z_AB_list, Z_AC_list, Z_BC_list
+        )
+
+        if not Z_ABC_list or len(Z_ABC_list) != len(x_A_list):
+            return {
+                "conditions": {
+                    "elem_A": elemIdToSymbol(elem_A),
+                    "elem_B": elemIdToSymbol(elem_B),
+                    "elem_C": elemIdToSymbol(elem_C),
+                    "plane": plane,
+                },
+                "dims": ["x_A", "x_B", "x_C", output_symbol],
+                "main_dim": output_symbol,
+                "values": [],
+                "latex": {
+                    "x_A": "x_A",
+                    "x_B": "x_B",
+                    "x_C": "x_C",
+                    output_symbol: final_latex,
+                },
+                "units": {"x_A": "", "x_B": "", "x_C": "", output_symbol: final_unit},
+                "plane": plane,
+            }
+
+        values = [
+            {output_symbol: z, "x_A": a, "x_B": b, "x_C": c}
+            for a, b, c, z in zip(x_A_list, x_B_list, x_C_list, Z_ABC_list)
+        ]
+
+        return {
+            "conditions": {
+                "elem_A": elemIdToSymbol(elem_A),
+                "elem_B": elemIdToSymbol(elem_B),
+                "elem_C": elemIdToSymbol(elem_C),
+                "plane": plane,
+            },
+            "dims": ["x_A", "x_B", "x_C", output_symbol],
+            "main_dim": output_symbol,
+            "values": values,
+            "latex": {
+                "x_A": "x_A",
+                "x_B": "x_B",
+                "x_C": "x_C",
+                output_symbol: final_latex,
+            },
+            "units": {
+                "x_A": "",
+                "x_B": "",
+                "x_C": "",
+                output_symbol: final_unit,
+            },
+            "x_i": x_A_list,
+            "x_j": x_B_list,
+            output_symbol: Z_ABC_list,
+            "plane": plane,
+        }
 
         x_A_list, x_B_list, x_C_list = self._generateGrid(n_points)
 
@@ -617,6 +764,7 @@ class ToopCalc:
                 "plane": plane,
             },
             "dims": ["x_A", "x_B", "x_C", output_symbol],
+            "main_dim": output_symbol,
             "values": values,
             "latex": {
                 "x_A": "x_A",
