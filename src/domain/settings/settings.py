@@ -53,16 +53,8 @@ class Settings:
 
     # appearance
     @property
-    def theme(self) -> str:
-        return self.get("appearance", "theme")
-
-    @property
     def scheme(self) -> str:
         return self.get("appearance", "scheme")
-
-    @property
-    def enable_auto_dark_mode(self) -> bool:
-        return self.get("appearance", "enable_auto_dark_mode") == "true"
 
     @property
     def theme_mode(self) -> str:
@@ -70,22 +62,7 @@ class Settings:
 
     @property
     def density_scale(self) -> int:
-        return int(self.get("appearance", "density_scale", "-3"))
-
-    @property
-    def is_system_theme_mode(self) -> bool:
-        return self.get("appearance", "theme_mode") == "system"
-
-    # Combined Methods
-    @property
-    def theme_XML(self) -> str:
-        scheme = self._resolve_scheme()
-        return f"{scheme}_{self.get('appearance', 'theme')}.xml"
-
-    def _resolve_scheme(self) -> str:
-        if self.get("appearance", "theme_mode") == "system":
-            return "light"
-        return self.get("appearance", "scheme")
+        return int(self.get("appearance", "density_scale", "-2"))
 
     # appearance
     @property

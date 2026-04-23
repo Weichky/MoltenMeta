@@ -50,6 +50,7 @@ class SidebarWidget(QDockWidget):
     def _setupIcons(self):
         icons_path = Path(ICONS_PATH)
         self.ui.homeButton.setIcon(QIcon(str(icons_path / "home.svg")))
+        self.ui.simulationButton.setIcon(QIcon(str(icons_path / "experiment.svg")))
         self.ui.settingsButton.setIcon(QIcon(str(icons_path / "config.svg")))
         self.ui.dataButton.setIcon(QIcon(str(icons_path / "database_code.svg")))
         self._updateToggleIcon()
@@ -74,6 +75,7 @@ class SidebarWidget(QDockWidget):
         if self._is_collapsed:
             buttons = [
                 self.ui.homeButton,
+                self.ui.simulationButton,
                 self.ui.settingsButton,
                 self.ui.dataButton,
             ]

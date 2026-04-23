@@ -70,6 +70,9 @@ class MainWindow(QMainWindow):
 
         # Connect signals
         self.sidebar.ui.homeButton.clicked.connect(self.workspace.controller.showHome)
+        self.sidebar.ui.simulationButton.clicked.connect(
+            self.workspace.controller.showSimulation
+        )
         self.sidebar.ui.settingsButton.clicked.connect(
             self.workspace.controller.showSettings
         )
@@ -77,6 +80,7 @@ class MainWindow(QMainWindow):
 
         self._sidebar_button_group = QButtonGroup()
         self._sidebar_button_group.addButton(self.sidebar.ui.homeButton)
+        self._sidebar_button_group.addButton(self.sidebar.ui.simulationButton)
         self._sidebar_button_group.addButton(self.sidebar.ui.dataButton)
         self._sidebar_button_group.addButton(self.sidebar.ui.settingsButton)
         self._sidebar_button_group.setExclusive(True)

@@ -47,7 +47,7 @@ class UiSidebar(QObject):
         self.verticalLayout.setContentsMargins(0, 16, 0, 16)
 
         self.sidebarLayout = QVBoxLayout()
-        self.sidebarLayout.setSpacing(16)
+        self.sidebarLayout.setSpacing(0)
         self.sidebarLayout.setObjectName("sidebarLayout")
         self.sidebarLayout.setSizeConstraint(QLayout.SizeConstraint.SetMaximumSize)
 
@@ -62,6 +62,18 @@ class UiSidebar(QObject):
         self.homeButton.setSizePolicy(sizePolicy)
 
         self.sidebarLayout.addWidget(self.homeButton)
+
+        self.simulationButton = QPushButton(self.contents)
+        self.simulationButton.setObjectName("sidebarButton")
+        self.simulationButton.setCheckable(True)
+
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.simulationButton.sizePolicy().hasHeightForWidth())
+        self.simulationButton.setSizePolicy(sizePolicy)
+
+        self.sidebarLayout.addWidget(self.simulationButton)
 
         self.dataButton = QPushButton(self.contents)
         self.dataButton.setObjectName("sidebarButton")
@@ -108,16 +120,18 @@ class UiSidebar(QObject):
         self.sidebarLayout.setStretch(0, 0)
         self.sidebarLayout.setStretch(1, 0)
         self.sidebarLayout.setStretch(2, 0)
-        self.sidebarLayout.setStretch(3, 1)
-        self.sidebarLayout.setStretch(4, 0)
+        self.sidebarLayout.setStretch(3, 0)
+        self.sidebarLayout.setStretch(4, 1)
+        self.sidebarLayout.setStretch(5, 0)
 
         self.verticalLayout.addLayout(self.sidebarLayout)
         dock.setWidget(self.contents)
 
     def retranslateUi(self, dock: QDockWidget):
         self.homeButton.setText(self.tr("Home"))
-        self.settingsButton.setText(self.tr("Settings"))
+        self.simulationButton.setText(self.tr("Simulation"))
         self.dataButton.setText(self.tr("Data"))
+        self.settingsButton.setText(self.tr("Settings"))
 
     def adjustSidebarSize(self, sidebar, is_collapsed: bool = False):
         if is_collapsed:

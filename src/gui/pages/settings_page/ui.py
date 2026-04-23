@@ -17,21 +17,6 @@ class UiSettingsPage(QObject):
         self._settings = settings
 
     def setupUi(self, settingsPage: QtWidgets.QWidget):
-        # Prepare translations for combo box items
-        self.display_mode_translations = {
-            "light": self.tr("Light"),
-            "dark": self.tr("Dark"),
-            "system": self.tr("System"),
-        }
-
-        self.color_translations = {
-            "blue": self.tr("Blue"),
-            "teal": self.tr("Teal"),
-            "amber": self.tr("Amber"),
-            "cyan": self.tr("Cyan"),
-            "red": self.tr("Red"),
-        }
-
         if not settingsPage.objectName():
             settingsPage.setObjectName("settingsPage")
 

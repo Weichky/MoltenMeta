@@ -75,10 +75,9 @@ class ThemeService(QObject):
         super().__init__(app)
         self._app = app
         self._logger = log_service.getLogger(__name__)
-        self._theme = "blue"
         self._scheme = "light"
-        self._theme_mode = "system"
-        self._density_scale = -3
+        self._theme_mode = "light"
+        self._density_scale = -2
         self._style_hints: QStyleHints | None = None
         self._inverted_icons: dict[str, InvertedIcon] = {}
         self._primary_color = "#C62828"
@@ -134,9 +133,8 @@ class ThemeService(QObject):
         self._applyTheme()
 
     def initialize(
-        self, theme: str, scheme: str, theme_mode: str, density_scale: int = -3
+        self, scheme: str, theme_mode: str, density_scale: int = -2
     ) -> None:
-        self._theme = theme
         self._scheme = scheme
         self._theme_mode = theme_mode
         self._density_scale = density_scale
@@ -206,11 +204,6 @@ class ThemeService(QObject):
             self._applyTheme()
             self.theme_changed.emit()
 
-    def setTheme(self, theme: str) -> None:
-        self._theme = theme
-        self._applyTheme()
-        self.theme_changed.emit()
-
     def updateDensityScale(self, scale: int) -> None:
         self._density_scale = scale
         self._density_scale_option = _getDensityScaleOption(scale)
@@ -234,19 +227,12 @@ class ThemeService(QObject):
             return "dark" if self._isSystemDark() else "light"
         return self._scheme
 
-    @property
-    def theme(self) -> str:
-        return self._theme
-
     def addStyleSheet(self, css: Path) -> None:
         self._logger.debug("Adding stylesheet: %s", css)
 
         stylesheet = self._app.styleSheet()
         with open(css, "r", encoding="utf-8") as f:
             self._app.setStyleSheet(stylesheet + f.read())
-
-    def getThemeList(self) -> list[str]:
-        return ["blue"]
 
     def registerInvertedIcon(self, button, icon_path: str) -> InvertedIcon:
         """Register an icon that should be inverted in dark mode."""

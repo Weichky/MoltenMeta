@@ -4,11 +4,9 @@ file_logging = false
 enable_console = false
 
 [appearance]
-theme = "blue"
 scheme = "light"
-theme_mode = "system"
-enable_auto_dark_mode = true
-density_scale = -3
+theme_mode = "light"
+density_scale = -2
 
 [locale]
 language = "en"
@@ -22,8 +20,8 @@ sqlite_path = "data/db/moltenmeta.mmdb"
 
 [plot]
 colorscheme = "default"
-color_algorithm = "linear"
 colorScheme = "follow"
+color_algorithm = "linear"
 lineStyle = "-"
 marker = "o"
 lineWidth = 2.0
