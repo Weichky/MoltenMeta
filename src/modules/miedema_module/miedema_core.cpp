@@ -93,7 +93,7 @@ class MiedemaCore {
         }
 
         py::array_t<double> calculateSingleBatch(py::array_t<double> x_array) const {
-            const ssize_t num = x_array.size();
+            const Py_ssize_t num = x_array.size();
             py::array_t<double> result(num);
             double *ptr_res = static_cast<double*>(result.request().ptr);
             const double *ptr_x = static_cast<double*>(x_array.request().ptr);
@@ -104,7 +104,7 @@ class MiedemaCore {
             const double VA = elemA.V_23;
             const double VB = elemB.V_23;
 
-            for (ssize_t i = 0; i < num; ++i) {
+            for (Py_ssize_t i = 0; i < num; ++i) {
                 const double x_A = ptr_x[i];
                 const double x_B = 1 - x_A;
 

@@ -56,7 +56,7 @@ py::array_t<double> calculatePropertyList(
     double* ptr_res = static_cast<double*>(result.request().ptr);
 
     // Expanded from calculateSingleProperty() to avoid function call overhead
-    for (ssize_t i = 0; i < n; ++i) {
+    for (Py_ssize_t i = 0; i < n; ++i) {
         double x_B = ptr_xB[i];
         double x_C = ptr_xC[i];
         double sum = x_B + x_C;
