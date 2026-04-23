@@ -142,6 +142,16 @@ QPushButton[theme="text"]:hover {{
   color: #B71C1C;
 }}
 
+/* Sidebar Background */
+QDockWidget {{
+  background-color: #E8E8E8;
+  border: none;
+}}
+
+QDockWidget > QWidget {{
+  background-color: #E8E8E8;
+}}
+
 /* Sidebar Buttons (Compact) */
 QPushButton#sidebarButton {{
   background-color: rgba(250, 250, 250, 200);

@@ -3,10 +3,11 @@ from PySide6.QtCore import QObject
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
+import matplotlib as mpl
 import numpy as np
 
 from core.log import getLogLevelMap
-from catalog import getSupportedLanguagesNameMap
+from catalog import getSupportedLanguagesNameMap, UI_THEME_PRIMARY_DEFAULT, UI_THEME_SECONDARY_DEFAULT
 
 from domain.settings import Settings
 
@@ -124,16 +125,16 @@ class UiSettingsPage(QObject):
 
         self.primary_color_input = QtWidgets.QLineEdit()
         self.primary_color_input.setObjectName("primaryColorInput")
-        self.primary_color_input.setPlaceholderText("#C62828")
-        primary_color = self._settings.primary_color or "#C62828"
+        self.primary_color_input.setPlaceholderText(UI_THEME_PRIMARY_DEFAULT)
+        primary_color = self._settings.primary_color or UI_THEME_PRIMARY_DEFAULT
         self.primary_color_input.setText(primary_color)
         grid_layout.addWidget(QtWidgets.QLabel(self.tr("Primary Color")), 0, 0)
         grid_layout.addWidget(self.primary_color_input, 0, 1)
 
         self.secondary_color_input = QtWidgets.QLineEdit()
         self.secondary_color_input.setObjectName("secondaryColorInput")
-        self.secondary_color_input.setPlaceholderText("#1A1A1A")
-        secondary_color = self._settings.secondary_color or "#1A1A1A"
+        self.secondary_color_input.setPlaceholderText(UI_THEME_SECONDARY_DEFAULT)
+        secondary_color = self._settings.secondary_color or UI_THEME_SECONDARY_DEFAULT
         self.secondary_color_input.setText(secondary_color)
         grid_layout.addWidget(QtWidgets.QLabel(self.tr("Secondary Color")), 1, 0)
         grid_layout.addWidget(self.secondary_color_input, 1, 1)
@@ -417,31 +418,38 @@ class UiSettingsPage(QObject):
         preview_label.setText(self.tr("Preview"))
         page_layout.addWidget(preview_label)
 
+        self.preview_figure = Figure(figsize=(8, 6), constrained_layout=True)
+        dpi = mpl.rcParams["figure.dpi"]
+        fig_width, fig_height = self.preview_figure.get_size_inches()
+        min_size = QtCore.QSize(int(fig_width * dpi), int(fig_height * dpi))
+
+        self.preview_ax1 = self.preview_figure.add_subplot(2, 2, 1)
+        self.preview_ax2 = self.preview_figure.add_subplot(2, 2, 2)
+        self.preview_ax3 = self.preview_figure.add_subplot(2, 2, 3, projection="3d")
+        self.preview_ax4 = self.preview_figure.add_subplot(2, 2, 4)
+
+        self.preview_canvas = FigureCanvasQTAgg(self.preview_figure)
+        self.preview_canvas.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.MinimumExpanding,
+            QtWidgets.QSizePolicy.Policy.MinimumExpanding,
+        )
+        self.preview_canvas.setMinimumSize(min_size)
+
+        preview_widget = QtWidgets.QWidget()
+        preview_inner_layout = QtWidgets.QVBoxLayout(preview_widget)
+        preview_inner_layout.setContentsMargins(0, 0, 0, 0)
+        preview_widget.setMinimumSize(min_size)
+        preview_inner_layout.addWidget(self.preview_canvas)
+
         scroll_area = QtWidgets.QScrollArea()
         scroll_area.setObjectName("previewScrollArea")
         scroll_area.setWidgetResizable(False)
         scroll_area.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
         scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-
-        preview_widget = QtWidgets.QWidget()
-        preview_inner_layout = QtWidgets.QVBoxLayout(preview_widget)
-        preview_inner_layout.setContentsMargins(0, 0, 0, 0)
-
-        self.preview_figure = Figure(figsize=(8, 6), constrained_layout=True)
-        self.preview_canvas = FigureCanvasQTAgg(self.preview_figure)
-        self.preview_canvas.setSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Minimum,
-            QtWidgets.QSizePolicy.Policy.Minimum,
-        )
-        self.preview_ax1 = self.preview_figure.add_subplot(2, 2, 1)
-        self.preview_ax2 = self.preview_figure.add_subplot(2, 2, 2)
-        self.preview_ax3 = self.preview_figure.add_subplot(2, 2, 3, projection="3d")
-        self.preview_ax4 = self.preview_figure.add_subplot(2, 2, 4)
-        preview_inner_layout.addWidget(self.preview_canvas)
-
+        scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        scroll_area.setMinimumSize(min_size)
         scroll_area.setWidget(preview_widget)
-        page_layout.addWidget(scroll_area)
+        page_layout.addWidget(scroll_area, stretch=1)
 
         return page
 

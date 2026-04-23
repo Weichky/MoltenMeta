@@ -11,24 +11,27 @@ class Tile(QtWidgets.QPushButton):
 
 
 class AccentLine(QtWidgets.QFrame):
-    def __init__(self, width: int = 200, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.setFixedHeight(3)
-        self.setFixedWidth(width)
+        self.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding,
+            QtWidgets.QSizePolicy.Policy.Fixed,
+        )
         self.setStyleSheet("background-color: #C62828; border: none;")
 
 
 class RulerWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedHeight(12)
+        self.setFixedHeight(16)
 
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setPen(QPen(QColor("#E0E0E0"), 1))
-        painter.drawLine(0, 11, self.width(), 11)
+        painter.drawLine(0, 5, self.width(), 5)
         for i in range(0, self.width(), 20):
-            painter.drawLine(i, 11, i, 11 - (6 if i % 40 == 0 else 3))
+            painter.drawLine(i, 5, i, 5 + (6 if i % 40 == 0 else 3))
 
 
 class UiHomePage(QObject):
@@ -44,7 +47,7 @@ class UiHomePage(QObject):
 
         self.root_layout = QtWidgets.QVBoxLayout(homePage)
         self.root_layout.setSpacing(0)
-        self.root_layout.setContentsMargins(80, 64, 80, 64)
+        self.root_layout.setContentsMargins(80, 64, 0, 64)
 
         header_widget = QtWidgets.QWidget()
         header_layout = QtWidgets.QVBoxLayout(header_widget)
@@ -55,7 +58,7 @@ class UiHomePage(QObject):
         self.title_label.setObjectName("heroTitle")
         header_layout.addWidget(self.title_label)
 
-        self.accent_line = AccentLine(320)
+        self.accent_line = AccentLine()
         header_layout.addWidget(self.accent_line)
 
         self.subtitle_label = QtWidgets.QLabel()
@@ -115,7 +118,9 @@ class UiHomePage(QObject):
         self.root_layout.addSpacing(32)
 
     def retranslateUi(self):
-        self.title_label.setText("MoltenMeta")
+        self.title_label.setText(
+            'Molten<span style="color: #C62828;">M</span>eta'
+        )
         self.subtitle_label.setText(self.tr("Material Science Computing Platform"))
         self.description.setText(
             self.tr(

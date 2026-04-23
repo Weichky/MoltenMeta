@@ -87,6 +87,17 @@ class SidebarWidget(QDockWidget):
     def _adjustSidebarSize(self):
         self.ui.adjustSidebarSize(self, self._is_collapsed)
 
+    def setActivePage(self, page_key: str) -> None:
+        button_map = {
+            "home": self.ui.homeButton,
+            "simulation": self.ui.simulationButton,
+            "data": self.ui.dataButton,
+            "settings": self.ui.settingsButton,
+        }
+        button = button_map.get(page_key)
+        if button:
+            button.setChecked(True)
+
     def retranslateUi(self):
         self.ui.retranslateUi(self)
         self.ui.toggleButton.setToolTip(self.tr("Collapse sidebar"))

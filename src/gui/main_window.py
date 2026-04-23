@@ -100,6 +100,10 @@ class MainWindow(QMainWindow):
 
         # Automatically show home page on startup
         self.workspace.controller.showHome()
+        self.sidebar.ui.homeButton.setChecked(True)
+
+        # Connect page changed signal to sidebar update
+        self.workspace.controller.page_changed.connect(self.sidebar.setActivePage)
 
     def changeEvent(self, event):
         if event.type() == QEvent.Type.ThemeChange:

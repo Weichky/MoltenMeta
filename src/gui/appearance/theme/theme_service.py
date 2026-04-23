@@ -5,6 +5,7 @@ from PySide6.QtGui import QPalette, QColor, QStyleHints, QIcon
 from PySide6.QtWidgets import QPushButton
 
 from core.log import LogService
+from catalog import UI_THEME_PRIMARY_DEFAULT, UI_THEME_SECONDARY_DEFAULT
 from .ads_theme import getAdsStylesheet
 from .swiss_style import SwissStyle
 
@@ -80,8 +81,8 @@ class ThemeService(QObject):
         self._density_scale = -2
         self._style_hints: QStyleHints | None = None
         self._inverted_icons: dict[str, InvertedIcon] = {}
-        self._primary_color = "#C62828"
-        self._secondary_color = "#1A1A1A"
+        self._primary_color = UI_THEME_PRIMARY_DEFAULT
+        self._secondary_color = UI_THEME_SECONDARY_DEFAULT
 
     def _createLightPalette(self) -> QPalette:
         palette = QPalette()

@@ -1,5 +1,5 @@
 from PySide6 import QtWidgets
-from PySide6.QtCore import QCoreApplication
+from PySide6.QtCore import QCoreApplication, Signal, QObject
 import PySide6QtAds as QtAds
 
 from gui.pages.home_page import HomePage
@@ -19,13 +19,16 @@ from typing import Callable
 # src/DockWidget.h
 
 
-class PageController:
+class PageController(QObject):
+    page_changed = Signal(str)
+
     def __init__(
         self,
         dock_manager: QtAds.CDockManager,
         background_layer: QtWidgets.QWidget,
         context: AppContext,
     ):
+        super().__init__()
         self.logger = context.log.getLogger(__name__)
         self.i18n_service = context.i18n
 
@@ -112,6 +115,10 @@ class PageController:
             self.background_layer.show()
             self.background_layer.raise_()
 
+    def _onDockVisibility(self, key: str, visible: bool) -> None:
+        if visible:
+            self.page_changed.emit(key)
+
     # Get the dock area
     # Btw notice QtADS's C++ src code to learn more about the api
     # The Python version documents are in need of improvement and even not complete
@@ -177,6 +184,7 @@ class PageController:
         dock.setObjectName(spec.key)
         dock.setWidget(widget)
         dock.visibilityChanged.connect(self._onDockVisibilityChanged)
+        dock.visibilityChanged.connect(lambda visible: self._onDockVisibility(spec.key, visible))
         if spec.onCreate:
             spec.onCreate(widget)
 

@@ -7,6 +7,7 @@ from application.app_startup import initApp
 
 
 def main():
+    QApplication.setStyle("Fusion")
     app = QApplication(sys.argv)
 
     window = MainWindow(initApp(app))

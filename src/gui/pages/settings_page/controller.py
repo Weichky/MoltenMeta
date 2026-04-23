@@ -1,7 +1,7 @@
 import logging
 
 from PySide6 import QtWidgets
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject, Signal, QTimer
 from PySide6.QtGui import QTextCursor
 
 from application import AppContext
@@ -15,6 +15,9 @@ from core.plot.config import PlotStyleService
 from catalog import ColorAlgorithm
 
 from gui.appearance.theme import ThemeService
+
+
+_PREVIEW_UPDATE_DEBOUNCE_MS = 300
 
 
 class QtLogHandler(logging.Handler):
@@ -66,6 +69,10 @@ class SettingsController(QObject):
         self._plot_style_service = PlotStyleService()
         self._setupNavigation()
         self._setupLogHandler()
+        self._preview_debounce_timer = QTimer()
+        self._preview_debounce_timer.setSingleShot(True)
+        self._preview_debounce_timer.timeout.connect(self._updatePlotPreview)
+        self._window_resize_pending = False
 
     def _setupLogHandler(self):
         self._log_handler = QtLogHandler()
@@ -157,18 +164,24 @@ class SettingsController(QObject):
             [SettingsSnapshot("appearance", "density_scale", str(value))]
         )
 
+    def _scheduleUpdatePlotPreview(self) -> None:
+        self._preview_debounce_timer.start(_PREVIEW_UPDATE_DEBOUNCE_MS)
+
     def _updatePlotPreview(self) -> None:
+        from catalog import THEME_COLORS_DEFAULT
+
         settings = Settings(records=self._settings_repo.findAll())
-        primary = (
-            self.ui.primary_color_input.text()
-            or settings.get("plot", "primary_color")
-            or "#C62828"
-        )
-        secondary = (
-            self.ui.secondary_color_input.text()
-            or settings.get("plot", "secondary_color")
-            or "#1A1A1A"
-        )
+        colorscheme = settings.plot_colorscheme or "default"
+
+        if colorscheme == "custom":
+            primary = settings.get("plot", "custom_primary") or THEME_COLORS_DEFAULT["primary"]
+            secondary = settings.get("plot", "custom_secondary") or THEME_COLORS_DEFAULT["secondary"]
+        else:
+            from core.plot.color import ColorPalette
+
+            theme_colors = ColorPalette.getThemeColors(colorscheme)
+            primary = theme_colors.primary
+            secondary = theme_colors.secondary
         algorithm = self.ui.algorithm_combo.currentData()
         line_style = self.ui.line_style_combo.currentData()
         marker = self.ui.marker_combo.currentData()
@@ -281,7 +294,7 @@ class SettingsController(QObject):
             text = text.upper()
             self.ui.primary_color_input.setText(text)
             self._saveAndReload([SettingsSnapshot("appearance", "primary_color", text)])
-            secondary = self.ui.secondary_color_input.text() or "#1A1A1A"
+            secondary = self.ui.secondary_color_input.text() or self._theme_service._secondary_color
             self._theme_service.updateThemeColors(text, secondary)
 
     def _onSecondaryColorSubmitted(self, text: str):
@@ -296,7 +309,7 @@ class SettingsController(QObject):
             self._saveAndReload(
                 [SettingsSnapshot("appearance", "secondary_color", text)]
             )
-            primary = self.ui.primary_color_input.text() or "#C62828"
+            primary = self.ui.primary_color_input.text() or self._theme_service._primary_color
             self._theme_service.updateThemeColors(primary, text)
 
     def _onColorAlgorithmChanged(self, index: int):
@@ -319,20 +332,17 @@ class SettingsController(QObject):
 
     def _onLineWidthChanged(self, value: float):
         self._saveAndReload([SettingsSnapshot("plot", "lineWidth", str(value))])
-        self._updatePlotPreview()
-        self.plot_settings_changed.emit()
+        self._scheduleUpdatePlotPreview()
 
     def _onMarkerSizeChanged(self, value: float):
         self._saveAndReload([SettingsSnapshot("plot", "markerSize", str(value))])
-        self._updatePlotPreview()
-        self.plot_settings_changed.emit()
+        self._scheduleUpdatePlotPreview()
 
     def _onGridChanged(self, checked: bool):
         self._saveAndReload(
             [SettingsSnapshot("plot", "grid", "true" if checked else "false")]
         )
-        self._updatePlotPreview()
-        self.plot_settings_changed.emit()
+        self._scheduleUpdatePlotPreview()
 
     def _onGridModeChanged(self, index: int):
         mode = self.ui.grid_mode_combo.itemData(index)
@@ -342,30 +352,24 @@ class SettingsController(QObject):
 
     def _onGridDensityChanged(self, value: float):
         self._saveAndReload([SettingsSnapshot("plot", "gridDensity", str(value))])
-        self._updatePlotPreview()
-        self.plot_settings_changed.emit()
+        self._scheduleUpdatePlotPreview()
 
     def _onGridLabelDensityChanged(self, value: float):
         self._saveAndReload([SettingsSnapshot("plot", "gridLabelDensity", str(value))])
-        self._updatePlotPreview()
-        self.plot_settings_changed.emit()
+        self._scheduleUpdatePlotPreview()
 
     def _onTitleFontSizeChanged(self, value: int):
         self._saveAndReload([SettingsSnapshot("plot", "titleFontSize", str(value))])
-        self._updatePlotPreview()
-        self.plot_settings_changed.emit()
+        self._scheduleUpdatePlotPreview()
 
     def _onLabelFontSizeChanged(self, value: int):
         self._saveAndReload([SettingsSnapshot("plot", "labelFontSize", str(value))])
-        self._updatePlotPreview()
-        self.plot_settings_changed.emit()
+        self._scheduleUpdatePlotPreview()
 
     def _onTickFontSizeChanged(self, value: int):
         self._saveAndReload([SettingsSnapshot("plot", "tickFontSize", str(value))])
-        self._updatePlotPreview()
-        self.plot_settings_changed.emit()
+        self._scheduleUpdatePlotPreview()
 
     def _onLegendFontSizeChanged(self, value: int):
         self._saveAndReload([SettingsSnapshot("plot", "legendFontSize", str(value))])
-        self._updatePlotPreview()
-        self.plot_settings_changed.emit()
+        self._scheduleUpdatePlotPreview()

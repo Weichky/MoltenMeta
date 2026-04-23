@@ -10,15 +10,14 @@ from catalog import (
     DEFAULT_LINE_WIDTH,
     DEFAULT_MARKER,
     DEFAULT_MARKER_SIZE,
+    DEFAULT_TITLE_FONT_SIZE,
+    DEFAULT_LABEL_FONT_SIZE,
+    DEFAULT_TICK_FONT_SIZE,
+    DEFAULT_LEGEND_FONT_SIZE,
     ColorAlgorithm,
 )
 
 from core.plot.color import ColorPalette, ThemeColors
-
-DEFAULT_TITLE_FONT_SIZE = 14
-DEFAULT_LABEL_FONT_SIZE = 12
-DEFAULT_TICK_FONT_SIZE = 10
-DEFAULT_LEGEND_FONT_SIZE = 10
 
 
 @dataclass(frozen=True)

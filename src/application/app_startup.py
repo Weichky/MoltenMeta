@@ -2,7 +2,7 @@ from core.log import LogService
 from core.platform import getArgs, getRuntimePath
 
 from db.core import DatabaseManager
-from catalog import DatabaseType, DatabaseConnInfo
+from catalog import DatabaseType, DatabaseConnInfo, UI_THEME_PRIMARY_DEFAULT, UI_THEME_SECONDARY_DEFAULT
 
 from .app_context import AppContext
 
@@ -80,8 +80,8 @@ def initApp(app) -> AppContext:
         core_db_service.settings.theme_mode,
         core_db_service.settings.density_scale,
     )
-    primary = core_db_service.settings.primary_color or "#C62828"
-    secondary = core_db_service.settings.secondary_color or "#1A1A1A"
+    primary = core_db_service.settings.primary_color or UI_THEME_PRIMARY_DEFAULT
+    secondary = core_db_service.settings.secondary_color or UI_THEME_SECONDARY_DEFAULT
     context.theme.updateThemeColors(primary, secondary)
 
     context.modules = ModuleService(getRuntimePath(), context.log)
