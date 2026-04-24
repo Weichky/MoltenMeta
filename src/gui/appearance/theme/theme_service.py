@@ -96,7 +96,7 @@ class ThemeService(QObject):
         palette.setColor(QPalette.Button, QColor(245, 245, 245))
         palette.setColor(QPalette.ButtonText, QColor(26, 26, 26))
         palette.setColor(QPalette.BrightText, QColor(255, 255, 255))
-        palette.setColor(QPalette.Highlight, QColor(198, 40, 40))
+        palette.setColor(QPalette.Highlight, QColor(self._primary_color))
         palette.setColor(QPalette.HighlightedText, QColor(255, 255, 255))
         palette.setColor(QPalette.PlaceholderText, QColor(158, 158, 158))
         return palette
@@ -113,7 +113,7 @@ class ThemeService(QObject):
         palette.setColor(QPalette.Button, QColor(55, 55, 55))
         palette.setColor(QPalette.ButtonText, QColor(255, 255, 255))
         palette.setColor(QPalette.BrightText, QColor(255, 255, 255))
-        palette.setColor(QPalette.Highlight, QColor(198, 40, 40))
+        palette.setColor(QPalette.Highlight, QColor(self._primary_color))
         palette.setColor(QPalette.HighlightedText, QColor(255, 255, 255))
         palette.setColor(QPalette.Link, QColor(100, 180, 255))
         palette.setColor(QPalette.PlaceholderText, QColor(160, 160, 160))

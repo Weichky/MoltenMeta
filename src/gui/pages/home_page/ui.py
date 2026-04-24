@@ -117,10 +117,12 @@ class UiHomePage(QObject):
 
         self.root_layout.addSpacing(32)
 
-    def retranslateUi(self):
+    def setupTitleLabel(self, primary_color: str):
         self.title_label.setText(
-            'Molten<span style="color: #C62828;">M</span>eta'
+            f'Molten<span style="color: {primary_color};">M</span>eta'
         )
+
+    def retranslateUi(self):
         self.subtitle_label.setText(self.tr("Material Science Computing Platform"))
         self.description.setText(
             self.tr(

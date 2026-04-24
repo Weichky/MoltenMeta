@@ -107,39 +107,44 @@ QPushButton:disabled {{
 
 /* Primary Button */
 QPushButton[theme="primary"] {{
-  background-color: #C62828;
+  background-color: {primary_color};
   color: #FFFFFF;
 }}
 
 QPushButton[theme="primary"]:hover {{
-  background-color: #B71C1C;
+  background-color: {primary_color};
+  border: 1px solid {primary_color};
+  opacity: 0.8;
 }}
 
 QPushButton[theme="primary"]:pressed {{
-  background-color: #8E0000;
+  background-color: {primary_color};
+  opacity: 0.6;
 }}
 
 /* Secondary Button */
 QPushButton[theme="secondary"] {{
   background-color: transparent;
-  border: 1px solid #424242;
-  color: #1A1A1A;
+  border: 1px solid {secondary_color};
+  color: {secondary_color};
 }}
 
 QPushButton[theme="secondary"]:hover {{
-  background-color: #F5F5F5;
+  background-color: {secondary_color};
+  color: #FFFFFF;
 }}
 
 /* Text Button */
 QPushButton[theme="text"] {{
   background-color: transparent;
   border: none;
-  color: #C62828;
+  color: {primary_color};
   text-decoration: underline;
 }}
 
 QPushButton[theme="text"]:hover {{
-  color: #B71C1C;
+  color: {primary_color};
+  opacity: 0.7;
 }}
 
 /* Sidebar Background */
@@ -219,7 +224,7 @@ QFrame#rulerMark {{
 }}
 
 QFrame#cornerAccent {{
-  background-color: #C62828;
+  background-color: {primary_color};
   border: none;
 }}
 
@@ -353,8 +358,8 @@ QTabBar::tab {{
 }}
 
 QTabBar::tab:selected {{
-  color: #C62828;
-  border-bottom: 2px solid #C62828;
+  color: {primary_color};
+  border-bottom: 2px solid {primary_color};
 }}
 
 QTabBar::tab:hover:!selected {{
@@ -404,7 +409,7 @@ QTableWidget::item {{
 
 QTreeWidget::item:selected,
 QTableWidget::item:selected {{
-  background-color: #C62828;
+  background-color: {primary_color};
   color: #FFFFFF;
 }}
 
@@ -420,7 +425,7 @@ QListWidget::item {{
 }}
 
 QListWidget::item:selected {{
-  background-color: #C62828;
+  background-color: {primary_color};
   color: #FFFFFF;
 }}
 

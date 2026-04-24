@@ -49,7 +49,7 @@ class PageController(QObject):
             # This might be fixed someday, but not today.
             # It is damning, but currently the least fragile approach.
             titleProvider=lambda: QCoreApplication.translate("DockPage", "Home Page"),
-            factory=lambda: HomePage(self.i18n_service),
+            factory=lambda: HomePage(self.i18n_service, context.theme),
             onCreate=self._connectHomeSignals,
         )
 
