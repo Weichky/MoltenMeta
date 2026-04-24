@@ -562,6 +562,21 @@ class ComputationCacheRepository(BaseRepository[ComputationCacheSnapshot]):
         self.connection.commit()
         return cursor.rowCount
 
+    def insertBatch(self, entries: list["ComputationCacheSnapshot"]) -> int:
+        if not entries:
+            return 0
+        table = self.getTableName()
+        dialect = self.dialect
+        record = entries[0].toRecord()
+        columns = list(record.keys())
+        placeholders = ", ".join([dialect.getPlaceholder() for _ in columns])
+        sql = f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({placeholders})"
+        for entry in entries:
+            record = entry.toRecord()
+            self.connection.execute(sql, list(record.values()))
+        self.connection.commit()
+        return len(entries)
+
     def countActive(self) -> int:
         sql = "SELECT COUNT(*) FROM computation_cache WHERE is_deleted = 0"
         cursor = self.connection.execute(sql)

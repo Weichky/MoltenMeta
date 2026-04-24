@@ -322,7 +322,9 @@ class PlotPanel(QtWidgets.QWidget):
 
         z_min = np.nanmin(z_arr)
         z_max = np.nanmax(z_arr)
-
+        if z_min == z_max:
+            z_min = z_min - 1e-10
+            z_max = z_max + 1e-10
         contour_levels = np.linspace(z_min, z_max, levels)
         cf = self._ax.contourf(
             x_arr,
@@ -407,7 +409,8 @@ class PlotPanel(QtWidgets.QWidget):
         x_A_arr = np.array([v.get("x_A", 0) for v in values])
         x_B_arr = np.array([v.get("x_B", 0) for v in values])
         x_C_arr = np.array([v.get("x_C", 0) for v in values])
-        z_arr = np.array([v.get("Z_ABC", 0) for v in values])
+        z_key = next((k for k in values[0] if k not in ("x_A", "x_B", "x_C")), "Z_ABC")
+        z_arr = np.array([v.get(z_key, 0) for v in values])
 
         if len(x_A_arr) == 0 or len(x_B_arr) == 0 or len(x_C_arr) == 0:
             return
@@ -438,6 +441,9 @@ class PlotPanel(QtWidgets.QWidget):
 
         z_min = np.min(z_valid)
         z_max = np.max(z_valid)
+        if z_min == z_max:
+            z_min = z_min - 1e-10
+            z_max = z_max + 1e-10
         contour_levels = np.linspace(z_min, z_max, plot_levels)
 
         if generator:

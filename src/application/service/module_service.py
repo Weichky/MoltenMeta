@@ -96,6 +96,7 @@ class ModuleService:
         units = result.get("units", {})
         main_dim = result.get("main_dim")
         values = result.get("values", [])
+        entries: list[ComputationCacheSnapshot] = []
 
         if main_dim and dims:
             condition_dims = [d for d in dims if d != main_dim]
@@ -119,7 +120,7 @@ class ModuleService:
                     parent_run_id=parent_run_id,
                     property_id=property_id,
                 )
-                self._computation_cache_repo.insert(entry)
+                entries.append(entry)
         elif dims:
             for value_record in values:
                 if not isinstance(value_record, dict):
@@ -138,7 +139,7 @@ class ModuleService:
                             params_json=json.dumps(value_record),
                             parent_run_id=parent_run_id,
                         )
-                        self._computation_cache_repo.insert(entry)
+                        entries.append(entry)
         else:
             if values and isinstance(values[0], (int, float)):
                 entry = ComputationCacheSnapshot(
@@ -150,7 +151,10 @@ class ModuleService:
                     params_json=json.dumps({"raw_values": values}),
                     parent_run_id=parent_run_id,
                 )
-                self._computation_cache_repo.insert(entry)
+                entries.append(entry)
+
+        if entries:
+            self._computation_cache_repo.insertBatch(entries)
 
         return run_id
 
