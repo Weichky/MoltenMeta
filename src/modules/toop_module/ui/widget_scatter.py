@@ -19,115 +19,113 @@ class ToopScatterWizardDialog(QDialog):
         self.setWindowTitle(self.tr("Toop 3D Scatter Configuration"))
         self.setMinimumSize(500, 400)
         self._ms = module_service
-        self._user_db = user_db_service
+        self._userDb = user_db_service
         self._sources = {"Z_AB": None, "Z_AC": None, "Z_BC": None}
-        self._setup_ui()
+        self._setupUi()
 
-    def _setup_ui(self):
+    def _setupUi(self):
         from ..data_source_discovery import ToopDataSourceDiscovery
 
-        self._discovery = ToopDataSourceDiscovery(self._ms, self._user_db)
+        self._discovery = ToopDataSourceDiscovery(self._ms, self._userDb)
 
         from .wizard_pages import ElementSelectionPage
 
-        main_layout = QVBoxLayout(self)
+        mainLayout = QVBoxLayout(self)
 
         title = QLabel(self.tr("Toop 3D Scatter Configuration"))
         title.setStyleSheet("font-size: 16pt; font-weight: bold;")
-        main_layout.addWidget(title)
+        mainLayout.addWidget(title)
 
-        self._element_page = ElementSelectionPage()
-        main_layout.addWidget(self._element_page)
+        self._elementPage = ElementSelectionPage()
+        mainLayout.addWidget(self._elementPage)
 
-        options_group = QGroupBox(self.tr("Calculation Options"))
-        options_layout = QVBoxLayout()
-        self._n_points_label = QLabel(self.tr("Grid density (points per edge):"))
-        self._n_points_spin = QSpinBox()
-        self._n_points_spin.setRange(2, 1000)
-        self._n_points_spin.setValue(50)
-        options_layout.addWidget(self._n_points_label)
-        options_layout.addWidget(self._n_points_spin)
-        options_group.setLayout(options_layout)
-        main_layout.addWidget(options_group)
+        optionsGroup = QGroupBox(self.tr("Calculation Options"))
+        optionsLayout = QVBoxLayout()
+        self._nPointsLabel = QLabel(self.tr("Grid density (points per edge):"))
+        self._nPointsSpin = QSpinBox()
+        self._nPointsSpin.setRange(2, 1000)
+        self._nPointsSpin.setValue(50)
+        optionsLayout.addWidget(self._nPointsLabel)
+        optionsLayout.addWidget(self._nPointsSpin)
+        optionsGroup.setLayout(optionsLayout)
+        mainLayout.addWidget(optionsGroup)
 
-        main_layout.addStretch()
+        mainLayout.addStretch()
 
-        button_layout = QHBoxLayout()
-        self._cancel_btn = QPushButton(self.tr("Cancel"))
-        self._calc_btn = QPushButton(self.tr("Calculate"))
+        buttonLayout = QHBoxLayout()
+        self._cancelBtn = QPushButton(self.tr("Cancel"))
+        self._calcBtn = QPushButton(self.tr("Calculate"))
 
-        button_layout.addWidget(self._cancel_btn)
-        button_layout.addStretch()
-        button_layout.addWidget(self._calc_btn)
+        buttonLayout.addWidget(self._cancelBtn)
+        buttonLayout.addStretch()
+        buttonLayout.addWidget(self._calcBtn)
 
-        main_layout.addLayout(button_layout)
+        mainLayout.addLayout(buttonLayout)
 
-        self._cancel_btn.clicked.connect(self.reject)
-        self._calc_btn.clicked.connect(self._on_calculate)
+        self._cancelBtn.clicked.connect(self.reject)
+        self._calcBtn.clicked.connect(self._onCalculate)
 
-        self._element_page.selectionChanged.connect(self._on_elements_changed)
+        self._elementPage.selectionChanged.connect(self._onElementsChanged)
 
-        self._update_sources()
+        self._updateSources()
 
-    def _update_sources(self):
-        elem_a, elem_b, elem_c = self._element_page.get_elements()
+    def _updateSources(self):
+        elemA, elemB, elemC = self._elementPage.getElements()
 
-        sources_ab = self._discovery.findSources("thermodynamic", elem_a, elem_b)
-        sources_ac = self._discovery.findSources("thermodynamic", elem_a, elem_c)
-        sources_bc = self._discovery.findSources("thermodynamic", elem_b, elem_c)
+        sourcesAB = self._discovery.findSources("thermodynamic", elemA, elemB)
+        sourcesAC = self._discovery.findSources("thermodynamic", elemA, elemC)
+        sourcesBC = self._discovery.findSources("thermodynamic", elemB, elemC)
 
-        if sources_ab:
-            self._sources["Z_AB"] = sources_ab[0]
-        if sources_ac:
-            self._sources["Z_AC"] = sources_ac[0]
-        if sources_bc:
-            self._sources["Z_BC"] = sources_bc[0]
+        if sourcesAB:
+            self._sources["Z_AB"] = sourcesAB[0]
+        if sourcesAC:
+            self._sources["Z_AC"] = sourcesAC[0]
+        if sourcesBC:
+            self._sources["Z_BC"] = sourcesBC[0]
 
-    def _on_elements_changed(self):
-        self._update_sources()
+    def _onElementsChanged(self):
+        self._updateSources()
 
     def _getOutputSymbolLatexUnit(self, source) -> tuple[str, str, str]:
-        """Query symbol, latex and unit for a DataSource by resolving its output symbol against module config."""
         if source is None:
             return "", "", ""
-        module_name = source.source_name
-        output_symbol = source.output_symbol
-        config = self._ms.getModuleConfig(module_name)
+        moduleName = source.source_name
+        outputSymbol = source.output_symbol
+        config = self._ms.getModuleConfig(moduleName)
         if not config:
             return "", "", ""
-        module_cfg = config.get("module")
-        if module_cfg is None:
+        moduleCfg = config.get("module")
+        if moduleCfg is None:
             return "", "", ""
-        all_methods = module_cfg.get("all_methods", [])
-        for method_name in all_methods:
-            method_config = config.get(method_name, {})
-            outputs = method_config.get("outputs", {})
+        allMethods = moduleCfg.get("all_methods", [])
+        for methodName in allMethods:
+            methodConfig = config.get(methodName, {})
+            outputs = methodConfig.get("outputs", {})
             symbols = outputs.get("symbol", [])
-            latex_list = outputs.get("latex", [])
+            latexList = outputs.get("latex", [])
             units = outputs.get("unit", [])
             for i, sym in enumerate(symbols):
-                if sym == output_symbol:
-                    latex = latex_list.get(sym, "")
+                if sym == outputSymbol:
+                    latex = latexList.get(sym, "")
                     unit = units.get(sym, "")
-                    return output_symbol, latex, unit
+                    return outputSymbol, latex, unit
         return "", "", ""
 
-    def _on_calculate(self):
-        """Gather inputs and invoke Toop scatter calculation."""
+    def _onCalculate(self):
         from ..toop_module import ToopCalc
 
-        elem_a, elem_b, elem_c = self._element_page.get_elements()
-        n_points = self._n_points_spin.value()
+        elemA, elemB, elemC = self._elementPage.getElements()
+        nPoints = self._nPointsSpin.value()
 
         toop = ToopCalc()
 
-        x_A_list, x_B_list, x_C_list = toop._generateGrid(n_points)
+        xAList, xBList, xCList = toop._generateGrid(nPoints)
 
-        Z_AB_source = self._sources["Z_AB"]
-        Z_AC_source = self._sources["Z_AC"]
-        Z_BC_source = self._sources["Z_BC"]
+        zAbSource = self._sources["Z_AB"]
+        zAcSource = self._sources["Z_AC"]
+        zBcSource = self._sources["Z_BC"]
 
-        if not Z_AB_source or not Z_AC_source or not Z_BC_source:
+        if not zAbSource or not zAcSource or not zBcSource:
             QMessageBox.warning(
                 self,
                 self.tr("Warning"),
@@ -135,38 +133,37 @@ class ToopScatterWizardDialog(QDialog):
             )
             return
 
-        Z_AB_list = Z_AB_source.get_values(elem_a, elem_b, x_A_list)
-        Z_AC_list = Z_AC_source.get_values(elem_a, elem_c, x_A_list)
+        zABList = zAbSource.get_values(elemA, elemB, xAList)
+        zACList = zAcSource.get_values(elemA, elemC, xAList)
 
-        w_B_list = [
-            x_B / (x_B + x_C) if (x_B + x_C) > 0 else 0
-            for x_B, x_C in zip(x_B_list, x_C_list)
+        wBList = [
+            xB / (xB + xC) if (xB + xC) > 0 else 0 for xB, xC in zip(xBList, xCList)
         ]
-        Z_BC_list = Z_BC_source.get_values(elem_b, elem_c, w_B_list)
+        zBCList = zBcSource.get_values(elemB, elemC, wBList)
 
-        z_symbol, z_latex, z_unit = self._getOutputSymbolLatexUnit(Z_AB_source)
+        zSymbol, zLatex, zUnit = self._getOutputSymbolLatexUnit(zAbSource)
 
         result = toop.calculateScatterWithData(
-            elem_a,
-            elem_b,
-            elem_c,
-            n_points,
-            Z_AB_list,
-            Z_AC_list,
-            Z_BC_list,
-            z_latex,
-            z_unit,
-            z_symbol,
+            elemA,
+            elemB,
+            elemC,
+            nPoints,
+            zABList,
+            zACList,
+            zBCList,
+            zLatex,
+            zUnit,
+            zSymbol,
         )
 
         self._ms.cacheResult(
             "toop_module",
             "calculateScatter",
             result,
-            elem_A=elem_a,
-            elem_B=elem_b,
-            elem_C=elem_c,
-            n_points=n_points,
+            elem_A=elemA,
+            elem_B=elemB,
+            elem_C=elemC,
+            n_points=nPoints,
         )
 
         self.resultReady.emit(result)

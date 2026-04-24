@@ -1,18 +1,18 @@
 [module]
-package_name = "toop_module"
-entry_class = "ToopCalc"
+package_name = "kohler_module"
+entry_class = "KohlerCalc"
 all_methods = ["calculateSingleProperty", "calculateScatter", "calculateContour"]
 
 type = "simulation"
 category = "geometric_model"
-name = "Toop Module"
+name = "Kohler Module"
 version = "1.0.0"
 author = "Weichky"
 license = "MIT"
-description = "Toop model for predicting ternary thermodynamic properties from binary data"
+description = "Kohler symmetric model for predicting ternary thermodynamic properties from binary data"
 
 [calculateSingleProperty.inputs]
-symbol = ["elem_A", "elem_B", "elem_C", "x_B", "x_C", "Z_AB", "Z_AC", "Z_BC"]
+symbol = ["elem_A", "elem_B", "elem_C", "x_A", "x_B", "x_C", "Z_AB", "Z_BC", "Z_AC"]
 input_method = "raw"
 
 [calculateSingleProperty.inputs.raw]
@@ -20,42 +20,46 @@ method_map = [
     ["elem_A", "element_symbol_input"],
     ["elem_B", "element_symbol_input"],
     ["elem_C", "element_symbol_input"],
+    ["x_A", "float_input"],
     ["x_B", "float_input"],
     ["x_C", "float_input"],
     ["Z_AB", "float_input"],
-    ["Z_AC", "float_input"],
-    ["Z_BC", "float_input"]
+    ["Z_BC", "float_input"],
+    ["Z_AC", "float_input"]
 ]
 
 [calculateSingleProperty.inputs.latex]
 elem_A = "elem_A"
 elem_B = "elem_B"
 elem_C = "elem_C"
+x_A = "x_A"
 x_B = "x_B"
 x_C = "x_C"
 Z_AB = "Z_{AB}"
-Z_AC = "Z_{AC}"
 Z_BC = "Z_{BC}"
+Z_AC = "Z_{AC}"
 
 [calculateSingleProperty.inputs.description]
-elem_A = "Element A (solvent)"
+elem_A = "Element A"
 elem_B = "Element B"
 elem_C = "Element C"
+x_A = "Mole fraction of A"
 x_B = "Mole fraction of B"
 x_C = "Mole fraction of C"
-Z_AB = "Binary property AB at x_A"
-Z_AC = "Binary property AC at x_A"
+Z_AB = "Binary property AB at x_A/(x_A+x_B)"
 Z_BC = "Binary property BC at x_B/(x_B+x_C)"
+Z_AC = "Binary property AC at x_A/(x_A+x_C)"
 
 [calculateSingleProperty.inputs.unit]
 elem_A = ""
 elem_B = ""
 elem_C = ""
+x_A = ""
 x_B = ""
 x_C = ""
 Z_AB = ""
-Z_AC = ""
 Z_BC = ""
+Z_AC = ""
 
 [calculateSingleProperty.outputs]
 symbol = ["Z_ABC"]
@@ -106,7 +110,7 @@ elem_C = "elem_C"
 n_points = "n_\\text{points}"
 
 [calculateScatter.inputs.description]
-elem_A = "Element A (solvent)"
+elem_A = "Element A"
 elem_B = "Element B"
 elem_C = "Element C"
 n_points = "Number of points per edge"
@@ -166,7 +170,7 @@ plane = "plane"
 n_points = "n_\\text{points}"
 
 [calculateContour.inputs.description]
-elem_A = "Element A (solvent)"
+elem_A = "Element A"
 elem_B = "Element B"
 elem_C = "Element C"
 plane = "Projection plane (x_A-x_B, x_A-x_C, x_B-x_C)"

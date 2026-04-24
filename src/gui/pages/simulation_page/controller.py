@@ -107,9 +107,9 @@ class SimulationController:
 
             import_module(f"runtime.modules.{package_name}.ui")
 
-            from runtime.modules.toop_module.ui import create_toop_wizard
+            from runtime.modules.toop_module.ui import createToopWizard
 
-            widget = create_toop_wizard(
+            widget = createToopWizard(
                 method_name, self._module_service, self._context.user_db
             )
             if widget is not None:

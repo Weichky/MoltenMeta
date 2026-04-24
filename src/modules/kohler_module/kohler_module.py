@@ -12,31 +12,31 @@ from .element_map import elemIdToSymbol
 _MODULE_DIR = Path(__file__).parent
 
 if sys.platform == "win32":
-    _ALG_EXT = "toop_algorithm.pyd"
-    _GRID_EXT = "toop_grid.pyd"
+    _ALG_EXT = "kohler_algorithm.pyd"
+    _GRID_EXT = "kohler_grid.pyd"
 else:
-    _ALG_EXT = "toop_algorithm.so"
-    _GRID_EXT = "toop_grid.so"
+    _ALG_EXT = "kohler_algorithm.so"
+    _GRID_EXT = "kohler_grid.so"
 
 _spec_alg = importlib.util.spec_from_file_location(
-    "toop_algorithm", _MODULE_DIR / "lib" / _ALG_EXT
+    "kohler_algorithm", _MODULE_DIR / "lib" / _ALG_EXT
 )
 assert _spec_alg is not None and _spec_alg.loader is not None
-_toop_algorithm = importlib.util.module_from_spec(_spec_alg)
-_spec_alg.loader.exec_module(_toop_algorithm)
+_kohler_algorithm = importlib.util.module_from_spec(_spec_alg)
+_spec_alg.loader.exec_module(_kohler_algorithm)
 
 _spec_grid = importlib.util.spec_from_file_location(
-    "toop_grid", _MODULE_DIR / "lib" / _GRID_EXT
+    "kohler_grid", _MODULE_DIR / "lib" / _GRID_EXT
 )
 assert _spec_grid is not None and _spec_grid.loader is not None
-_toop_grid = importlib.util.module_from_spec(_spec_grid)
-_spec_grid.loader.exec_module(_toop_grid)
+_kohler_grid = importlib.util.module_from_spec(_spec_grid)
+_spec_grid.loader.exec_module(_kohler_grid)
 
 with open(_MODULE_DIR / "config.toml", "rb") as _f:
     MODULE_INFO = tomllib.load(_f)
 
 
-class ToopCalc:
+class KohlerCalc:
     def __init__(self, binary_provider: "BinaryDataProvider | None" = None):
         self._provider = binary_provider
 
@@ -48,14 +48,16 @@ class ToopCalc:
         elem_A: int,
         elem_B: int,
         elem_C: int,
+        x_A: float,
         x_B: float,
         x_C: float,
         Z_AB: float,
-        Z_AC: float,
         Z_BC: float,
+        Z_AC: float,
     ) -> dict:
-        x_A = 1 - x_B - x_C
-        value = _toop_algorithm.calculateSingleProperty(x_B, x_C, Z_AB, Z_AC, Z_BC)
+        value = _kohler_algorithm.calculateSingleProperty(
+            x_A, x_B, x_C, Z_AB, Z_BC, Z_AC
+        )
 
         cfg = MODULE_INFO["calculateSingleProperty"]
         output_symbol = cfg["outputs"]["symbol"][0]
@@ -85,28 +87,30 @@ class ToopCalc:
             },
             "dims": ["x_A", "x_B", "x_C", output_symbol],
             "main_dim": output_symbol,
-            "method": "Toop",
+            "method": "Kohler",
         }
 
     def calculatePropertyList(
         self,
+        x_A_list: list[float],
         x_B_list: list[float],
         x_C_list: list[float],
         Z_AB_list: list[float],
-        Z_AC_list: list[float],
         Z_BC_list: list[float],
+        Z_AC_list: list[float],
     ) -> list[float]:
         """Call C++ batch calculation."""
         import numpy as np
 
+        x_A_arr = np.array(x_A_list, dtype=np.float64)
         x_B_arr = np.array(x_B_list, dtype=np.float64)
         x_C_arr = np.array(x_C_list, dtype=np.float64)
         Z_AB_arr = np.array(Z_AB_list, dtype=np.float64)
-        Z_AC_arr = np.array(Z_AC_list, dtype=np.float64)
         Z_BC_arr = np.array(Z_BC_list, dtype=np.float64)
+        Z_AC_arr = np.array(Z_AC_list, dtype=np.float64)
 
-        result = _toop_algorithm.calculatePropertyList(
-            x_B_arr, x_C_arr, Z_AB_arr, Z_AC_arr, Z_BC_arr
+        result = _kohler_algorithm.calculatePropertyList(
+            x_A_arr, x_B_arr, x_C_arr, Z_AB_arr, Z_BC_arr, Z_AC_arr
         )
         return result.tolist()
 
@@ -118,7 +122,7 @@ class ToopCalc:
             return [], [], []
         if n_points == 1:
             return [0.0], [0.0], [1.0]
-        x_A_arr, x_B_arr, x_C_arr = _toop_grid.generateTriangularGrid(n_points)
+        x_A_arr, x_B_arr, x_C_arr = _kohler_grid.generateTriangularGrid(n_points)
         return list(x_A_arr), list(x_B_arr), list(x_C_arr)
 
     def calculateScatter(
@@ -130,7 +134,7 @@ class ToopCalc:
         z_symbol: str | None = None,
     ) -> dict:
         """
-        Calculate Toop model for a triangular grid.
+        Calculate Kohler model for a triangular grid.
 
         Args:
             elem_A: Atomic number of element A
@@ -146,7 +150,7 @@ class ToopCalc:
             raise ValueError(f"n_points must be non-negative, got {n_points}")
 
         if self._provider is None:
-            raise RuntimeError("No BinaryDataProvider configured for ToopCalc")
+            raise RuntimeError("No BinaryDataProvider configured for KohlerCalc")
 
         x_A_list, x_B_list, x_C_list = self._generateGrid(n_points)
 
@@ -159,30 +163,38 @@ class ToopCalc:
                 extra_conditions={"output_symbol": z_symbol} if z_symbol else None,
             )
 
-        Z_AB_list = self._provider.get_values(elem_A, elem_B, x_A_list)
-        if len(Z_AB_list) != len(x_A_list):
+        w_AB_list = [
+            x_A / (x_A + x_B) if (x_A + x_B) > 0 else 0
+            for x_A, x_B in zip(x_A_list, x_B_list)
+        ]
+        Z_AB_list = self._provider.get_values(elem_A, elem_B, w_AB_list)
+        if len(Z_AB_list) != len(w_AB_list):
             raise ValueError(
-                f"Provider Z_AB returned {len(Z_AB_list)} values, expected {len(x_A_list)}"
+                f"Provider Z_AB returned {len(Z_AB_list)} values, expected {len(w_AB_list)}"
             )
 
-        Z_AC_list = self._provider.get_values(elem_A, elem_C, x_A_list)
-        if len(Z_AC_list) != len(x_A_list):
-            raise ValueError(
-                f"Provider Z_AC returned {len(Z_AC_list)} values, expected {len(x_A_list)}"
-            )
-
-        w_B_list = [
+        w_BC_list = [
             x_B / (x_B + x_C) if (x_B + x_C) > 0 else 0
             for x_B, x_C in zip(x_B_list, x_C_list)
         ]
-        Z_BC_list = self._provider.get_values(elem_B, elem_C, w_B_list)
-        if len(Z_BC_list) != len(w_B_list):
+        Z_BC_list = self._provider.get_values(elem_B, elem_C, w_BC_list)
+        if len(Z_BC_list) != len(w_BC_list):
             raise ValueError(
-                f"Provider Z_BC returned {len(Z_BC_list)} values, expected {len(w_B_list)}"
+                f"Provider Z_BC returned {len(Z_BC_list)} values, expected {len(w_BC_list)}"
+            )
+
+        w_AC_list = [
+            x_A / (x_A + x_C) if (x_A + x_C) > 0 else 0
+            for x_A, x_C in zip(x_A_list, x_C_list)
+        ]
+        Z_AC_list = self._provider.get_values(elem_A, elem_C, w_AC_list)
+        if len(Z_AC_list) != len(w_AC_list):
+            raise ValueError(
+                f"Provider Z_AC returned {len(Z_AC_list)} values, expected {len(w_AC_list)}"
             )
 
         Z_ABC_list = self.calculatePropertyList(
-            x_B_list, x_C_list, Z_AB_list, Z_AC_list, Z_BC_list
+            x_A_list, x_B_list, x_C_list, Z_AB_list, Z_BC_list, Z_AC_list
         )
 
         cfg = MODULE_INFO["calculateScatter"]
@@ -220,7 +232,7 @@ class ToopCalc:
             },
             "dims": ["x_A", "x_B", "x_C", output_symbol],
             "main_dim": output_symbol,
-            "method": "Toop",
+            "method": "Kohler",
         }
 
     def calculateContour(
@@ -257,7 +269,7 @@ class ToopCalc:
             raise ValueError(f"plane must be x_A-x_B, x_A-x_C, or x_B-x_C, got {plane}")
 
         if self._provider is None:
-            raise RuntimeError("No BinaryDataProvider configured for ToopCalc")
+            raise RuntimeError("No BinaryDataProvider configured for KohlerCalc")
 
         if n_points == 0:
             return {
@@ -331,36 +343,49 @@ class ToopCalc:
                 "plane": plane,
             }
 
-        Z_AB_list = self._provider.get_values(elem_A, elem_B, x_A_flat.tolist())
-        if len(Z_AB_list) != len(x_A_flat):
-            raise ValueError(
-                f"Provider Z_AB returned {len(Z_AB_list)} values, expected {len(x_A_flat)}"
+        with np.errstate(invalid="ignore"):
+            w_AB_flat = np.where(
+                (x_A_flat + x_B_flat) > 0,
+                x_A_flat / (x_A_flat + x_B_flat),
+                0.0,
             )
-
-        Z_AC_list = self._provider.get_values(elem_A, elem_C, x_A_flat.tolist())
-        if len(Z_AC_list) != len(x_A_flat):
+        Z_AB_list = self._provider.get_values(elem_A, elem_B, w_AB_flat.tolist())
+        if len(Z_AB_list) != len(w_AB_flat):
             raise ValueError(
-                f"Provider Z_AC returned {len(Z_AC_list)} values, expected {len(x_A_flat)}"
+                f"Provider Z_AB returned {len(Z_AB_list)} values, expected {len(w_AB_flat)}"
             )
 
         with np.errstate(invalid="ignore"):
-            w_B_flat = np.where(
+            w_BC_flat = np.where(
                 (x_B_flat + x_C_flat) > 0,
                 x_B_flat / (x_B_flat + x_C_flat),
                 0.0,
             )
-        Z_BC_list = self._provider.get_values(elem_B, elem_C, w_B_flat.tolist())
-        if len(Z_BC_list) != len(w_B_flat):
+        Z_BC_list = self._provider.get_values(elem_B, elem_C, w_BC_flat.tolist())
+        if len(Z_BC_list) != len(w_BC_flat):
             raise ValueError(
-                f"Provider Z_BC returned {len(Z_BC_list)} values, expected {len(w_B_flat)}"
+                f"Provider Z_BC returned {len(Z_BC_list)} values, expected {len(w_BC_flat)}"
+            )
+
+        with np.errstate(invalid="ignore"):
+            w_AC_flat = np.where(
+                (x_A_flat + x_C_flat) > 0,
+                x_A_flat / (x_A_flat + x_C_flat),
+                0.0,
+            )
+        Z_AC_list = self._provider.get_values(elem_A, elem_C, w_AC_flat.tolist())
+        if len(Z_AC_list) != len(w_AC_flat):
+            raise ValueError(
+                f"Provider Z_AC returned {len(Z_AC_list)} values, expected {len(w_AC_flat)}"
             )
 
         Z_ABC_flat = self.calculatePropertyList(
+            x_A_flat.tolist(),
             x_B_flat.tolist(),
             x_C_flat.tolist(),
             Z_AB_list,
-            Z_AC_list,
             Z_BC_list,
+            Z_AC_list,
         )
 
         Z_ABC_mesh = np.full_like(x_i_mesh, np.nan, dtype=float)
@@ -423,7 +448,7 @@ class ToopCalc:
             },
             "dims": ["x_A", "x_B", "x_C", output_symbol],
             "main_dim": output_symbol,
-            "method": "Toop",
+            "method": "Kohler",
         }
 
     def calculateScatterWithData(
@@ -433,23 +458,23 @@ class ToopCalc:
         elem_C: int,
         n_points: int,
         Z_AB_list: list[float],
-        Z_AC_list: list[float],
         Z_BC_list: list[float],
+        Z_AC_list: list[float],
         z_latex: str,
         z_unit: str,
         z_symbol: str | None = None,
     ) -> dict:
         """
-        Calculate Toop model for a triangular grid with direct data input.
+        Calculate Kohler model for a triangular grid with direct data input.
 
         Args:
             elem_A: Atomic number of element A
             elem_B: Atomic number of element B
             elem_C: Atomic number of element C
             n_points: Number of points per edge
-            Z_AB_list: Pre-computed binary AB values at x_A points
-            Z_AC_list: Pre-computed binary AC values at x_A points
-            Z_BC_list: Pre-computed binary BC values at w_B points
+            Z_AB_list: Pre-computed binary AB values at w_AB points
+            Z_BC_list: Pre-computed binary BC values at w_BC points
+            Z_AC_list: Pre-computed binary AC values at w_AC points
             z_latex: LaTeX symbol for z-axis property
             z_unit: Unit for z-axis property
             z_symbol: Output symbol name (e.g. "Delta_H_mix"). If None, uses config default.
@@ -485,26 +510,35 @@ class ToopCalc:
                 extra_conditions={"output_symbol": output_symbol},
             )
 
-        if len(Z_AB_list) != len(x_A_list):
+        w_AB_list = [
+            x_A / (x_A + x_B) if (x_A + x_B) > 0 else 0
+            for x_A, x_B in zip(x_A_list, x_B_list)
+        ]
+        if len(Z_AB_list) != len(w_AB_list):
             raise ValueError(
-                f"Z_AB_list has {len(Z_AB_list)} values, expected {len(x_A_list)}"
-            )
-        if len(Z_AC_list) != len(x_A_list):
-            raise ValueError(
-                f"Z_AC_list has {len(Z_AC_list)} values, expected {len(x_A_list)}"
+                f"Z_AB_list has {len(Z_AB_list)} values, expected {len(w_AB_list)}"
             )
 
-        w_B_list = [
+        w_BC_list = [
             x_B / (x_B + x_C) if (x_B + x_C) > 0 else 0
             for x_B, x_C in zip(x_B_list, x_C_list)
         ]
-        if len(Z_BC_list) != len(w_B_list):
+        if len(Z_BC_list) != len(w_BC_list):
             raise ValueError(
-                f"Z_BC_list has {len(Z_BC_list)} values, expected {len(w_B_list)}"
+                f"Z_BC_list has {len(Z_BC_list)} values, expected {len(w_BC_list)}"
+            )
+
+        w_AC_list = [
+            x_A / (x_A + x_C) if (x_A + x_C) > 0 else 0
+            for x_A, x_C in zip(x_A_list, x_C_list)
+        ]
+        if len(Z_AC_list) != len(w_AC_list):
+            raise ValueError(
+                f"Z_AC_list has {len(Z_AC_list)} values, expected {len(w_AC_list)}"
             )
 
         Z_ABC_list = self.calculatePropertyList(
-            x_B_list, x_C_list, Z_AB_list, Z_AC_list, Z_BC_list
+            x_A_list, x_B_list, x_C_list, Z_AB_list, Z_BC_list, Z_AC_list
         )
 
         if not Z_ABC_list or len(Z_ABC_list) != len(x_A_list):
@@ -542,7 +576,7 @@ class ToopCalc:
             },
             "dims": ["x_A", "x_B", "x_C", output_symbol],
             "main_dim": output_symbol,
-            "method": "Toop",
+            "method": "Kohler",
         }
 
     def calculateContourWithData(
@@ -553,8 +587,8 @@ class ToopCalc:
         plane: str,
         n_points: int,
         Z_AB_list: list[float],
-        Z_AC_list: list[float],
         Z_BC_list: list[float],
+        Z_AC_list: list[float],
         z_latex: str,
         z_unit: str,
         z_symbol: str | None = None,
@@ -568,9 +602,9 @@ class ToopCalc:
             elem_C: Atomic number of element C
             plane: Projection plane - "x_A-x_B", "x_A-x_C", or "x_B-x_C"
             n_points: Number of points per axis
-            Z_AB_list: Pre-computed binary AB values at x_A points
-            Z_AC_list: Pre-computed binary AC values at x_A points
-            Z_BC_list: Pre-computed binary BC values at w_B points
+            Z_AB_list: Pre-computed binary AB values at w_AB points
+            Z_BC_list: Pre-computed binary BC values at w_BC points
+            Z_AC_list: Pre-computed binary AC values at w_AC points
             z_latex: LaTeX symbol for z-axis property
             z_unit: Unit for z-axis property
             z_symbol: Output symbol name (e.g. "Delta_H_mix"). If None, uses config default.
@@ -636,26 +670,35 @@ class ToopCalc:
                 "plane": plane,
             }
 
-        if len(Z_AB_list) != len(x_A_list):
+        w_AB_list = [
+            x_A / (x_A + x_B) if (x_A + x_B) > 0 else 0
+            for x_A, x_B in zip(x_A_list, x_B_list)
+        ]
+        if len(Z_AB_list) != len(w_AB_list):
             raise ValueError(
-                f"Z_AB_list has {len(Z_AB_list)} values, expected {len(x_A_list)}"
-            )
-        if len(Z_AC_list) != len(x_A_list):
-            raise ValueError(
-                f"Z_AC_list has {len(Z_AC_list)} values, expected {len(x_A_list)}"
+                f"Z_AB_list has {len(Z_AB_list)} values, expected {len(w_AB_list)}"
             )
 
-        w_B_list = [
+        w_BC_list = [
             x_B / (x_B + x_C) if (x_B + x_C) > 0 else 0
             for x_B, x_C in zip(x_B_list, x_C_list)
         ]
-        if len(Z_BC_list) != len(w_B_list):
+        if len(Z_BC_list) != len(w_BC_list):
             raise ValueError(
-                f"Z_BC_list has {len(Z_BC_list)} values, expected {len(w_B_list)}"
+                f"Z_BC_list has {len(Z_BC_list)} values, expected {len(w_BC_list)}"
+            )
+
+        w_AC_list = [
+            x_A / (x_A + x_C) if (x_A + x_C) > 0 else 0
+            for x_A, x_C in zip(x_A_list, x_C_list)
+        ]
+        if len(Z_AC_list) != len(w_AC_list):
+            raise ValueError(
+                f"Z_AC_list has {len(Z_AC_list)} values, expected {len(w_AC_list)}"
             )
 
         Z_ABC_list = self.calculatePropertyList(
-            x_B_list, x_C_list, Z_AB_list, Z_AC_list, Z_BC_list
+            x_A_list, x_B_list, x_C_list, Z_AB_list, Z_BC_list, Z_AC_list
         )
 
         if not Z_ABC_list or len(Z_ABC_list) != len(x_A_list):

@@ -5,48 +5,39 @@ from PySide6.QtWidgets import (
     QLabel,
     QPushButton,
     QSpinBox,
-    QComboBox,
     QGroupBox,
     QMessageBox,
 )
 from PySide6.QtCore import Signal
 
 
-class ToopContourWizardDialog(QDialog):
+class KohlerScatterWizardDialog(QDialog):
     resultReady = Signal(dict)
 
     def __init__(self, module_service, user_db_service, parent=None):
         super().__init__(parent)
-        self.setWindowTitle(self.tr("Toop Contour Configuration"))
+        self.setWindowTitle(self.tr("Kohler 3D Scatter Configuration"))
         self.setMinimumSize(500, 400)
         self._ms = module_service
         self._userDb = user_db_service
-        self._sources = {"Z_AB": None, "Z_AC": None, "Z_BC": None}
+        self._sources = {"Z_AB": None, "Z_BC": None, "Z_AC": None}
         self._setupUi()
 
     def _setupUi(self):
-        from ..data_source_discovery import ToopDataSourceDiscovery
+        from ..data_source_discovery import KohlerDataSourceDiscovery
 
-        self._discovery = ToopDataSourceDiscovery(self._ms, self._userDb)
+        self._discovery = KohlerDataSourceDiscovery(self._ms, self._userDb)
 
         from .wizard_pages import ElementSelectionPage
 
         mainLayout = QVBoxLayout(self)
 
-        title = QLabel(self.tr("Toop Contour Configuration"))
+        title = QLabel(self.tr("Kohler 3D Scatter Configuration"))
         title.setStyleSheet("font-size: 16pt; font-weight: bold;")
         mainLayout.addWidget(title)
 
         self._elementPage = ElementSelectionPage()
         mainLayout.addWidget(self._elementPage)
-
-        planeGroup = QGroupBox(self.tr("Projection Plane"))
-        planeLayout = QVBoxLayout()
-        self._planeCombo = QComboBox()
-        self._planeCombo.addItems(["x_A-x_B", "x_A-x_C", "x_B-x_C"])
-        planeLayout.addWidget(self._planeCombo)
-        planeGroup.setLayout(planeLayout)
-        mainLayout.addWidget(planeGroup)
 
         optionsGroup = QGroupBox(self.tr("Calculation Options"))
         optionsLayout = QVBoxLayout()
@@ -82,15 +73,15 @@ class ToopContourWizardDialog(QDialog):
         elemA, elemB, elemC = self._elementPage.getElements()
 
         sourcesAB = self._discovery.findSources("thermodynamic", elemA, elemB)
-        sourcesAC = self._discovery.findSources("thermodynamic", elemA, elemC)
         sourcesBC = self._discovery.findSources("thermodynamic", elemB, elemC)
+        sourcesAC = self._discovery.findSources("thermodynamic", elemA, elemC)
 
         if sourcesAB:
             self._sources["Z_AB"] = sourcesAB[0]
-        if sourcesAC:
-            self._sources["Z_AC"] = sourcesAC[0]
         if sourcesBC:
             self._sources["Z_BC"] = sourcesBC[0]
+        if sourcesAC:
+            self._sources["Z_AC"] = sourcesAC[0]
 
     def _onElementsChanged(self):
         self._updateSources()
@@ -103,7 +94,9 @@ class ToopContourWizardDialog(QDialog):
         config = self._ms.getModuleConfig(moduleName)
         if not config:
             return "", "", ""
-        moduleCfg = config.get("module", {})
+        moduleCfg = config.get("module")
+        if moduleCfg is None:
+            return "", "", ""
         allMethods = moduleCfg.get("all_methods", [])
         for methodName in allMethods:
             methodConfig = config.get(methodName, {})
@@ -119,21 +112,20 @@ class ToopContourWizardDialog(QDialog):
         return "", "", ""
 
     def _onCalculate(self):
-        from ..toop_module import ToopCalc
+        from ..kohler_module import KohlerCalc
 
         elemA, elemB, elemC = self._elementPage.getElements()
         nPoints = self._nPointsSpin.value()
-        plane = self._planeCombo.currentText()
 
-        toop = ToopCalc()
+        kohler = KohlerCalc()
 
-        xAList, xBList, xCList = toop._generateGrid(nPoints)
+        xAList, xBList, xCList = kohler._generateGrid(nPoints)
 
         zAbSource = self._sources["Z_AB"]
-        zAcSource = self._sources["Z_AC"]
         zBcSource = self._sources["Z_BC"]
+        zAcSource = self._sources["Z_AC"]
 
-        if not zAbSource or not zAcSource or not zBcSource:
+        if not zAbSource or not zBcSource or not zAcSource:
             QMessageBox.warning(
                 self,
                 self.tr("Warning"),
@@ -141,38 +133,43 @@ class ToopContourWizardDialog(QDialog):
             )
             return
 
-        zABList = zAbSource.get_values(elemA, elemB, xAList)
-        zACList = zAcSource.get_values(elemA, elemC, xAList)
+        wABList = [
+            xA / (xA + xB) if (xA + xB) > 0 else 0 for xA, xB in zip(xAList, xBList)
+        ]
+        zABList = zAbSource.get_values(elemA, elemB, wABList)
 
-        wBList = [
+        wBCList = [
             xB / (xB + xC) if (xB + xC) > 0 else 0 for xB, xC in zip(xBList, xCList)
         ]
-        zBCList = zBcSource.get_values(elemB, elemC, wBList)
+        zBCList = zBcSource.get_values(elemB, elemC, wBCList)
+
+        wACList = [
+            xA / (xA + xC) if (xA + xC) > 0 else 0 for xA, xC in zip(xAList, xCList)
+        ]
+        zACList = zAcSource.get_values(elemA, elemC, wACList)
 
         zSymbol, zLatex, zUnit = self._getOutputSymbolLatexUnit(zAbSource)
 
-        result = toop.calculateContourWithData(
+        result = kohler.calculateScatterWithData(
             elemA,
             elemB,
             elemC,
-            plane,
             nPoints,
             zABList,
-            zACList,
             zBCList,
+            zACList,
             zLatex,
             zUnit,
             zSymbol,
         )
 
         self._ms.cacheResult(
-            "toop_module",
-            "calculateContour",
+            "kohler_module",
+            "calculateScatter",
             result,
             elem_A=elemA,
             elem_B=elemB,
             elem_C=elemC,
-            plane=plane,
             n_points=nPoints,
         )
 
