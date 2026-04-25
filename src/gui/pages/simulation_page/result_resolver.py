@@ -103,8 +103,21 @@ class ResultResolver:
     def _resolve_contour_triangular(self, result: dict) -> ResolvedData | None:
         latex = result.get("latex", {})
         units = result.get("units", {})
+        dims = result.get("dims", [])
+        values = result.get("values", [])
 
         z_key = "Z_ABC"
+        if values and isinstance(values[0], dict):
+            for k in values[0]:
+                if k not in ("x_A", "x_B", "x_C"):
+                    z_key = k
+                    break
+        elif dims:
+            for d in dims:
+                if d not in ("x_A", "x_B", "x_C"):
+                    z_key = d
+                    break
+
         z_label = latex.get(z_key, z_key)
         z_unit = units.get(z_key, "")
         if z_unit:
