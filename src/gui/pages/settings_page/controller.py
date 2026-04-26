@@ -125,7 +125,7 @@ class SettingsController(QObject):
         self.ui.marker_combo.currentIndexChanged.connect(self._onMarkerChanged)
         self.ui.line_width_spin.valueChanged.connect(self._onLineWidthChanged)
         self.ui.marker_size_spin.valueChanged.connect(self._onMarkerSizeChanged)
-        self.ui.grid_check.toggled.connect(self._onGridChanged)
+        self.ui.grid_combo.currentIndexChanged.connect(self._onGridChanged)
         self.ui.grid_mode_combo.currentIndexChanged.connect(self._onGridModeChanged)
         self.ui.grid_density_spin.valueChanged.connect(self._onGridDensityChanged)
         self.ui.grid_label_density_spin.valueChanged.connect(
@@ -186,7 +186,7 @@ class SettingsController(QObject):
         line_style = self.ui.line_style_combo.currentData()
         marker = self.ui.marker_combo.currentData()
         line_width = self.ui.line_width_spin.value()
-        grid = self.ui.grid_check.isChecked()
+        grid = self.ui.grid_combo.currentData() == "true"
         grid_mode = self.ui.grid_mode_combo.currentData()
         grid_density = self.ui.grid_density_spin.value()
         grid_label_density = self.ui.grid_label_density_spin.value()
@@ -338,10 +338,9 @@ class SettingsController(QObject):
         self._saveAndReload([SettingsSnapshot("plot", "markerSize", str(value))])
         self._scheduleUpdatePlotPreview()
 
-    def _onGridChanged(self, checked: bool):
-        self._saveAndReload(
-            [SettingsSnapshot("plot", "grid", "true" if checked else "false")]
-        )
+    def _onGridChanged(self, index: int):
+        value = self.ui.grid_combo.itemData(index)
+        self._saveAndReload([SettingsSnapshot("plot", "grid", value)])
         self._scheduleUpdatePlotPreview()
 
     def _onGridModeChanged(self, index: int):

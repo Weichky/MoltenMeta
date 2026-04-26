@@ -33,6 +33,10 @@ class PlotPanel(QtWidgets.QWidget):
         self._current_scheme = "light"
         self._setTheme("light")
 
+    def applyPlaceholder(self, grid: bool, gridMode: str, gridDensity: float, gridLabelDensity: float) -> None:
+        self._applyGrid(grid, gridMode, gridDensity, gridLabelDensity)
+        self._canvas.draw()
+
     def _applyGrid(
         self,
         enabled: bool,

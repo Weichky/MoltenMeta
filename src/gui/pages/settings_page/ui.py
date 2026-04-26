@@ -141,14 +141,14 @@ class UiSettingsPage(QObject):
 
         self.density_scale_combo = QtWidgets.QComboBox()
         self.density_scale_combo.setObjectName("densityScaleCombo")
-        density_options = [
-            (self.tr("50%"), -4),
-            (self.tr("75%"), -3),
-            (self.tr("100%"), -2),
-            (self.tr("125%"), -1),
-            (self.tr("150%"), 0),
+        self.density_items = [
+            ("50%", -4),
+            ("75%", -3),
+            ("100%", -2),
+            ("125%", -1),
+            ("150%", 0),
         ]
-        for display, value in density_options:
+        for display, value in self.density_items:
             self.density_scale_combo.addItem(display, value)
         current_density = self._settings.density_scale
         self.density_scale_combo.setCurrentIndex(
@@ -183,8 +183,9 @@ class UiSettingsPage(QObject):
         row_layout.addWidget(self.log_level_combo)
         row_layout.addStretch()
 
-        for level in getLogLevelMap().keys():
-            self.log_level_combo.addItem(self.tr(level), level)
+        self.log_level_items = list(getLogLevelMap().keys())
+        for level in self.log_level_items:
+            self.log_level_combo.addItem(level, level)
 
         log_level = self._settings.log_level
         self.log_level_combo.setCurrentIndex(self.log_level_combo.findData(log_level))
@@ -319,12 +320,19 @@ class UiSettingsPage(QObject):
         line_grid.addWidget(QtWidgets.QLabel(self.tr("Marker Size")), 1, 0)
         line_grid.addWidget(self.marker_size_spin, 1, 1)
 
-        self.grid_check = QtWidgets.QCheckBox()
-        self.grid_check.setObjectName("gridCheck")
-        self.grid_check.setChecked(
-            self._settings.plot_grid if self._settings.plot_grid is not None else True
-        )
-        line_grid.addWidget(self.grid_check, 2, 0, 1, 2)
+        self.grid_combo = QtWidgets.QComboBox()
+        self.grid_combo.setObjectName("gridCombo")
+        self.grid_items = [
+            (self.tr("Enabled"), "true"),
+            (self.tr("Disabled"), "false"),
+        ]
+        for display, value in self.grid_items:
+            self.grid_combo.addItem(display, value)
+        grid_val = self._settings.plot_grid
+        grid_index = self.grid_combo.findData("true" if grid_val else "false")
+        self.grid_combo.setCurrentIndex(grid_index if grid_index >= 0 else 0)
+        line_grid.addWidget(QtWidgets.QLabel(self.tr("Grid")), 2, 0)
+        line_grid.addWidget(self.grid_combo, 2, 1)
 
         self.grid_mode_combo = QtWidgets.QComboBox()
         self.grid_mode_combo.setObjectName("gridModeCombo")
@@ -459,19 +467,25 @@ class UiSettingsPage(QObject):
         self.plot_button.setText(self.tr("Plot"))
 
         for i, (display, value) in enumerate(self.palette_items):
-            self.palette_combo.setItemText(i, self.tr(display))
+            self.palette_combo.setItemText(i, display)
 
         for i, (display, value) in enumerate(self.algorithm_items):
-            self.algorithm_combo.setItemText(i, self.tr(display))
+            self.algorithm_combo.setItemText(i, display)
 
         for i, (display, value) in enumerate(self.line_style_items):
-            self.line_style_combo.setItemText(i, self.tr(display))
+            self.line_style_combo.setItemText(i, display)
 
         for i, (display, value) in enumerate(self.marker_items):
-            self.marker_combo.setItemText(i, self.tr(display))
+            self.marker_combo.setItemText(i, display)
 
         for i, (display, value) in enumerate(self.grid_mode_items):
-            self.grid_mode_combo.setItemText(i, self.tr(display))
+            self.grid_mode_combo.setItemText(i, display)
+
+        for i, (display, value) in enumerate(self.grid_items):
+            self.grid_combo.setItemText(i, display)
+
+        for i, (display, value) in enumerate(self.density_items):
+            self.density_scale_combo.setItemText(i, display)
 
     def _calcGridTicks(
         self, axis_min: float, axis_max: float, grid_mode: str, grid_density: float

@@ -83,6 +83,15 @@ class SimulationPage(QtWidgets.QWidget):
         self._connectSignals()
         self._populateCategories()
         self._applyTheme()
+        if self._context.core_db is not None:
+            self._context.core_db.settingsReloaded.connect(self._onSettingsReloaded)
+
+        settings = self._context.settings
+        grid = settings.plot_grid if settings.plot_grid is not None else True
+        grid_mode = settings.plot_grid_mode or "auto"
+        grid_density = settings.plot_grid_density or 1.0
+        grid_label_density = settings.plot_grid_label_density or 1.0
+        self._plot_panel.applyPlaceholder(grid, grid_mode, grid_density, grid_label_density)
 
     def _clearModuleWidget(self) -> None:
         if self._module_widget is not None:
@@ -239,6 +248,17 @@ class SimulationPage(QtWidgets.QWidget):
             self._result_resolver.setCurrentCoord(index)
         if self._current_result:
             self._displayResult(self._current_result)
+
+    def _onSettingsReloaded(self) -> None:
+        if self._current_result:
+            self._displayResult(self._current_result)
+        else:
+            settings = self._context.settings
+            grid = settings.plot_grid if settings.plot_grid is not None else True
+            grid_mode = settings.plot_grid_mode or "auto"
+            grid_density = settings.plot_grid_density or 1.0
+            grid_label_density = settings.plot_grid_label_density or 1.0
+            self._plot_panel.applyPlaceholder(grid, grid_mode, grid_density, grid_label_density)
 
     def _displayResult(self, result: dict) -> None:
         self._current_result = result

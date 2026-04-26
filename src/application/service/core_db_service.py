@@ -1,4 +1,4 @@
-from PySide6.QtCore import QObject
+from PySide6.QtCore import QObject, Signal
 
 from db.core import SettingsRepository, DatabaseManager
 from .db_service import DatabaseService
@@ -11,6 +11,8 @@ from db.seeds.settings_seed import loadDefaultSettings
 
 
 class CoreDbService(QObject):
+    settingsReloaded = Signal()
+
     def __init__(
         self,
         app,
@@ -43,3 +45,4 @@ class CoreDbService(QObject):
 
     def reloadSettings(self) -> None:
         self._settings = Settings(records=self._settings_repo.findAll())
+        self.settingsReloaded.emit()
