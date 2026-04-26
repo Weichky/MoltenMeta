@@ -59,8 +59,7 @@ class PlotPanel(QtWidgets.QWidget):
             range_val = axis_max - axis_min
             if gridMode == "absolute":
                 return gridDensity
-            else:
-                return range_val / (10.0 * gridDensity)
+            return range_val / (10.0 * gridDensity)
 
         x_interval = calcInterval(xlim[0], xlim[1])
         y_interval = calcInterval(ylim[0], ylim[1])
@@ -78,13 +77,52 @@ class PlotPanel(QtWidgets.QWidget):
         self._ax.grid(True, which="major", alpha=0.3)
         self._ax.grid(True, which="minor", alpha=0.15)
 
-        # gridLabelDensity: show every Nth tick label to reduce clutter.
-        # density=1 shows all labels, density=2 shows every other, etc.
         label_every = max(1, int(gridLabelDensity))
         for i, tick in enumerate(self._ax.xaxis.get_major_ticks()):
             tick.label1.set_visible(i % label_every == 0)
         for i, tick in enumerate(self._ax.yaxis.get_major_ticks()):
             tick.label1.set_visible(i % label_every == 0)
+
+    def _applyGridToAxis(
+        self,
+        axis,
+        lim: tuple[float, float],
+        gridDensity: float,
+        gridMode: str,
+        labelDensity: float,
+    ) -> None:
+        if gridMode == "auto":
+            axis.grid(True, alpha=0.3)
+            return
+
+        def calcInterval(axis_min: float, axis_max: float) -> float:
+            range_val = axis_max - axis_min
+            if gridMode == "absolute":
+                return gridDensity
+            return range_val / (10.0 * gridDensity)
+
+        interval = calcInterval(lim[0], lim[1])
+        ticks = np.arange(lim[0], lim[1] + interval, interval)
+        axis.set_ticks(ticks)
+        axis.grid(True, alpha=0.3)
+
+        label_every = max(1, int(labelDensity))
+        for i, tick in enumerate(axis.get_major_ticks()):
+            tick.label1.set_visible(i % label_every == 0)
+
+    def _applyGrid3D(
+        self,
+        enabled: bool,
+        gridMode: str,
+        gridDensity: float,
+        gridLabelDensity: float = 1.0,
+    ) -> None:
+        if not enabled:
+            self._ax.grid(False, which="major")
+            return
+        self._applyGridToAxis(
+            self._ax.zaxis, self._ax.get_zlim(), gridDensity, gridMode, gridLabelDensity
+        )
 
     def _setTheme(self, scheme: str) -> None:
         self._current_scheme = scheme
@@ -296,6 +334,11 @@ class PlotPanel(QtWidgets.QWidget):
         if title:
             self._ax.set_title(self._wrapLatex(title), fontsize=style.titleFontSize)
 
+        self._ax.tick_params(axis="both", labelsize=style.tickFontSize)
+        self._ax.tick_params(axis="z", labelsize=style.tickFontSize)
+        self._applyGrid(style.grid, style.gridMode, style.gridDensity, style.gridLabelDensity)
+        self._applyGrid3D(style.grid, style.gridMode, style.gridDensity, style.gridLabelDensity)
+
         self._canvas.draw()
 
     def contourf(
@@ -329,22 +372,36 @@ class PlotPanel(QtWidgets.QWidget):
         if z_min == z_max:
             z_min = z_min - 1e-10
             z_max = z_max + 1e-10
-        contour_levels = np.linspace(z_min, z_max, levels)
-        cf = self._ax.contourf(
-            x_arr,
-            y_arr,
-            z_arr,
-            levels=contour_levels,
-            cmap="viridis" if not generator else None,
-            alpha=0.8,
-        )
 
         if generator:
-            for i, level in enumerate(contour_levels):
-                color = generator.getColor(i, len(contour_levels))
+            n_cmap = 256
+            cmap_colors = [generator.getColorAt(i / (n_cmap - 1)) for i in range(n_cmap)]
+            cmap = mpl.colors.ListedColormap(cmap_colors)
+            z_norm = (z_arr - z_min) / (z_max - z_min + 1e-12)
+            cf = self._ax.contourf(
+                x_arr,
+                y_arr,
+                z_norm,
+                levels=np.linspace(0, 1, levels),
+                cmap=cmap,
+                alpha=0.8,
+                extend="neither",
+            )
+            for i, level in enumerate(np.linspace(0, 1, levels)):
+                color = generator.getColorAt(level)
                 self._ax.contour(
-                    x_arr, y_arr, z_arr, levels=[level], colors=[color], linewidths=0.5
+                    x_arr, y_arr, z_norm, levels=[level], colors=[color], linewidths=0.5
                 )
+        else:
+            contour_levels = np.linspace(z_min, z_max, levels)
+            cf = self._ax.contourf(
+                x_arr,
+                y_arr,
+                z_arr,
+                levels=contour_levels,
+                cmap="viridis",
+                alpha=0.8,
+            )
 
         cbar = self._figure.colorbar(cf, ax=self._ax)
         cbar.set_label(self._wrapLatex("Z_ABC"), fontsize=style.labelFontSize)
@@ -361,6 +418,8 @@ class PlotPanel(QtWidgets.QWidget):
 
         self._ax.set_xlim(0, 1)
         self._ax.set_ylim(0, 1)
+        self._ax.tick_params(axis="both", labelsize=style.tickFontSize)
+        self._applyGrid(style.grid, style.gridMode, style.gridDensity, style.gridLabelDensity)
 
         self._canvas.draw()
 
@@ -451,14 +510,19 @@ class PlotPanel(QtWidgets.QWidget):
         contour_levels = np.linspace(z_min, z_max, plot_levels)
 
         if generator:
-            n_colors = len(contour_levels)
-            colors = [generator.getColor(i, n_colors) for i in range(n_colors)]
+            n_cmap = 256
+            cmap_colors = [generator.getColorAt(i / (n_cmap - 1)) for i in range(n_cmap)]
+            cmap = mpl.colors.ListedColormap(cmap_colors)
+            cmap.set_under("white")
+            cmap.set_over("white")
+            z_normalized = (z_valid - z_min) / (z_max - z_min + 1e-12)
             cf = self._ax.tricontourf(
                 triang,
-                z_valid,
-                levels=contour_levels,
-                colors=colors,
+                z_normalized,
+                levels=np.linspace(0, 1, plot_levels),
+                cmap=cmap,
                 alpha=0.8,
+                extend="neither",
             )
             self._ax.tricontour(
                 triang, z_valid, levels=contour_levels, colors="white", linewidths=0.3

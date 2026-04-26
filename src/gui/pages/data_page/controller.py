@@ -58,6 +58,9 @@ class DataController(QObject):
 
         self._context.i18n.language_changed.connect(self.ui.retranslateUi)
 
+        if self.ui.table_combo.count() > 0:
+            self._onTableSelected(0)
+
     def _getRepository(self, table_name: str):
         """Get the repository for a predefined table, or None if not found."""
         repo_property = TABLE_TO_REPO_PROPERTY.get(table_name)

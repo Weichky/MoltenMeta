@@ -71,32 +71,48 @@ class ColorGenerator:
     def getColorN(self, n: int) -> list[str]:
         return [self.getColor(i, n) for i in range(n)]
 
-    def _linear(self, index: int, total: int) -> str:
-        theme = self._theme
-        primary_rgb = _hexToRgb(theme.primary)
-        secondary_rgb = _hexToRgb(theme.secondary)
+    def getColorAt(self, t: float) -> str:
+        t = max(0.0, min(1.0, t))
+        if self._algorithm == ColorAlgorithm.LINEAR:
+            return self._colorAtLinear(t)
+        elif self._algorithm == ColorAlgorithm.HARMONIC:
+            return self._colorAtHarmonic(t)
+        elif self._algorithm == ColorAlgorithm.COLORWHEEL:
+            return self._colorAtColorwheel(t)
+        return self._theme.primary
 
-        if total == 1:
-            return theme.primary
-
-        t = index / (total - 1) if total > 1 else 0
+    def _colorAtLinear(self, t: float) -> str:
+        primary_rgb = _hexToRgb(self._theme.primary)
+        secondary_rgb = _hexToRgb(self._theme.secondary)
         result_rgb = _lerpColor(primary_rgb, secondary_rgb, t)
         return _rgbToHex(result_rgb)
 
-    def _harmonic(self, index: int, total: int) -> str:
-        hue_shift = index * (1.0 / total)
-        rgb: tuple[float, float, float] = _hexToRgb(self._theme.primary)
+    def _colorAtHarmonic(self, t: float) -> str:
+        rgb = _hexToRgb(self._theme.primary)
         hsv = colorsys.rgb_to_hsv(*rgb)
-        new_hue = (hsv[0] + hue_shift) % 1.0
+        new_hue = (hsv[0] + t) % 1.0
         result = colorsys.hsv_to_rgb(new_hue, hsv[1], hsv[2])
         return _rgbToHex(result)
+
+    def _colorAtColorwheel(self, t: float) -> str:
+        rgb = colorsys.hsv_to_rgb(t, 0.7, 0.9)
+        return _rgbToHex(rgb)
+
+    def _linear(self, index: int, total: int) -> str:
+        if total == 1:
+            return self._theme.primary
+        t = index / (total - 1) if total > 1 else 0
+        return self._colorAtLinear(t)
+
+    def _harmonic(self, index: int, total: int) -> str:
+        t = index * (1.0 / total)
+        return self._colorAtHarmonic(t)
 
     def _colorwheel(self, index: int, total: int) -> str:
         if total == 1:
             return self._theme.primary
-        hue = index * (360.0 / total)
-        rgb = colorsys.hsv_to_rgb(hue / 360.0, 0.7, 0.9)
-        return _rgbToHex(rgb)
+        t = index * (360.0 / total) / 360.0
+        return self._colorAtColorwheel(t)
 
 
 class ColorPalette:

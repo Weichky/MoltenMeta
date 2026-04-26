@@ -363,7 +363,7 @@ class UiSettingsPage(QObject):
         self.grid_label_density_spin.setValue(
             self._settings.plot_grid_label_density or 1.0
         )
-        line_grid.addWidget(QtWidgets.QLabel(self.tr("Label Density")), 5, 0)
+        line_grid.addWidget(QtWidgets.QLabel(self.tr("Label Spacing")), 5, 0)
         line_grid.addWidget(self.grid_label_density_spin, 5, 1)
 
         page_layout.addLayout(line_grid)
@@ -534,8 +534,34 @@ class UiSettingsPage(QObject):
         for i, tick in enumerate(ax.yaxis.get_major_ticks()):
             tick.label1.set_visible(i % label_every == 0)
 
+    def _applyGridToAxis3D(
+        self,
+        ax,
+        enabled: bool,
+        grid_mode: str,
+        grid_density: float,
+        grid_label_density: float = 1.0,
+    ) -> None:
+        if not enabled:
+            ax.grid(False, which="major")
+            return
+
+        if grid_mode == "auto":
+            ax.grid(True, alpha=0.3)
+            return
+
+        zlim = ax.get_zlim()
+        z_ticks = self._calcGridTicks(zlim[0], zlim[1], grid_mode, grid_density)
+        ax.set_zticks(z_ticks)
+        ax.grid(True, alpha=0.3)
+
+        label_every = max(1, int(grid_label_density))
+        for i, tick in enumerate(ax.zaxis.get_major_ticks()):
+            tick.label1.set_visible(i % label_every == 0)
+
     def updatePreview(
         self,
+        gen,
         colors: list[str],
         line_style: str = "-",
         marker: str = "o",
@@ -588,16 +614,26 @@ class UiSettingsPage(QObject):
         )
 
         self.preview_ax3.set_title("Surface 3D", fontsize=title_font_size)
-        X = np.linspace(-5, 5, 30)
-        Y = np.linspace(-5, 5, 30)
+        X = np.linspace(-5, 5, 60)
+        Y = np.linspace(-5, 5, 60)
         X, Y = np.meshgrid(X, Y)
         Z = np.sin(np.sqrt(X**2 + Y**2))
+        Z_norm = (Z - Z.min()) / (Z.max() - Z.min() + 1e-9)
+        n_cmap = 256
+        cmap_colors = [gen.getColorAt(i / (n_cmap - 1)) for i in range(n_cmap)]
+        cmap = mpl.colors.ListedColormap(cmap_colors)
+        facecolors = cmap(Z_norm)
+        self.preview_ax3.set_navigate(False)
         self.preview_ax3.plot_surface(
-            X, Y, Z, color=colors[0], alpha=0.7, rstride=1, cstride=1
+            X, Y, Z, facecolors=facecolors, rstride=1, cstride=1
         )
         self.preview_ax3.view_init(elev=25, azim=45)
         self.preview_ax3.set_box_aspect([1.2, 1.2, 0.8])
         self.preview_ax3.tick_params(axis="both", labelsize=tick_font_size)
+        self.preview_ax3.tick_params(axis="z", labelsize=tick_font_size)
+        self._applyGridToAxis3D(
+            self.preview_ax3, grid, grid_mode, grid_density, grid_label_density
+        )
 
         self.preview_ax4.set_title("Contour", fontsize=title_font_size)
         X = np.arange(-5, 5, 0.5)

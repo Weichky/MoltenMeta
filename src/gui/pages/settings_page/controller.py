@@ -206,6 +206,7 @@ class SettingsController(QObject):
         colors = gen.getColorN(5)
 
         self.ui.updatePreview(
+            gen,
             colors,
             line_style,
             marker,

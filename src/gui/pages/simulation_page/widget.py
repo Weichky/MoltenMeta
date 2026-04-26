@@ -91,7 +91,9 @@ class SimulationPage(QtWidgets.QWidget):
         grid_mode = settings.plot_grid_mode or "auto"
         grid_density = settings.plot_grid_density or 1.0
         grid_label_density = settings.plot_grid_label_density or 1.0
-        self._plot_panel.applyPlaceholder(grid, grid_mode, grid_density, grid_label_density)
+        self._plot_panel.applyPlaceholder(
+            grid, grid_mode, grid_density, grid_label_density
+        )
 
     def _clearModuleWidget(self) -> None:
         if self._module_widget is not None:
@@ -258,7 +260,9 @@ class SimulationPage(QtWidgets.QWidget):
             grid_mode = settings.plot_grid_mode or "auto"
             grid_density = settings.plot_grid_density or 1.0
             grid_label_density = settings.plot_grid_label_density or 1.0
-            self._plot_panel.applyPlaceholder(grid, grid_mode, grid_density, grid_label_density)
+            self._plot_panel.applyPlaceholder(
+                grid, grid_mode, grid_density, grid_label_density
+            )
 
     def _displayResult(self, result: dict) -> None:
         self._current_result = result
