@@ -16,12 +16,12 @@ from ...geometric_model_core import (
 )
 
 
-class KohlerWizardDialog(QDialog):
+class MaggianuWizardDialog(QDialog):
     resultReady = Signal(dict)
 
     def __init__(self, module_service, user_db_service, parent=None):
         super().__init__(parent)
-        self.setWindowTitle(self.tr("Kohler Model Configuration"))
+        self.setWindowTitle(self.tr("Maggianu Model Configuration"))
         self.setMinimumSize(600, 500)
         self._ms = module_service
         self._userDb = user_db_service
@@ -29,15 +29,15 @@ class KohlerWizardDialog(QDialog):
         self._setupUi()
 
     def _setupUi(self):
-        from ..data_source_discovery import KohlerDataSourceDiscovery
+        from ..data_source_discovery import MaggianuDataSourceDiscovery
 
-        self._discovery = KohlerDataSourceDiscovery(self._ms, self._userDb)
+        self._discovery = MaggianuDataSourceDiscovery(self._ms, self._userDb)
 
         mainLayout = QVBoxLayout(self)
         mainLayout.setSpacing(24)
         mainLayout.setContentsMargins(32, 32, 32, 32)
 
-        title = QLabel(self.tr("Kohler Model Configuration"))
+        title = QLabel(self.tr("Maggianu Model Configuration"))
         title.setObjectName("wizardTitle")
         mainLayout.addWidget(title)
 
@@ -165,7 +165,7 @@ class KohlerWizardDialog(QDialog):
         return "", "", ""
 
     def calculate(self, inputs: dict) -> dict:
-        from ..kohler_module import KohlerCalc
+        from ..maggianu_module import MaggianuCalc
 
         elemA = inputs["elem_A"]
         elemB = inputs["elem_B"]
@@ -173,7 +173,7 @@ class KohlerWizardDialog(QDialog):
         nPoints = inputs["n_points"]
         sources = inputs["sources"]
 
-        kohler = KohlerCalc()
+        maggianu = MaggianuCalc()
 
         xAList = []
         xBList = []
@@ -191,24 +191,18 @@ class KohlerWizardDialog(QDialog):
         zBcSource = sources["Z_BC"]
         zAcSource = sources["Z_AC"]
 
-        wABList = [
-            xA / (xA + xB) if (xA + xB) > 0 else 0 for xA, xB in zip(xAList, xBList)
-        ]
-        zABList = zAbSource.get_values(elemA, elemB, wABList)
+        V_AB_list = [(1.0 + xA - xB) / 2.0 for xA, xB in zip(xAList, xBList)]
+        zABList = zAbSource.get_values(elemA, elemB, V_AB_list)
 
-        wBCList = [
-            xB / (xB + xC) if (xB + xC) > 0 else 0 for xB, xC in zip(xBList, xCList)
-        ]
-        zBCList = zBcSource.get_values(elemB, elemC, wBCList)
+        V_BC_list = [(1.0 + xB - xC) / 2.0 for xB, xC in zip(xBList, xCList)]
+        zBCList = zBcSource.get_values(elemB, elemC, V_BC_list)
 
-        wACList = [
-            xA / (xA + xC) if (xA + xC) > 0 else 0 for xA, xC in zip(xAList, xCList)
-        ]
-        zACList = zAcSource.get_values(elemA, elemC, wACList)
+        V_AC_list = [(1.0 + xA - xC) / 2.0 for xA, xC in zip(xAList, xCList)]
+        zACList = zAcSource.get_values(elemA, elemC, V_AC_list)
 
         zSymbol, zLatex, zUnit = self._getOutputSymbolLatexUnit(zAbSource)
 
-        result = kohler.calculateScatterWithData(
+        result = maggianu.calculateScatterWithData(
             elemA,
             elemB,
             elemC,
@@ -222,7 +216,7 @@ class KohlerWizardDialog(QDialog):
         )
 
         self._ms.cacheResult(
-            "kohler_module",
+            "maggianu_module",
             "calculateScatter",
             result,
             elem_A=elemA,

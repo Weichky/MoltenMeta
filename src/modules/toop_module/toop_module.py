@@ -8,15 +8,14 @@ if TYPE_CHECKING:
     from framework.binary_provider import BinaryDataProvider
 
 from .element_map import elemIdToSymbol
+from ..grid_module.grid import generateTriangularGrid
 
 _MODULE_DIR = Path(__file__).parent
 
 if sys.platform == "win32":
     _ALG_EXT = "toop_algorithm.pyd"
-    _GRID_EXT = "toop_grid.pyd"
 else:
     _ALG_EXT = "toop_algorithm.so"
-    _GRID_EXT = "toop_grid.so"
 
 _spec_alg = importlib.util.spec_from_file_location(
     "toop_algorithm", _MODULE_DIR / "lib" / _ALG_EXT
@@ -24,13 +23,6 @@ _spec_alg = importlib.util.spec_from_file_location(
 assert _spec_alg is not None and _spec_alg.loader is not None
 _toop_algorithm = importlib.util.module_from_spec(_spec_alg)
 _spec_alg.loader.exec_module(_toop_algorithm)
-
-_spec_grid = importlib.util.spec_from_file_location(
-    "toop_grid", _MODULE_DIR / "lib" / _GRID_EXT
-)
-assert _spec_grid is not None and _spec_grid.loader is not None
-_toop_grid = importlib.util.module_from_spec(_spec_grid)
-_spec_grid.loader.exec_module(_toop_grid)
 
 with open(_MODULE_DIR / "config.toml", "rb") as _f:
     MODULE_INFO = tomllib.load(_f)
@@ -118,7 +110,7 @@ class ToopCalc:
             return [], [], []
         if n_points == 1:
             return [0.0], [0.0], [1.0]
-        x_A_arr, x_B_arr, x_C_arr = _toop_grid.generateTriangularGrid(n_points)
+        x_A_arr, x_B_arr, x_C_arr = generateTriangularGrid(n_points)
         return list(x_A_arr), list(x_B_arr), list(x_C_arr)
 
     def calculateScatter(

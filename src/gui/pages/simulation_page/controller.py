@@ -105,11 +105,15 @@ class SimulationController:
             if runtime_parent not in sys.path:
                 sys.path.insert(0, runtime_parent)
 
-            import_module(f"runtime.modules.{package_name}.ui")
+            ui_module_name = f"runtime.modules.{package_name}.ui"
+            ui_module = import_module(ui_module_name)
 
-            from runtime.modules.toop_module.ui import createToopWizard
+            wizard_factory = getattr(ui_module, "createWizard", None)
+            if wizard_factory is None:
+                self._logger.error(f"No 'createWizard' found in {package_name}.ui")
+                return None
 
-            widget = createToopWizard(
+            widget = wizard_factory(
                 method_name, self._module_service, self._context.user_db
             )
             if widget is not None:

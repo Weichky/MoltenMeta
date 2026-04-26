@@ -6,43 +6,15 @@ from PySide6.QtWidgets import (
     QPushButton,
     QStackedWidget,
     QMessageBox,
-    QWidget,
 )
 from PySide6.QtCore import Signal
 
-
-class StepIndicator(QWidget):
-    def __init__(self, steps: list[str], parent=None):
-        super().__init__(parent)
-        self._steps = steps
-        self._current = 0
-        self._circles = []
-        self._lines = []
-        self._setupUi()
-
-    def _setupUi(self):
-        layout = QHBoxLayout(self)
-        layout.setSpacing(12)
-        layout.setContentsMargins(0, 0, 0, 0)
-
-        for i, step in enumerate(self._steps):
-            circle = QLabel()
-            circle.setFixedSize(12, 12)
-            circle.setObjectName("stepCircle")
-            self._circles.append(circle)
-            layout.addWidget(circle)
-
-            if i < len(self._steps) - 1:
-                line = QLabel()
-                line.setFixedHeight(2)
-                line.setObjectName("stepLine")
-                self._lines.append(line)
-                layout.addWidget(line)
-
-        layout.addStretch()
-
-    def setCurrentStep(self, step: int):
-        self._current = step
+from ...geometric_model_core import (
+    StepIndicator,
+    ElementSelectionPage,
+    DataSourceSelectionPage,
+    CalculationOptionsPage,
+)
 
 
 class ToopWizardDialog(QDialog):
@@ -61,12 +33,6 @@ class ToopWizardDialog(QDialog):
         from ..data_source_discovery import ToopDataSourceDiscovery
 
         self._discovery = ToopDataSourceDiscovery(self._ms, self._userDb)
-
-        from .wizard_pages import (
-            ElementSelectionPage,
-            DataSourceSelectionPage,
-            CalculationOptionsPage,
-        )
 
         mainLayout = QVBoxLayout(self)
         mainLayout.setSpacing(24)

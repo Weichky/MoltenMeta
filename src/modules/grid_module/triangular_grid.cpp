@@ -1,7 +1,8 @@
 /**
- * Toop Grid Generator - Generate triangular grid points for ternary systems.
+ * Triangular Grid Generator - Generate triangular grid points for ternary systems.
  *
  * Generates points on the triangular plane x_A + x_B + x_C = 1 with x_A, x_B, x_C >= 0.
+ * This is shared by all geometric models (Kohler, Toop, Maggianu, Hillert-Toop).
  */
 
 #include <pybind11/pybind11.h>
@@ -50,7 +51,8 @@ py::array_t<double> generateTriangularGrid(int n_points) {
     return py::make_tuple(result_A, result_B, result_C);
 }
 
-PYBIND11_MODULE(toop_grid, m) {
+PYBIND11_MODULE(triangular_grid, m) {
     m.def("generateTriangularGrid", &generateTriangularGrid,
-          "Generate triangular grid points for ternary system");
+          "Generate triangular grid points for ternary system. "
+          "Returns tuple of (x_A, x_B, x_C) arrays where x_A + x_B + x_C = 1");
 }

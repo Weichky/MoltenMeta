@@ -1,15 +1,15 @@
 [module]
-package_name = "kohler_module"
-entry_class = "KohlerCalc"
+package_name = "maggianu_module"
+entry_class = "MaggianuCalc"
 all_methods = ["calculateSingleProperty", "calculateScatter", "calculateContour"]
 
 type = "simulation"
 category = "geometric_model"
-name = "Kohler Module"
+name = "Maggianu Module"
 version = "1.0.0"
 author = "Weichky"
 license = "MIT"
-description = "Kohler symmetric model for predicting ternary thermodynamic properties from binary data"
+description = "Maggianu symmetric model for predicting ternary thermodynamic properties from binary data"
 
 [calculateSingleProperty.inputs]
 symbol = ["elem_A", "elem_B", "elem_C", "x_A", "x_B", "x_C", "Z_AB", "Z_BC", "Z_AC"]

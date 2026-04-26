@@ -61,6 +61,7 @@ Z_BC = ""
 symbol = ["Z_ABC"]
 can_be_used_as_input = true
 is_collection = false
+is_virtual = true
 
 [calculateSingleProperty.outputs.latex]
 Z_ABC = "Z_{ABC}"
@@ -69,7 +70,7 @@ Z_ABC = "Z_{ABC}"
 Z_ABC = "Predicted ternary property"
 
 [calculateSingleProperty.outputs.unit]
-Z_ABC = "kJ/mol"
+
 
 [calculateSingleProperty.plot]
 plotType = "scatter_3d"
@@ -120,6 +121,7 @@ n_points = ""
 [calculateScatter.outputs]
 symbol = ["Z_ABC"]
 is_collection = true
+is_virtual = true
 
 [calculateScatter.outputs.latex]
 Z_ABC = "Z_{ABC}"
@@ -128,7 +130,7 @@ Z_ABC = "Z_{ABC}"
 Z_ABC = "Predicted ternary property"
 
 [calculateScatter.outputs.unit]
-Z_ABC = "kJ/mol"
+
 
 [calculateScatter.plot]
 plotType = "scatter_3d"
@@ -182,6 +184,7 @@ n_points = ""
 [calculateContour.outputs]
 symbol = ["Z_ABC"]
 is_collection = true
+is_virtual = true
 
 [calculateContour.outputs.latex]
 Z_ABC = "Z_{ABC}"
@@ -190,7 +193,7 @@ Z_ABC = "Z_{ABC}"
 Z_ABC = "Predicted ternary property"
 
 [calculateContour.outputs.unit]
-Z_ABC = "kJ/mol"
+
 
 [calculateContour.plot]
 plotType = "contour_triangular"

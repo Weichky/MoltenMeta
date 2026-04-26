@@ -13,22 +13,22 @@ from ..grid_module.grid import generateTriangularGrid
 _MODULE_DIR = Path(__file__).parent
 
 if sys.platform == "win32":
-    _ALG_EXT = "kohler_algorithm.pyd"
+    _ALG_EXT = "maggianu_algorithm.pyd"
 else:
-    _ALG_EXT = "kohler_algorithm.so"
+    _ALG_EXT = "maggianu_algorithm.so"
 
 _spec_alg = importlib.util.spec_from_file_location(
-    "kohler_algorithm", _MODULE_DIR / "lib" / _ALG_EXT
+    "maggianu_algorithm", _MODULE_DIR / "lib" / _ALG_EXT
 )
 assert _spec_alg is not None and _spec_alg.loader is not None
-_kohler_algorithm = importlib.util.module_from_spec(_spec_alg)
-_spec_alg.loader.exec_module(_kohler_algorithm)
+_maggianu_algorithm = importlib.util.module_from_spec(_spec_alg)
+_spec_alg.loader.exec_module(_maggianu_algorithm)
 
 with open(_MODULE_DIR / "config.toml", "rb") as _f:
     MODULE_INFO = tomllib.load(_f)
 
 
-class KohlerCalc:
+class MaggianuCalc:
     def __init__(self, binary_provider: "BinaryDataProvider | None" = None):
         self._provider = binary_provider
 
@@ -47,7 +47,7 @@ class KohlerCalc:
         Z_BC: float,
         Z_AC: float,
     ) -> dict:
-        value = _kohler_algorithm.calculateSingleProperty(
+        value = _maggianu_algorithm.calculateSingleProperty(
             x_A, x_B, x_C, Z_AB, Z_BC, Z_AC
         )
 
@@ -79,7 +79,7 @@ class KohlerCalc:
             },
             "dims": ["x_A", "x_B", "x_C", output_symbol],
             "main_dim": output_symbol,
-            "method": "Kohler",
+            "method": "Maggianu",
         }
 
     def calculatePropertyList(
@@ -101,7 +101,7 @@ class KohlerCalc:
         Z_BC_arr = np.array(Z_BC_list, dtype=np.float64)
         Z_AC_arr = np.array(Z_AC_list, dtype=np.float64)
 
-        result = _kohler_algorithm.calculatePropertyList(
+        result = _maggianu_algorithm.calculatePropertyList(
             x_A_arr, x_B_arr, x_C_arr, Z_AB_arr, Z_BC_arr, Z_AC_arr
         )
         return result.tolist()
@@ -155,34 +155,25 @@ class KohlerCalc:
                 extra_conditions={"output_symbol": z_symbol} if z_symbol else None,
             )
 
-        w_AB_list = [
-            x_A / (x_A + x_B) if (x_A + x_B) > 0 else 0
-            for x_A, x_B in zip(x_A_list, x_B_list)
-        ]
-        Z_AB_list = self._provider.get_values(elem_A, elem_B, w_AB_list)
-        if len(Z_AB_list) != len(w_AB_list):
+        V_AB_list = [(1.0 + x_A - x_B) / 2.0 for x_A, x_B in zip(x_A_list, x_B_list)]
+        Z_AB_list = self._provider.get_values(elem_A, elem_B, V_AB_list)
+        if len(Z_AB_list) != len(V_AB_list):
             raise ValueError(
-                f"Provider Z_AB returned {len(Z_AB_list)} values, expected {len(w_AB_list)}"
+                f"Provider Z_AB returned {len(Z_AB_list)} values, expected {len(V_AB_list)}"
             )
 
-        w_BC_list = [
-            x_B / (x_B + x_C) if (x_B + x_C) > 0 else 0
-            for x_B, x_C in zip(x_B_list, x_C_list)
-        ]
-        Z_BC_list = self._provider.get_values(elem_B, elem_C, w_BC_list)
-        if len(Z_BC_list) != len(w_BC_list):
+        V_BC_list = [(1.0 + x_B - x_C) / 2.0 for x_B, x_C in zip(x_B_list, x_C_list)]
+        Z_BC_list = self._provider.get_values(elem_B, elem_C, V_BC_list)
+        if len(Z_BC_list) != len(V_BC_list):
             raise ValueError(
-                f"Provider Z_BC returned {len(Z_BC_list)} values, expected {len(w_BC_list)}"
+                f"Provider Z_BC returned {len(Z_BC_list)} values, expected {len(V_BC_list)}"
             )
 
-        w_AC_list = [
-            x_A / (x_A + x_C) if (x_A + x_C) > 0 else 0
-            for x_A, x_C in zip(x_A_list, x_C_list)
-        ]
-        Z_AC_list = self._provider.get_values(elem_A, elem_C, w_AC_list)
-        if len(Z_AC_list) != len(w_AC_list):
+        V_AC_list = [(1.0 + x_A - x_C) / 2.0 for x_A, x_C in zip(x_A_list, x_C_list)]
+        Z_AC_list = self._provider.get_values(elem_A, elem_C, V_AC_list)
+        if len(Z_AC_list) != len(V_AC_list):
             raise ValueError(
-                f"Provider Z_AC returned {len(Z_AC_list)} values, expected {len(w_AC_list)}"
+                f"Provider Z_AC returned {len(Z_AC_list)} values, expected {len(V_AC_list)}"
             )
 
         Z_ABC_list = self.calculatePropertyList(
@@ -224,7 +215,7 @@ class KohlerCalc:
             },
             "dims": ["x_A", "x_B", "x_C", output_symbol],
             "main_dim": output_symbol,
-            "method": "Kohler",
+            "method": "Maggianu",
         }
 
     def calculateContour(
@@ -336,39 +327,39 @@ class KohlerCalc:
             }
 
         with np.errstate(invalid="ignore"):
-            w_AB_flat = np.where(
+            V_AB_flat = np.where(
                 (x_A_flat + x_B_flat) > 0,
-                x_A_flat / (x_A_flat + x_B_flat),
+                (1.0 + x_A_flat - x_B_flat) / 2.0,
                 0.0,
             )
-        Z_AB_list = self._provider.get_values(elem_A, elem_B, w_AB_flat.tolist())
-        if len(Z_AB_list) != len(w_AB_flat):
+        Z_AB_list = self._provider.get_values(elem_A, elem_B, V_AB_flat.tolist())
+        if len(Z_AB_list) != len(V_AB_flat):
             raise ValueError(
-                f"Provider Z_AB returned {len(Z_AB_list)} values, expected {len(w_AB_flat)}"
+                f"Provider Z_AB returned {len(Z_AB_list)} values, expected {len(V_AB_flat)}"
             )
 
         with np.errstate(invalid="ignore"):
-            w_BC_flat = np.where(
+            V_BC_flat = np.where(
                 (x_B_flat + x_C_flat) > 0,
-                x_B_flat / (x_B_flat + x_C_flat),
+                (1.0 + x_B_flat - x_C_flat) / 2.0,
                 0.0,
             )
-        Z_BC_list = self._provider.get_values(elem_B, elem_C, w_BC_flat.tolist())
-        if len(Z_BC_list) != len(w_BC_flat):
+        Z_BC_list = self._provider.get_values(elem_B, elem_C, V_BC_flat.tolist())
+        if len(Z_BC_list) != len(V_BC_flat):
             raise ValueError(
-                f"Provider Z_BC returned {len(Z_BC_list)} values, expected {len(w_BC_flat)}"
+                f"Provider Z_BC returned {len(Z_BC_list)} values, expected {len(V_BC_flat)}"
             )
 
         with np.errstate(invalid="ignore"):
-            w_AC_flat = np.where(
+            V_AC_flat = np.where(
                 (x_A_flat + x_C_flat) > 0,
-                x_A_flat / (x_A_flat + x_C_flat),
+                (1.0 + x_A_flat - x_C_flat) / 2.0,
                 0.0,
             )
-        Z_AC_list = self._provider.get_values(elem_A, elem_C, w_AC_flat.tolist())
-        if len(Z_AC_list) != len(w_AC_flat):
+        Z_AC_list = self._provider.get_values(elem_A, elem_C, V_AC_flat.tolist())
+        if len(Z_AC_list) != len(V_AC_flat):
             raise ValueError(
-                f"Provider Z_AC returned {len(Z_AC_list)} values, expected {len(w_AC_flat)}"
+                f"Provider Z_AC returned {len(Z_AC_list)} values, expected {len(V_AC_flat)}"
             )
 
         Z_ABC_flat = self.calculatePropertyList(
@@ -440,7 +431,7 @@ class KohlerCalc:
             },
             "dims": ["x_A", "x_B", "x_C", output_symbol],
             "main_dim": output_symbol,
-            "method": "Kohler",
+            "method": "Maggianu",
         }
 
     def calculateScatterWithData(
@@ -502,31 +493,22 @@ class KohlerCalc:
                 extra_conditions={"output_symbol": output_symbol},
             )
 
-        w_AB_list = [
-            x_A / (x_A + x_B) if (x_A + x_B) > 0 else 0
-            for x_A, x_B in zip(x_A_list, x_B_list)
-        ]
-        if len(Z_AB_list) != len(w_AB_list):
+        V_AB_list = [(1.0 + x_A - x_B) / 2.0 for x_A, x_B in zip(x_A_list, x_B_list)]
+        if len(Z_AB_list) != len(V_AB_list):
             raise ValueError(
-                f"Z_AB_list has {len(Z_AB_list)} values, expected {len(w_AB_list)}"
+                f"Z_AB_list has {len(Z_AB_list)} values, expected {len(V_AB_list)}"
             )
 
-        w_BC_list = [
-            x_B / (x_B + x_C) if (x_B + x_C) > 0 else 0
-            for x_B, x_C in zip(x_B_list, x_C_list)
-        ]
-        if len(Z_BC_list) != len(w_BC_list):
+        V_BC_list = [(1.0 + x_B - x_C) / 2.0 for x_B, x_C in zip(x_B_list, x_C_list)]
+        if len(Z_BC_list) != len(V_BC_list):
             raise ValueError(
-                f"Z_BC_list has {len(Z_BC_list)} values, expected {len(w_BC_list)}"
+                f"Z_BC_list has {len(Z_BC_list)} values, expected {len(V_BC_list)}"
             )
 
-        w_AC_list = [
-            x_A / (x_A + x_C) if (x_A + x_C) > 0 else 0
-            for x_A, x_C in zip(x_A_list, x_C_list)
-        ]
-        if len(Z_AC_list) != len(w_AC_list):
+        V_AC_list = [(1.0 + x_A - x_C) / 2.0 for x_A, x_C in zip(x_A_list, x_C_list)]
+        if len(Z_AC_list) != len(V_AC_list):
             raise ValueError(
-                f"Z_AC_list has {len(Z_AC_list)} values, expected {len(w_AC_list)}"
+                f"Z_AC_list has {len(Z_AC_list)} values, expected {len(V_AC_list)}"
             )
 
         Z_ABC_list = self.calculatePropertyList(
@@ -542,10 +524,10 @@ class KohlerCalc:
                 extra_conditions={"output_symbol": output_symbol},
             )
 
-        values = [
-            {output_symbol: z, "x_A": a, "x_B": b, "x_C": c}
-            for a, b, c, z in zip(x_A_list, x_B_list, x_C_list, Z_ABC_list)
-        ]
+        values = []
+        for a, b, c, z in zip(x_A_list, x_B_list, x_C_list, Z_ABC_list):
+            if z is not None and z == z:
+                values.append({output_symbol: z, "x_A": a, "x_B": b, "x_C": c})
 
         return {
             "conditions": {
@@ -568,7 +550,7 @@ class KohlerCalc:
             },
             "dims": ["x_A", "x_B", "x_C", output_symbol],
             "main_dim": output_symbol,
-            "method": "Kohler",
+            "method": "Maggianu",
         }
 
     def calculateContourWithData(
@@ -662,31 +644,22 @@ class KohlerCalc:
                 "plane": plane,
             }
 
-        w_AB_list = [
-            x_A / (x_A + x_B) if (x_A + x_B) > 0 else 0
-            for x_A, x_B in zip(x_A_list, x_B_list)
-        ]
-        if len(Z_AB_list) != len(w_AB_list):
+        V_AB_list = [(1.0 + x_A - x_B) / 2.0 for x_A, x_B in zip(x_A_list, x_B_list)]
+        if len(Z_AB_list) != len(V_AB_list):
             raise ValueError(
-                f"Z_AB_list has {len(Z_AB_list)} values, expected {len(w_AB_list)}"
+                f"Z_AB_list has {len(Z_AB_list)} values, expected {len(V_AB_list)}"
             )
 
-        w_BC_list = [
-            x_B / (x_B + x_C) if (x_B + x_C) > 0 else 0
-            for x_B, x_C in zip(x_B_list, x_C_list)
-        ]
-        if len(Z_BC_list) != len(w_BC_list):
+        V_BC_list = [(1.0 + x_B - x_C) / 2.0 for x_B, x_C in zip(x_B_list, x_C_list)]
+        if len(Z_BC_list) != len(V_BC_list):
             raise ValueError(
-                f"Z_BC_list has {len(Z_BC_list)} values, expected {len(w_BC_list)}"
+                f"Z_BC_list has {len(Z_BC_list)} values, expected {len(V_BC_list)}"
             )
 
-        w_AC_list = [
-            x_A / (x_A + x_C) if (x_A + x_C) > 0 else 0
-            for x_A, x_C in zip(x_A_list, x_C_list)
-        ]
-        if len(Z_AC_list) != len(w_AC_list):
+        V_AC_list = [(1.0 + x_A - x_C) / 2.0 for x_A, x_C in zip(x_A_list, x_C_list)]
+        if len(Z_AC_list) != len(V_AC_list):
             raise ValueError(
-                f"Z_AC_list has {len(Z_AC_list)} values, expected {len(w_AC_list)}"
+                f"Z_AC_list has {len(Z_AC_list)} values, expected {len(V_AC_list)}"
             )
 
         Z_ABC_list = self.calculatePropertyList(
@@ -714,10 +687,10 @@ class KohlerCalc:
                 "plane": plane,
             }
 
-        values = [
-            {output_symbol: z, "x_A": a, "x_B": b, "x_C": c}
-            for a, b, c, z in zip(x_A_list, x_B_list, x_C_list, Z_ABC_list)
-        ]
+        values = []
+        for a, b, c, z in zip(x_A_list, x_B_list, x_C_list, Z_ABC_list):
+            if z is not None and z == z:
+                values.append({output_symbol: z, "x_A": a, "x_B": b, "x_C": c})
 
         return {
             "conditions": {

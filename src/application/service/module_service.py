@@ -205,13 +205,8 @@ class ModuleService:
 
         return results
 
-    _INTERPOLATION_MODULES = ("toop_module",)
-
     def registerModuleProperties(self, package_name: str) -> None:
         """Register module output properties in the database, creating symbols and units as needed."""
-        if package_name in self._INTERPOLATION_MODULES:
-            return
-
         if not all([self._symbols_repo, self._units_repo, self._properties_repo]):
             self._logger.debug(
                 "Property registration skipped: repos not fully initialized"
@@ -226,6 +221,10 @@ class ModuleService:
         for method_name in module_cfg.get("all_methods", []):
             method_config = config.get(method_name, {})
             outputs = method_config.get("outputs", {})
+
+            if outputs.get("is_virtual"):
+                continue
+
             output_symbols = outputs.get("symbol", [])
             output_units = outputs.get("unit", {})
             for symbol in output_symbols:
