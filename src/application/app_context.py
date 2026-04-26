@@ -21,10 +21,20 @@ class AppContext:
         unified_data: UnifiedDataQueryService | None = None,
     ):
         self.log = log
-        self.settings = settings
+        self._settings = settings
         self.i18n = i18n
         self.theme = theme
         self.core_db = core_db
         self.user_db = user_db
         self.modules = modules
         self.unified_data = unified_data
+
+    @property
+    def settings(self) -> Settings | None:
+        if self.core_db is not None:
+            return self.core_db.settings
+        return self._settings
+
+    @settings.setter
+    def settings(self, value: Settings | None) -> None:
+        self._settings = value

@@ -69,13 +69,13 @@ def _getDefaultSettings() -> dict:
         return {}
 
 
-def _parseAlgorithm(algo_str: str | None) -> ColorAlgorithm:
+def _parseAlgorithm(algo_str: str | None) -> ColorAlgorithm | None:
     if not algo_str:
-        return DEFAULT_ALGORITHM
+        return None
     for algo in ColorAlgorithm:
         if algo.value == algo_str:
             return algo
-    return DEFAULT_ALGORITHM
+    return None
 
 
 def _parseThemeColors(
