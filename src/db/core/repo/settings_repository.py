@@ -36,11 +36,14 @@ class SettingsRepository(BaseRepository[SettingsSnapshot]):
             columns=["section", "key", "value"],
         )
 
-        for snap in snapshots:
-            record = snap.toRecord()
-            self.connection.execute(sql, list(record.values()))
-
-        self.connection.commit()
+        try:
+            for snap in snapshots:
+                record = snap.toRecord()
+                self.connection.execute(sql, list(record.values()))
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
 
     def findBySectionAndKey(self, section: str, key: str) -> SettingsSnapshot | None:
         placeholder = self.dialect.getPlaceholder()

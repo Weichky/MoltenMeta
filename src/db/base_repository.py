@@ -27,7 +27,13 @@ class BaseRepository(ABC, Generic[T]):
 
     @property
     def connection(self) -> DatabaseConnection:
-        return self._db_manager.connection
+        conn = self._db_manager.connection
+        if conn is None:
+            raise RuntimeError(
+                f"Database connection not established for {self.__class__.__name__}. "
+                "Ensure applyConnection() was called on the DatabaseManager."
+            )
+        return conn
 
     @property
     def dialect(self):

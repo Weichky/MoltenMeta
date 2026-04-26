@@ -115,11 +115,14 @@ class SystemCompositionsRepository(BaseRepository[SystemCompositionSnapshot]):
         )
         sql = f"INSERT OR IGNORE INTO {table} ({', '.join(items[0].toRecord().keys())}) VALUES ({placeholders})"
 
-        for item in items:
-            record = item.toRecord()
-            self.connection.execute(sql, list(record.values()))
-
-        self.connection.commit()
+        try:
+            for item in items:
+                record = item.toRecord()
+                self.connection.execute(sql, list(record.values()))
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
         return len(items)
 
 
@@ -390,11 +393,14 @@ class SymbolsRepository(BaseRepository[SymbolSnapshot]):
             columns=["symbol", "name", "category"],
         )
 
-        for snap in snapshots:
-            record = snap.toRecord()
-            self.connection.execute(sql, list(record.values()))
-
-        self.connection.commit()
+        try:
+            for snap in snapshots:
+                record = snap.toRecord()
+                self.connection.execute(sql, list(record.values()))
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
 
 
 class UnitsRepository(BaseRepository[UnitSnapshot]):
@@ -571,10 +577,14 @@ class ComputationCacheRepository(BaseRepository[ComputationCacheSnapshot]):
         columns = list(record.keys())
         placeholders = ", ".join([dialect.getPlaceholder() for _ in columns])
         sql = f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({placeholders})"
-        for entry in entries:
-            record = entry.toRecord()
-            self.connection.execute(sql, list(record.values()))
-        self.connection.commit()
+        try:
+            for entry in entries:
+                record = entry.toRecord()
+                self.connection.execute(sql, list(record.values()))
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
         return len(entries)
 
     def countActive(self) -> int:

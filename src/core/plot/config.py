@@ -1,4 +1,5 @@
 from __future__ import annotations
+import logging
 from dataclasses import dataclass, field
 from importlib.resources import files
 from typing import TYPE_CHECKING
@@ -8,7 +9,6 @@ import tomllib
 from catalog import (
     DEFAULT_PLOT_TYPE,
     DEFAULT_THEME_PRESET,
-    DEFAULT_ALGORITHM,
     ColorAlgorithm,
     DEFAULT_SCATTER_3D_DEFAULT_COORD_INDEX,
     DEFAULT_CONTOUR_TRIANGULAR_HEIGHT_FACTOR,
@@ -26,6 +26,8 @@ from core.plot.style import PlotStyle, getDefaultPlotStyle
 
 if TYPE_CHECKING:
     from domain.settings import Settings
+
+_logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -65,8 +67,9 @@ def _getDefaultSettings() -> dict:
         default_path = files("resources.default").joinpath("default_settings.toml")
         with open(str(default_path), "rb") as f:
             return tomllib.load(f)
-    except Exception:
-        return {}
+    except Exception as e:
+        _logger.error(f"Failed to load default_settings.toml: {e}")
+        raise
 
 
 def _parseAlgorithm(algo_str: str | None) -> ColorAlgorithm | None:

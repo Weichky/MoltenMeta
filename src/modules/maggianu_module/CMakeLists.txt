@@ -63,7 +63,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 # 6. BUILD MODULES
 # -----------------------------------------------------------------------------
 pybind11_add_module(maggianu_algorithm maggianu_algorithm.cpp)
-pybind11_add_module(maggianu_grid maggianu_grid.cpp)
 
 # -----------------------------------------------------------------------------
 # 7. CONFIGURE LIBRARY PROPERTIES
@@ -74,7 +73,7 @@ else()
     set(PLATFORM_SUFFIX ".so")
 endif()
 
-foreach(_MODULE maggianu_algorithm maggianu_grid)
+foreach(_MODULE maggianu_algorithm)
     set_target_properties(${_MODULE} PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib
         PREFIX ""
@@ -87,5 +86,5 @@ endforeach()
 # =============================================================================
 # After running cmake .. && make, you should find:
 #   lib/maggianu_algorithm.so
-#   lib/maggianu_grid.so
+# Note: triangular_grid is shared in grid_module/
 # =============================================================================

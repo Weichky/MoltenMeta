@@ -32,4 +32,9 @@ def getArgs() -> argparse.Namespace:
 
 
 def getRuntimePath() -> Path:
-    return Path(getArgs().runtime_path).resolve() if getArgs().runtime_path else None
+    runtime_path = getArgs().runtime_path
+    if not runtime_path:
+        raise RuntimeError(
+            "Runtime path not configured. Use --runtime-path to set the runtime directory."
+        )
+    return Path(runtime_path).resolve()

@@ -88,7 +88,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 # 6. BUILD MODULES
 # -----------------------------------------------------------------------------
 pybind11_add_module(kohler_algorithm kohler_algorithm.cpp)
-pybind11_add_module(kohler_grid kohler_grid.cpp)
 
 # -----------------------------------------------------------------------------
 # 7. CONFIGURE LIBRARY PROPERTIES
@@ -99,7 +98,7 @@ else()
     set(PLATFORM_SUFFIX ".so")
 endif()
 
-foreach(_MODULE kohler_algorithm kohler_grid)
+foreach(_MODULE kohler_algorithm)
     set_target_properties(${_MODULE} PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib
         PREFIX ""
@@ -112,5 +111,5 @@ endforeach()
 # =============================================================================
 # After running cmake .. && make, you should find:
 #   lib/kohler_algorithm.so
-#   lib/kohler_grid.so
+# Note: triangular_grid is now in grid_module/
 # =============================================================================

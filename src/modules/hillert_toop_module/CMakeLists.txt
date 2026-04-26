@@ -19,16 +19,16 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 pybind11_add_module(hillert_toop_algorithm hillert_toop_algorithm.cpp)
-pybind11_add_module(hillert_toop_grid hillert_toop_grid.cpp)
 if(WIN32)
     set(PLATFORM_SUFFIX ".pyd")
 else()
     set(PLATFORM_SUFFIX ".so")
 endif()
-foreach(_MODULE hillert_toop_algorithm hillert_toop_grid)
+foreach(_MODULE hillert_toop_algorithm)
     set_target_properties(${_MODULE} PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib
         PREFIX ""
         SUFFIX "${PLATFORM_SUFFIX}"
     )
 endforeach()
+# Note: triangular_grid is shared in grid_module/

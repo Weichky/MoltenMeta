@@ -41,7 +41,11 @@ class DatabaseManager:
 
     @property
     def dialect(self) -> DatabaseDialect:
-        return self.connection.getDialect()
+        if self._active_conn is None:
+            raise RuntimeError(
+                "Database connection not established. Call applyConnection() first."
+            )
+        return self._active_conn.getDialect()
 
     def closeConnection(self) -> None:
         if self._active_conn:
