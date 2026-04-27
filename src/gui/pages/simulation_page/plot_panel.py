@@ -556,13 +556,19 @@ class PlotPanel(QtWidgets.QWidget):
         )
         cbar.ax.tick_params(labelsize=style.tickFontSize)
 
-        if style.grid:
-            n_ticks = max(5, int(style.gridDensity) * 2)
+        if style.gridMode == "auto":
+            cbar_ticks = 9
+        elif style.gridMode == "absolute":
+            cbar_ticks = max(1, round(style.gridDensity))
         else:
-            n_ticks = 5
-        cbar.set_ticks(np.linspace(0, 1, n_ticks))
-        tick_vals = np.linspace(z_min, z_max, n_ticks)
-        cbar.set_ticklabels([f"{v:.4g}" for v in tick_vals])
+            cbar_ticks = max(1, round(style.gridDensity * 10))
+
+        label_every = max(1, round(style.gridLabelDensity))
+        tick_positions = np.linspace(0, 1, cbar_ticks)
+        tick_vals = np.linspace(z_min, z_max, cbar_ticks)
+        labels = [f"{v:.4g}" if i % label_every == 0 else "" for i, v in enumerate(tick_vals)]
+        cbar.set_ticks(tick_positions)
+        cbar.set_ticklabels(labels)
 
         if style.grid:
             if style.gridMode == "auto":
@@ -606,6 +612,7 @@ class PlotPanel(QtWidgets.QWidget):
             tick_length,
             elem_labels,
             plane,
+            style.gridLabelDensity,
         )
 
         final_title = title if title else config.title
@@ -626,6 +633,7 @@ class PlotPanel(QtWidgets.QWidget):
         tick_length: float,
         elem_labels: list[str],
         plane: str = "x_A-x_B",
+        gridLabelDensity: float = 1.0,
     ) -> None:
         """Draw triangular coordinate axes with ticks and labels on all three sides."""
         self._ax.set_xlim(xlim[0], xlim[1])
@@ -655,32 +663,36 @@ class PlotPanel(QtWidgets.QWidget):
             label_c = elem_labels[2] if len(elem_labels) > 2 else "C"
 
         if style.gridMode == "auto":
-            tick_interval = 0.2
+            n_ticks = 9
         elif style.gridMode == "absolute":
-            tick_interval = 1.0 / style.gridDensity
+            n_ticks = max(1, round(style.gridDensity))
         else:
-            tick_interval = 1.0 / (style.gridDensity * 10)
+            n_ticks = max(1, round(style.gridDensity * 10))
 
+        tick_interval = 1.0 / n_ticks
+
+        label_every = max(1, round(gridLabelDensity))
         display_ticks = []
-        for i in range(1, int(round(1.0 / tick_interval))):
-            display_ticks.append(round(i * tick_interval, 1))
+        for i in range(1, n_ticks):
+            display_ticks.append((round(i * tick_interval, 2), i % label_every == 0))
 
-        for t in display_ticks:
+        for t, show_label in display_ticks:
             self._ax.plot([t, t], [-tick_length * 0.5, tick_length * 0.5], "k-", linewidth=0.8)
-            self._ax.text(
-                t,
-                -0.015,
-                f"{t:.2f}",
-                ha="center",
-                va="top",
-                fontsize=style.tickFontSize,
-            )
+            if show_label:
+                self._ax.text(
+                    t,
+                    -0.015,
+                    f"{t:.2f}",
+                    ha="center",
+                    va="top",
+                    fontsize=style.tickFontSize,
+                )
 
         left_nx, left_ny = -h, 0.5
         left_len = (left_nx * left_nx + left_ny * left_ny) ** 0.5
         left_nx, left_ny = left_nx / left_len, left_ny / left_len
 
-        for t in display_ticks:
+        for t, show_label in display_ticks:
             x_on_left = t * 0.5
             y_on_left = t * h
             self._ax.plot(
@@ -689,22 +701,23 @@ class PlotPanel(QtWidgets.QWidget):
                 "k-",
                 linewidth=0.8,
             )
-            label_x = x_on_left + left_nx * 0.02
-            label_y = y_on_left + left_ny * 0.02
-            self._ax.text(
-                label_x,
-                label_y,
-                f"{1 - t:.2f}",
-                ha="right",
-                va="center",
-                fontsize=style.tickFontSize,
-            )
+            if show_label:
+                label_x = x_on_left + left_nx * 0.02
+                label_y = y_on_left + left_ny * 0.02
+                self._ax.text(
+                    label_x,
+                    label_y,
+                    f"{1 - t:.2f}",
+                    ha="right",
+                    va="center",
+                    fontsize=style.tickFontSize,
+                )
 
         right_nx, right_ny = h, 0.5
         right_len = (right_nx * right_nx + right_ny * right_ny) ** 0.5
         right_nx, right_ny = right_nx / right_len, right_ny / right_len
 
-        for t in display_ticks:
+        for t, show_label in display_ticks:
             x_on_right = 1 - t * 0.5
             y_on_right = t * h
             self._ax.plot(
@@ -713,16 +726,17 @@ class PlotPanel(QtWidgets.QWidget):
                 "k-",
                 linewidth=0.8,
             )
-            label_x = x_on_right + right_nx * 0.02
-            label_y = y_on_right + right_ny * 0.02
-            self._ax.text(
-                label_x,
-                label_y,
-                f"{t:.2f}",
-                ha="left",
-                va="center",
-                fontsize=style.tickFontSize,
-            )
+            if show_label:
+                label_x = x_on_right + right_nx * 0.02
+                label_y = y_on_right + right_ny * 0.02
+                self._ax.text(
+                    label_x,
+                    label_y,
+                    f"{t:.2f}",
+                    ha="left",
+                    va="center",
+                    fontsize=style.tickFontSize,
+                )
 
         self._ax.text(
             0.5,
