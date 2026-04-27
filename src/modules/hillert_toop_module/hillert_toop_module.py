@@ -351,6 +351,91 @@ class HillertToopCalc:
             "method": "HillertToop",
         }
 
+    def calculateScatterWithData(
+        self,
+        elem_A: int,
+        elem_B: int,
+        elem_C: int,
+        n_points: int,
+        Z_AB_list: list[float],
+        Z_AC_list: list[float],
+        Z_BC_list: list[float],
+        z_latex: str,
+        z_unit: str,
+        z_symbol: str | None = None,
+    ) -> dict:
+        if n_points < 0:
+            raise ValueError(f"n_points must be non-negative, got {n_points}")
+
+        cfg = MODULE_INFO["calculateScatter"]
+        output_symbol = z_symbol or cfg["outputs"]["symbol"][0]
+        final_latex = z_latex
+        final_unit = z_unit
+
+        if n_points == 0:
+            return self._emptyResult(
+                elem_A,
+                elem_B,
+                elem_C,
+                MODULE_INFO["calculateScatter"],
+                extra_conditions={"output_symbol": output_symbol},
+            )
+
+        x_A_list, x_B_list, x_C_list = self._generateGrid(n_points)
+
+        if not x_A_list or len(x_A_list) < 3:
+            return self._emptyResult(
+                elem_A,
+                elem_B,
+                elem_C,
+                MODULE_INFO["calculateScatter"],
+                extra_conditions={"output_symbol": output_symbol},
+            )
+
+        V_BC_list = [(1.0 + x_B - x_C) / 2.0 for x_B, x_C in zip(x_B_list, x_C_list)]
+
+        Z_ABC_list = self.calculatePropertyList(
+            x_A_list, x_B_list, x_C_list, Z_AB_list, Z_AC_list, Z_BC_list
+        )
+
+        if not Z_ABC_list or len(Z_ABC_list) != len(x_A_list):
+            return self._emptyResult(
+                elem_A,
+                elem_B,
+                elem_C,
+                MODULE_INFO["calculateScatter"],
+                extra_conditions={"output_symbol": output_symbol},
+            )
+
+        values = [
+            {output_symbol: z, "x_A": a, "x_B": b, "x_C": c}
+            for a, b, c, z in zip(x_A_list, x_B_list, x_C_list, Z_ABC_list)
+        ]
+
+        return {
+            "conditions": {
+                "elem_A": elemIdToSymbol(elem_A),
+                "elem_B": elemIdToSymbol(elem_B),
+                "elem_C": elemIdToSymbol(elem_C),
+            },
+            "values": values,
+            "units": {
+                "x_A": "",
+                "x_B": "",
+                "x_C": "",
+                output_symbol: final_unit,
+            },
+            "latex": {
+                "x_A": "x_A",
+                "x_B": "x_B",
+                "x_C": "x_C",
+                output_symbol: final_latex,
+            },
+            "dims": ["x_A", "x_B", "x_C", output_symbol],
+            "main_dim": output_symbol,
+            "method": "HillertToop",
+        }
+
 
 def _linspace(start: float, end: float, num: int) -> list[float]:
     """Generate evenly spaced points."""

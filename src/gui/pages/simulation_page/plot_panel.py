@@ -431,6 +431,7 @@ class PlotPanel(QtWidgets.QWidget):
         title: str | None = None,
         z_label: str | None = None,
         levels: int | None = None,
+        plane: str = "x_A-x_B",
     ) -> None:
         """
         Draw contour plot in triangular coordinate system.
@@ -442,6 +443,7 @@ class PlotPanel(QtWidgets.QWidget):
             title: Plot title (overrides config.title if provided)
             z_label: Z-axis label (overrides config if provided)
             levels: Number of contour levels (overrides config if provided)
+            plane: Projection plane - "x_A-x_B", "x_A-x_C", or "x_B-x_C"
         """
         import numpy as np
 
@@ -464,6 +466,7 @@ class PlotPanel(QtWidgets.QWidget):
                 conditions.get("elem_B", "B"),
                 conditions.get("elem_C", "C"),
             ]
+            plane = conditions.get("plane", plane)
         else:
             elem_labels = config.triangular_elem_labels
 
@@ -494,11 +497,22 @@ class PlotPanel(QtWidgets.QWidget):
             return
 
         x_A_valid = x_A_arr[valid_mask]
+        x_B_valid = x_B_arr[valid_mask]
         x_C_valid = x_C_arr[valid_mask]
         z_valid = z_arr[valid_mask]
 
-        x_cart = x_C_valid + 0.5 * x_A_valid
-        y_cart = h * x_A_valid
+        if plane == "x_A-x_B":
+            x_cart = x_C_valid + 0.5 * x_A_valid
+            y_cart = h * x_A_valid
+        elif plane == "x_A-x_C":
+            x_cart = x_B_valid + 0.5 * x_A_valid
+            y_cart = h * x_A_valid
+        elif plane == "x_B-x_C":
+            x_cart = x_A_valid + 0.5 * x_B_valid
+            y_cart = h * x_B_valid
+        else:
+            x_cart = x_C_valid + 0.5 * x_A_valid
+            y_cart = h * x_A_valid
 
         triang = Triangulation(x_cart, y_cart)
 
@@ -542,6 +556,47 @@ class PlotPanel(QtWidgets.QWidget):
         )
         cbar.ax.tick_params(labelsize=style.tickFontSize)
 
+        if style.grid:
+            n_ticks = max(5, int(style.gridDensity) * 2)
+        else:
+            n_ticks = 5
+        cbar.set_ticks(np.linspace(0, 1, n_ticks))
+        tick_vals = np.linspace(z_min, z_max, n_ticks)
+        cbar.set_ticklabels([f"{v:.4g}" for v in tick_vals])
+
+        if style.grid:
+            if style.gridMode == "auto":
+                grid_n = 9
+            elif style.gridMode == "absolute":
+                grid_n = int(round(style.gridDensity))
+            else:
+                grid_n = int(round(style.gridDensity * 10))
+
+            grid_alpha = 0.3
+
+            for k in range(1, grid_n):
+                t = k / grid_n
+
+                # Grid lines parallel to BC (constant x_A = t) - horizontal lines
+                y_grid = t * h
+                x_left = t / 2
+                x_right = 1 - t / 2
+                self._ax.plot([x_left, x_right], [y_grid, y_grid], "k-", alpha=grid_alpha, linewidth=0.1)
+
+                # Grid lines parallel to AC (constant x_B = t)
+                x_start_ab = (1 - t) / 2
+                y_start_ab = h * (1 - t)
+                x_end_bc = 1 - t
+                y_end_bc = 0
+                self._ax.plot([x_start_ab, x_end_bc], [y_start_ab, y_end_bc], "k-", alpha=grid_alpha, linewidth=0.1)
+
+                # Grid lines parallel to AB (constant x_C = t)
+                x_start_ac = t + 0.5 * (1 - t)
+                y_start_ac = h * (1 - t)
+                x_end_bc = t
+                y_end_bc = 0
+                self._ax.plot([x_start_ac, x_end_bc], [y_start_ac, y_end_bc], "k-", alpha=grid_alpha, linewidth=0.1)
+
         self._draw_triangular_axes(
             style,
             h,
@@ -550,6 +605,7 @@ class PlotPanel(QtWidgets.QWidget):
             tick_positions,
             tick_length,
             elem_labels,
+            plane,
         )
 
         final_title = title if title else config.title
@@ -569,6 +625,7 @@ class PlotPanel(QtWidgets.QWidget):
         tick_positions: list[float],
         tick_length: float,
         elem_labels: list[str],
+        plane: str = "x_A-x_B",
     ) -> None:
         """Draw triangular coordinate axes with ticks and labels on all three sides."""
         self._ax.set_xlim(xlim[0], xlim[1])
@@ -580,87 +637,112 @@ class PlotPanel(QtWidgets.QWidget):
         triangle_y = [0, 0, h, 0]
         self._ax.plot(triangle_x, triangle_y, "k-", linewidth=1.0)
 
-        for t in tick_positions:
-            if t <= 1.0:
-                self._ax.plot([t, t], [-tick_length, tick_length], "k-", linewidth=0.8)
-                self._ax.text(
-                    t,
-                    -0.05,
-                    f"{t:.1f}",
-                    ha="center",
-                    va="top",
-                    fontsize=style.tickFontSize,
-                )
+        if plane == "x_A-x_B":
+            label_a = elem_labels[0] if len(elem_labels) > 0 else "A"
+            label_b = elem_labels[1] if len(elem_labels) > 1 else "B"
+            label_c = elem_labels[2] if len(elem_labels) > 2 else "C"
+        elif plane == "x_A-x_C":
+            label_a = elem_labels[0] if len(elem_labels) > 0 else "A"
+            label_b = elem_labels[2] if len(elem_labels) > 2 else "C"
+            label_c = elem_labels[1] if len(elem_labels) > 1 else "B"
+        elif plane == "x_B-x_C":
+            label_a = elem_labels[1] if len(elem_labels) > 1 else "B"
+            label_b = elem_labels[2] if len(elem_labels) > 2 else "C"
+            label_c = elem_labels[0] if len(elem_labels) > 0 else "A"
+        else:
+            label_a = elem_labels[0] if len(elem_labels) > 0 else "A"
+            label_b = elem_labels[1] if len(elem_labels) > 1 else "B"
+            label_c = elem_labels[2] if len(elem_labels) > 2 else "C"
 
-        for i, t in enumerate(tick_positions):
-            if t <= 0.5:
-                x_on_left = t * 0.5
-                y_on_left = t * h
-                dx = -0.02
-                dy = 0
-                self._ax.plot(
-                    [x_on_left - dx, x_on_left + dx],
-                    [y_on_left - dy, y_on_left + dy],
-                    "k-",
-                    linewidth=0.8,
-                )
-                label_x = x_on_left - 0.06
-                label_y = y_on_left
-                self._ax.text(
-                    label_x,
-                    label_y,
-                    f"{1 - t:.1f}",
-                    ha="right",
-                    va="center",
-                    fontsize=style.tickFontSize,
-                )
+        if style.gridMode == "auto":
+            tick_interval = 0.2
+        elif style.gridMode == "absolute":
+            tick_interval = 1.0 / style.gridDensity
+        else:
+            tick_interval = 1.0 / (style.gridDensity * 10)
 
-        for i, t in enumerate(tick_positions):
-            if t <= 0.5:
-                x_on_right = 1 - t * 0.5
-                y_on_right = t * h
-                dx = 0.02
-                dy = 0
-                self._ax.plot(
-                    [x_on_right - dx, x_on_right + dx],
-                    [y_on_right - dy, y_on_right + dy],
-                    "k-",
-                    linewidth=0.8,
-                )
-                label_x = x_on_right + 0.06
-                label_y = y_on_right
-                self._ax.text(
-                    label_x,
-                    label_y,
-                    f"{1 - t:.1f}",
-                    ha="left",
-                    va="center",
-                    fontsize=style.tickFontSize,
-                )
+        display_ticks = []
+        for i in range(1, int(round(1.0 / tick_interval))):
+            display_ticks.append(round(i * tick_interval, 1))
 
-        label_a = elem_labels[0] if len(elem_labels) > 0 else "A"
-        label_b = elem_labels[1] if len(elem_labels) > 1 else "B"
-        label_c = elem_labels[2] if len(elem_labels) > 2 else "C"
+        for t in display_ticks:
+            self._ax.plot([t, t], [-tick_length * 0.5, tick_length * 0.5], "k-", linewidth=0.8)
+            self._ax.text(
+                t,
+                -0.015,
+                f"{t:.2f}",
+                ha="center",
+                va="top",
+                fontsize=style.tickFontSize,
+            )
+
+        left_nx, left_ny = -h, 0.5
+        left_len = (left_nx * left_nx + left_ny * left_ny) ** 0.5
+        left_nx, left_ny = left_nx / left_len, left_ny / left_len
+
+        for t in display_ticks:
+            x_on_left = t * 0.5
+            y_on_left = t * h
+            self._ax.plot(
+                [x_on_left - left_nx * tick_length * 0.5, x_on_left + left_nx * tick_length * 0.5],
+                [y_on_left - left_ny * tick_length * 0.5, y_on_left + left_ny * tick_length * 0.5],
+                "k-",
+                linewidth=0.8,
+            )
+            label_x = x_on_left + left_nx * 0.02
+            label_y = y_on_left + left_ny * 0.02
+            self._ax.text(
+                label_x,
+                label_y,
+                f"{1 - t:.2f}",
+                ha="right",
+                va="center",
+                fontsize=style.tickFontSize,
+            )
+
+        right_nx, right_ny = h, 0.5
+        right_len = (right_nx * right_nx + right_ny * right_ny) ** 0.5
+        right_nx, right_ny = right_nx / right_len, right_ny / right_len
+
+        for t in display_ticks:
+            x_on_right = 1 - t * 0.5
+            y_on_right = t * h
+            self._ax.plot(
+                [x_on_right - right_nx * tick_length * 0.5, x_on_right + right_nx * tick_length * 0.5],
+                [y_on_right - right_ny * tick_length * 0.5, y_on_right + right_ny * tick_length * 0.5],
+                "k-",
+                linewidth=0.8,
+            )
+            label_x = x_on_right + right_nx * 0.02
+            label_y = y_on_right + right_ny * 0.02
+            self._ax.text(
+                label_x,
+                label_y,
+                f"{t:.2f}",
+                ha="left",
+                va="center",
+                fontsize=style.tickFontSize,
+            )
 
         self._ax.text(
             0.5,
-            h + 0.1,
+            h + 0.03,
             label_a,
             ha="center",
             va="bottom",
             fontsize=style.labelFontSize,
         )
         self._ax.text(
-            xlim[0] - 0.05,
-            -0.05,
+            -0.015,
+            -0.026,
             label_b,
             ha="right",
             va="top",
             fontsize=style.labelFontSize,
         )
         self._ax.text(
-            xlim[1] + 0.05,
-            -0.05,
+            1.015,
+            -0.026,
             label_c,
             ha="left",
             va="top",
