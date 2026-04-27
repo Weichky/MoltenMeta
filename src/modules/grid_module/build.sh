@@ -12,12 +12,9 @@ mkdir -p "$LIB_DIR"
 
 CACHE_FILE="$BUILD_DIR/CMakeCache.txt"
 if [[ -f "$CACHE_FILE" ]]; then
-    cached_source=$(grep "^CMAKE_HOME_DIRECTORY:" "$CACHE_FILE" | cut -d= -f2)
-    if [[ "$cached_source" != "$MODULE_DIR" ]]; then
-        echo "Stale CMake cache detected, cleaning build directory..."
+        echo "Cleaning stale build directory..."
         rm -rf "$BUILD_DIR"/*
     fi
-fi
 
 cd "$BUILD_DIR"
 
