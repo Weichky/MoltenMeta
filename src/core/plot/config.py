@@ -391,32 +391,44 @@ class PlotStyleService:
         triangular_levels = (
             plot_config.get("levels")
             or module_plot_config.get("levels")
-            or triangular_global.get("levels")
-            or (str(settings.plot_triangular_levels) if settings and settings.plot_triangular_levels else None)
+            or (
+                str(settings.plot_triangular_levels)
+                if settings and settings.plot_triangular_levels is not None
+                else None
+            )
             or DEFAULT_CONTOUR_TRIANGULAR_LEVELS
         )
 
         triangular_alpha = (
             plot_config.get("alpha")
             or module_plot_config.get("alpha")
-            or triangular_global.get("alpha")
-            or (str(settings.plot_triangular_alpha) if settings and settings.plot_triangular_alpha else None)
+            or (
+                str(settings.plot_triangular_alpha)
+                if settings and settings.plot_triangular_alpha is not None
+                else None
+            )
             or DEFAULT_CONTOUR_TRIANGULAR_ALPHA
         )
 
         triangular_grid_alpha = (
             plot_config.get("grid_alpha")
             or module_plot_config.get("grid_alpha")
-            or triangular_global.get("grid_alpha")
-            or (str(settings.plot_triangular_grid_alpha) if settings and settings.plot_triangular_grid_alpha else None)
+            or (
+                str(settings.plot_triangular_grid_alpha)
+                if settings and settings.plot_triangular_grid_alpha is not None
+                else None
+            )
             or DEFAULT_TRIANGULAR_GRID_ALPHA
         )
 
         triangular_grid_line_width = (
             plot_config.get("grid_line_width")
             or module_plot_config.get("grid_line_width")
-            or triangular_global.get("grid_line_width")
-            or (str(settings.plot_triangular_grid_line_width) if settings and settings.plot_triangular_grid_line_width else None)
+            or (
+                str(settings.plot_triangular_grid_line_width)
+                if settings and settings.plot_triangular_grid_line_width is not None
+                else None
+            )
             or DEFAULT_TRIANGULAR_GRID_LINE_WIDTH
         )
 
@@ -455,7 +467,7 @@ class PlotStyleService:
             triangular_tick_length=triangular_tick_length,
             triangular_elem_labels=triangular_elem_labels,
             triangular_colorbar_label=triangular_colorbar_label,
-            triangular_levels=triangular_levels,
+            triangular_levels=int(triangular_levels),
             triangular_alpha=float(triangular_alpha),
             triangular_grid_alpha=float(triangular_grid_alpha),
             triangular_grid_line_width=float(triangular_grid_line_width),

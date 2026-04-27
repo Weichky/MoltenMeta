@@ -84,10 +84,20 @@ def drawTriangularAxes(
     label_every = max(1, round(gridLabelDensity))
     display_ticks = []
     for i in range(1, n_ticks):
-        display_ticks.append((round(i * tick_interval, 2), i % label_every == 0))
+        display_ticks.append((round(i * tick_interval, 2), (i - 1) % label_every == 0))
+        # (i-1) offsets to 0-based index so first tick (i=1) shows label when label_every=2
+        # e.g. i=1: (1-1)%2=0 shows label; i=2: (2-1)%2=1 hides label
 
     for t, show_label in display_ticks:
-        ax.plot([t, t], [-tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO, tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO], "k-", linewidth=DEFAULT_TICK_LINE_WIDTH)
+        ax.plot(
+            [t, t],
+            [
+                -tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO,
+                tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO,
+            ],
+            "k-",
+            linewidth=DEFAULT_TICK_LINE_WIDTH,
+        )
         if show_label:
             ax.text(
                 t,
@@ -106,8 +116,14 @@ def drawTriangularAxes(
         x_on_left = t * DEFAULT_TRIANGULAR_COORD_FACTOR
         y_on_left = t * h
         ax.plot(
-            [x_on_left - left_nx * tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO, x_on_left + left_nx * tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO],
-            [y_on_left - left_ny * tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO, y_on_left + left_ny * tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO],
+            [
+                x_on_left - left_nx * tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO,
+                x_on_left + left_nx * tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO,
+            ],
+            [
+                y_on_left - left_ny * tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO,
+                y_on_left + left_ny * tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO,
+            ],
             "k-",
             linewidth=DEFAULT_TICK_LINE_WIDTH,
         )
@@ -131,8 +147,14 @@ def drawTriangularAxes(
         x_on_right = 1 - t * DEFAULT_TRIANGULAR_COORD_FACTOR
         y_on_right = t * h
         ax.plot(
-            [x_on_right - right_nx * tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO, x_on_right + right_nx * tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO],
-            [y_on_right - right_ny * tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO, y_on_right + right_ny * tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO],
+            [
+                x_on_right - right_nx * tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO,
+                x_on_right + right_nx * tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO,
+            ],
+            [
+                y_on_right - right_ny * tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO,
+                y_on_right + right_ny * tick_length * DEFAULT_TICK_HALF_LENGTH_RATIO,
+            ],
             "k-",
             linewidth=DEFAULT_TICK_LINE_WIDTH,
         )
@@ -293,7 +315,11 @@ def renderTriangularContour(
             extend="neither",
         )
         ax.tricontour(
-            triang, z_valid, levels=contour_levels, colors="white", linewidths=DEFAULT_CONTOUR_TRIANGULAR_LINE_WIDTH
+            triang,
+            z_valid,
+            levels=contour_levels,
+            colors="white",
+            linewidths=DEFAULT_CONTOUR_TRIANGULAR_LINE_WIDTH,
         )
     else:
         cf = ax.tricontourf(
@@ -305,9 +331,7 @@ def renderTriangularContour(
         )
 
     cbar = figure.colorbar(cf, ax=ax)
-    cbar.set_label(
-        wrap_latex(final_colorbar_label), fontsize=style.labelFontSize
-    )
+    cbar.set_label(wrap_latex(final_colorbar_label), fontsize=style.labelFontSize)
     cbar.ax.tick_params(labelsize=style.tickFontSize)
 
     if style.gridMode == "auto":
@@ -320,7 +344,9 @@ def renderTriangularContour(
     label_every = max(1, round(style.gridLabelDensity))
     tick_positions = np.linspace(0, 1, cbar_ticks)
     tick_vals = np.linspace(z_min, z_max, cbar_ticks)
-    labels = [f"{v:.4g}" if i % label_every == 0 else "" for i, v in enumerate(tick_vals)]
+    labels = [
+        f"{v:.4g}" if i % label_every == 0 else "" for i, v in enumerate(tick_vals)
+    ]
     cbar.set_ticks(tick_positions)
     cbar.set_ticklabels(labels)
 
@@ -343,7 +369,13 @@ def renderTriangularContour(
             y_grid = t * h
             x_left = t / 2
             x_right = 1 - t / 2
-            ax.plot([x_left, x_right], [y_grid, y_grid], "k-", alpha=grid_alpha, linewidth=grid_line_width)
+            ax.plot(
+                [x_left, x_right],
+                [y_grid, y_grid],
+                "k-",
+                alpha=grid_alpha,
+                linewidth=grid_line_width,
+            )
 
             # Line AB (constant x_C, from left side to right side):
             #   Start: midpoint of left edge at height (1-t)
@@ -352,7 +384,13 @@ def renderTriangularContour(
             y_start_ab = h * (1 - t)
             x_end_bc = 1 - t
             y_end_bc = 0
-            ax.plot([x_start_ab, x_end_bc], [y_start_ab, y_end_bc], "k-", alpha=grid_alpha, linewidth=grid_line_width)
+            ax.plot(
+                [x_start_ab, x_end_bc],
+                [y_start_ab, y_end_bc],
+                "k-",
+                alpha=grid_alpha,
+                linewidth=grid_line_width,
+            )
 
             # Line AC (constant x_B, from apex-adjacent to left base):
             #   Start: right of center at height (1-t)
@@ -361,7 +399,13 @@ def renderTriangularContour(
             y_start_ac = h * (1 - t)
             x_end_bc = t
             y_end_bc = 0
-            ax.plot([x_start_ac, x_end_bc], [y_start_ac, y_end_bc], "k-", alpha=grid_alpha, linewidth=grid_line_width)
+            ax.plot(
+                [x_start_ac, x_end_bc],
+                [y_start_ac, y_end_bc],
+                "k-",
+                alpha=grid_alpha,
+                linewidth=grid_line_width,
+            )
 
     drawTriangularAxes(
         ax,
@@ -377,6 +421,4 @@ def renderTriangularContour(
 
     final_title = title if title else config.title
     if final_title:
-        ax.set_title(
-            wrap_latex(final_title), fontsize=style.titleFontSize
-        )
+        ax.set_title(wrap_latex(final_title), fontsize=style.titleFontSize)
