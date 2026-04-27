@@ -27,6 +27,10 @@ class RulerWidget(QtWidgets.QWidget):
         self.setFixedHeight(16)
 
     def paintEvent(self, event):
+        # Draw a horizontal ruler with tick marks:
+        # - Main line at y=5 across full width
+        # - Short ticks every 20px (height 3px)
+        # - Long ticks every 40px (height 6px) for emphasis
         painter = QPainter(self)
         painter.setPen(QPen(QColor("#E0E0E0"), 1))
         painter.drawLine(0, 5, self.width(), 5)

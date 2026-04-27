@@ -87,6 +87,14 @@ class Settings:
         return self.get("plot", "colorScheme") or "follow"
 
     @property
+    def plot_bg(self) -> str | None:
+        return self.get("plot", "bg")
+
+    @property
+    def plot_fg(self) -> str | None:
+        return self.get("plot", "fg")
+
+    @property
     def plot_line_style(self) -> str | None:
         return self.get("plot", "lineStyle")
 
@@ -144,3 +152,23 @@ class Settings:
     def plot_legend_font_size(self) -> int | None:
         val = self.get("plot", "legendFontSize")
         return int(val) if val else None
+
+    @property
+    def plot_triangular_levels(self) -> int | None:
+        val = self.get("plot", "triangular_levels")
+        return int(val) if val else None
+
+    @property
+    def plot_triangular_alpha(self) -> float | None:
+        val = self.get("plot", "triangular_alpha")
+        return float(val) if val else None
+
+    @property
+    def plot_triangular_grid_alpha(self) -> float | None:
+        val = self.get("plot", "triangular_grid_alpha")
+        return float(val) if val else None
+
+    @property
+    def plot_triangular_grid_line_width(self) -> float | None:
+        val = self.get("plot", "triangular_grid_line_width")
+        return float(val) if val else None

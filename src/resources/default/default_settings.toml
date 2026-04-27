@@ -30,6 +30,8 @@ grid = true
 gridMode = "auto"
 gridDensity = 1.0
 fontSize = 12
+bg = "#fafafa"
+fg = "#323232"
 
 [plot.scatter_3d]
 default_coord_index = 0
@@ -46,3 +48,6 @@ tick_length = 0.02
 elem_labels = ["A", "B", "C"]
 colorbar_label = "Z_{ABC}"
 levels = 20
+alpha = 0.8
+grid_alpha = 0.3
+grid_line_width = 0.1

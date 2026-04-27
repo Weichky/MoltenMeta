@@ -9,6 +9,8 @@ import tomllib
 from catalog import (
     DEFAULT_PLOT_TYPE,
     DEFAULT_THEME_PRESET,
+    DEFAULT_PLOT_BG,
+    DEFAULT_PLOT_FG,
     ColorAlgorithm,
     DEFAULT_SCATTER_3D_DEFAULT_COORD_INDEX,
     DEFAULT_CONTOUR_TRIANGULAR_HEIGHT_FACTOR,
@@ -19,6 +21,9 @@ from catalog import (
     DEFAULT_CONTOUR_TRIANGULAR_ELEM_LABELS,
     DEFAULT_CONTOUR_TRIANGULAR_COLORBAR_LABEL,
     DEFAULT_CONTOUR_TRIANGULAR_LEVELS,
+    DEFAULT_CONTOUR_TRIANGULAR_ALPHA,
+    DEFAULT_TRIANGULAR_GRID_ALPHA,
+    DEFAULT_TRIANGULAR_GRID_LINE_WIDTH,
 )
 
 from core.plot.color import ColorPalette, ColorGenerator, ThemeColors
@@ -35,6 +40,8 @@ class PlotStyleConfig:
     plotType: str = DEFAULT_PLOT_TYPE
     style: PlotStyle = field(default_factory=getDefaultPlotStyle)
     colorGenerator: ColorGenerator | None = None
+    bg: str = DEFAULT_PLOT_BG
+    fg: str = DEFAULT_PLOT_FG
     x: str = ""
     xLabel: str = ""
     y: list[str] = field(default_factory=list)
@@ -60,6 +67,9 @@ class PlotStyleConfig:
     )
     triangular_colorbar_label: str = DEFAULT_CONTOUR_TRIANGULAR_COLORBAR_LABEL
     triangular_levels: int = DEFAULT_CONTOUR_TRIANGULAR_LEVELS
+    triangular_alpha: float = DEFAULT_CONTOUR_TRIANGULAR_ALPHA
+    triangular_grid_alpha: float = DEFAULT_TRIANGULAR_GRID_ALPHA
+    triangular_grid_line_width: float = DEFAULT_TRIANGULAR_GRID_LINE_WIDTH
 
 
 def _getDefaultSettings() -> dict:
@@ -382,13 +392,53 @@ class PlotStyleService:
             plot_config.get("levels")
             or module_plot_config.get("levels")
             or triangular_global.get("levels")
+            or (str(settings.plot_triangular_levels) if settings and settings.plot_triangular_levels else None)
             or DEFAULT_CONTOUR_TRIANGULAR_LEVELS
+        )
+
+        triangular_alpha = (
+            plot_config.get("alpha")
+            or module_plot_config.get("alpha")
+            or triangular_global.get("alpha")
+            or (str(settings.plot_triangular_alpha) if settings and settings.plot_triangular_alpha else None)
+            or DEFAULT_CONTOUR_TRIANGULAR_ALPHA
+        )
+
+        triangular_grid_alpha = (
+            plot_config.get("grid_alpha")
+            or module_plot_config.get("grid_alpha")
+            or triangular_global.get("grid_alpha")
+            or (str(settings.plot_triangular_grid_alpha) if settings and settings.plot_triangular_grid_alpha else None)
+            or DEFAULT_TRIANGULAR_GRID_ALPHA
+        )
+
+        triangular_grid_line_width = (
+            plot_config.get("grid_line_width")
+            or module_plot_config.get("grid_line_width")
+            or triangular_global.get("grid_line_width")
+            or (str(settings.plot_triangular_grid_line_width) if settings and settings.plot_triangular_grid_line_width else None)
+            or DEFAULT_TRIANGULAR_GRID_LINE_WIDTH
+        )
+
+        bg = (
+            plot_config.get("bg")
+            or module_plot_config.get("bg")
+            or (settings.plot_bg if settings else None)
+            or DEFAULT_PLOT_BG
+        )
+        fg = (
+            plot_config.get("fg")
+            or module_plot_config.get("fg")
+            or (settings.plot_fg if settings else None)
+            or DEFAULT_PLOT_FG
         )
 
         return PlotStyleConfig(
             plotType=plot_config.get("plotType", DEFAULT_PLOT_TYPE),
             style=style,
             colorGenerator=generator,
+            bg=bg,
+            fg=fg,
             x=plot_config.get("x", ""),
             xLabel=plot_config.get("xLabel", ""),
             y=plot_config.get("y", []),
@@ -406,4 +456,7 @@ class PlotStyleService:
             triangular_elem_labels=triangular_elem_labels,
             triangular_colorbar_label=triangular_colorbar_label,
             triangular_levels=triangular_levels,
+            triangular_alpha=float(triangular_alpha),
+            triangular_grid_alpha=float(triangular_grid_alpha),
+            triangular_grid_line_width=float(triangular_grid_line_width),
         )

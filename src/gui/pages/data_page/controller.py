@@ -148,6 +148,9 @@ class DataController(QObject):
             return
 
         if self._model:
+            # Must disconnect old model signals before replacing it.
+            # Otherwise the already-disconnected signal will cause a crash
+            # when the model is destroyed while still connected.
             self._model.dataChanged.disconnect(self._onDataChanged)
 
         self._model = DataTableModel(self._db_manager, self._user_db_service)
@@ -197,12 +200,15 @@ class DataController(QObject):
             return
 
         try:
+            # Build and execute UPDATE for each modified row.
+            # changes: {row_idx: {col_name: new_value}}
             for row_idx, row_changes in changes.items():
                 if row_idx >= len(self._model._data):
                     continue
 
                 current_row = self._model._data[row_idx]
 
+                # Build dynamic SET clause: "col1 = ?, col2 = ?, ..."
                 set_clauses = []
                 values = []
                 for col_name, new_value in row_changes.items():
@@ -212,6 +218,7 @@ class DataController(QObject):
                 if not set_clauses:
                     continue
 
+                # Get primary key value for WHERE clause
                 pk_value = current_row.get(primary_key)
                 if pk_value is None:
                     continue

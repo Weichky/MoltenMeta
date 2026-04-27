@@ -1,5 +1,6 @@
 from .color import ColorPalette, ColorGenerator, ThemeColors
 from .config import PlotStyleConfig, PlotStyleService
+from .result_resolver import ResultResolver
 from .style import PlotStyle, getDefaultPlotStyle
 
 __all__ = [
@@ -10,4 +11,5 @@ __all__ = [
     "PlotStyleConfig",
     "PlotStyleService",
     "getDefaultPlotStyle",
+    "ResultResolver",
 ]

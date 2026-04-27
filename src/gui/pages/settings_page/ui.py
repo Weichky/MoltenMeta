@@ -8,6 +8,18 @@ import numpy as np
 
 from core.log import getLogLevelMap
 from catalog import getSupportedLanguagesNameMap, UI_THEME_PRIMARY_DEFAULT, UI_THEME_SECONDARY_DEFAULT
+from catalog.plot_style import (
+    DEFAULT_FIGURE_SIZE,
+    DEFAULT_COLORMAP_RESOLUTION,
+    DEFAULT_GRID_RELATIVE_DIVISOR,
+    DEFAULT_NORMALIZED_EPSILON,
+    DEFAULT_PLOT_BG,
+    DEFAULT_PLOT_FG,
+    DEFAULT_CONTOUR_TRIANGULAR_LEVELS,
+    DEFAULT_CONTOUR_TRIANGULAR_ALPHA,
+    DEFAULT_TRIANGULAR_GRID_ALPHA,
+    DEFAULT_TRIANGULAR_GRID_LINE_WIDTH,
+)
 
 from domain.settings import Settings
 
@@ -295,6 +307,38 @@ class UiSettingsPage(QObject):
         self.section_line1.setFixedHeight(1)
         page_layout.addWidget(self.section_line1)
 
+        colors_label = QtWidgets.QLabel()
+        colors_label.setObjectName("sectionLabel")
+        colors_label.setText(self.tr("Colors"))
+        page_layout.addWidget(colors_label)
+
+        colors_grid = QtWidgets.QGridLayout()
+        colors_grid.setSpacing(12)
+        colors_grid.setColumnMinimumWidth(0, 80)
+
+        self.bg_color_input = QtWidgets.QLineEdit()
+        self.bg_color_input.setObjectName("bgColorInput")
+        bg_color = self._settings.plot_bg or DEFAULT_PLOT_BG
+        self.bg_color_input.setText(bg_color)
+        colors_grid.addWidget(QtWidgets.QLabel(self.tr("Background")), 0, 0)
+        colors_grid.addWidget(self.bg_color_input, 0, 1)
+
+        self.fg_color_input = QtWidgets.QLineEdit()
+        self.fg_color_input.setObjectName("fgColorInput")
+        fg_color = self._settings.plot_fg or DEFAULT_PLOT_FG
+        self.fg_color_input.setText(fg_color)
+        colors_grid.addWidget(QtWidgets.QLabel(self.tr("Foreground")), 1, 0)
+        colors_grid.addWidget(self.fg_color_input, 1, 1)
+
+        page_layout.addLayout(colors_grid)
+
+        self.section_line2 = QtWidgets.QFrame()
+        self.section_line2.setObjectName("dividerLine")
+        self.section_line2.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+        self.section_line2.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
+        self.section_line2.setFixedHeight(1)
+        page_layout.addWidget(self.section_line2)
+
         line_label = QtWidgets.QLabel()
         line_label.setObjectName("sectionLabel")
         line_label.setText(self.tr("Line & Grid"))
@@ -414,6 +458,66 @@ class UiSettingsPage(QObject):
 
         page_layout.addLayout(typography_grid)
 
+        self.section_triangular_line = QtWidgets.QFrame()
+        self.section_triangular_line.setObjectName("dividerLine")
+        self.section_triangular_line.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+        self.section_triangular_line.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
+        self.section_triangular_line.setFixedHeight(1)
+        page_layout.addWidget(self.section_triangular_line)
+
+        triangular_label = QtWidgets.QLabel()
+        triangular_label.setObjectName("sectionLabel")
+        triangular_label.setText(self.tr("Triangular"))
+        page_layout.addWidget(triangular_label)
+
+        triangular_grid = QtWidgets.QGridLayout()
+        triangular_grid.setSpacing(12)
+        triangular_grid.setColumnMinimumWidth(0, 80)
+
+        self.triangular_levels_spin = QtWidgets.QSpinBox()
+        self.triangular_levels_spin.setObjectName("triangularLevelsSpin")
+        self.triangular_levels_spin.setRange(3, 100)
+        self.triangular_levels_spin.setValue(
+            int(self._settings.plot_triangular_levels or DEFAULT_CONTOUR_TRIANGULAR_LEVELS)
+        )
+        triangular_grid.addWidget(QtWidgets.QLabel(self.tr("Levels")), 0, 0)
+        triangular_grid.addWidget(self.triangular_levels_spin, 0, 1)
+
+        self.triangular_alpha_spin = QtWidgets.QDoubleSpinBox()
+        self.triangular_alpha_spin.setObjectName("triangularAlphaSpin")
+        self.triangular_alpha_spin.setRange(0.0, 1.0)
+        self.triangular_alpha_spin.setSingleStep(0.05)
+        self.triangular_alpha_spin.setDecimals(2)
+        self.triangular_alpha_spin.setValue(
+            float(self._settings.plot_triangular_alpha or DEFAULT_CONTOUR_TRIANGULAR_ALPHA)
+        )
+        triangular_grid.addWidget(QtWidgets.QLabel(self.tr("Fill Alpha")), 1, 0)
+        triangular_grid.addWidget(self.triangular_alpha_spin, 1, 1)
+
+        self.triangular_grid_alpha_spin = QtWidgets.QDoubleSpinBox()
+        self.triangular_grid_alpha_spin.setObjectName("triangularGridAlphaSpin")
+        self.triangular_grid_alpha_spin.setRange(0.0, 1.0)
+        self.triangular_grid_alpha_spin.setSingleStep(0.05)
+        self.triangular_grid_alpha_spin.setDecimals(2)
+        self.triangular_grid_alpha_spin.setValue(
+            float(self._settings.plot_triangular_grid_alpha or DEFAULT_TRIANGULAR_GRID_ALPHA)
+        )
+        triangular_grid.addWidget(QtWidgets.QLabel(self.tr("Grid Alpha")), 2, 0)
+        triangular_grid.addWidget(self.triangular_grid_alpha_spin, 2, 1)
+
+        self.triangular_grid_line_width_spin = QtWidgets.QDoubleSpinBox()
+        self.triangular_grid_line_width_spin.setObjectName("triangularGridLineWidthSpin")
+        self.triangular_grid_line_width_spin.setRange(0.1, 5.0)
+        self.triangular_grid_line_width_spin.setSingleStep(0.1)
+        self.triangular_grid_line_width_spin.setDecimals(1)
+        self.triangular_grid_line_width_spin.setValue(
+            float(self._settings.plot_triangular_grid_line_width or DEFAULT_TRIANGULAR_GRID_LINE_WIDTH)
+        )
+        triangular_grid.addWidget(QtWidgets.QLabel(self.tr("Grid Width")), 3, 0)
+        triangular_grid.addWidget(self.triangular_grid_line_width_spin, 3, 1)
+
+        page_layout.addLayout(triangular_grid)
+
         self.section_line3 = QtWidgets.QFrame()
         self.section_line3.setObjectName("dividerLine")
         self.section_line3.setFrameShape(QtWidgets.QFrame.Shape.HLine)
@@ -426,7 +530,7 @@ class UiSettingsPage(QObject):
         preview_label.setText(self.tr("Preview"))
         page_layout.addWidget(preview_label)
 
-        self.preview_figure = Figure(figsize=(8, 6), constrained_layout=True)
+        self.preview_figure = Figure(figsize=DEFAULT_FIGURE_SIZE, constrained_layout=True)
         dpi = mpl.rcParams["figure.dpi"]
         fig_width, fig_height = self.preview_figure.get_size_inches()
         min_size = QtCore.QSize(int(fig_width * dpi), int(fig_height * dpi))
@@ -490,11 +594,14 @@ class UiSettingsPage(QObject):
     def _calcGridTicks(
         self, axis_min: float, axis_max: float, grid_mode: str, grid_density: float
     ) -> np.ndarray:
+        # Compute grid tick positions based on axis range and density mode.
+        # "absolute": interval is directly grid_density
+        # "relative": interval = range / (DEFAULT_GRID_RELATIVE_DIVISOR * density)
         range_val = axis_max - axis_min
         if grid_mode == "absolute":
             interval = grid_density
         else:
-            interval = range_val / (10.0 * grid_density)
+            interval = range_val / (DEFAULT_GRID_RELATIVE_DIVISOR * grid_density)
         return np.arange(axis_min, axis_max + interval, interval)
 
     def _applyGridToAxis(
@@ -505,6 +612,9 @@ class UiSettingsPage(QObject):
         grid_density: float,
         grid_label_density: float = 1.0,
     ) -> None:
+        # Apply grid lines to a 2D axis.
+        # "auto" mode uses matplotlib default alpha=0.3.
+        # "relative"/"absolute" use computed ticks with major/minor grid.
         if not enabled:
             ax.grid(False)
             return
@@ -528,6 +638,7 @@ class UiSettingsPage(QObject):
         ax.grid(True, which="major", alpha=0.3)
         ax.grid(True, which="minor", alpha=0.15)
 
+        # Show only every grid_label_density-th label to avoid crowding.
         label_every = max(1, int(grid_label_density))
         for i, tick in enumerate(ax.xaxis.get_major_ticks()):
             tick.label1.set_visible(i % label_every == 0)
@@ -542,6 +653,8 @@ class UiSettingsPage(QObject):
         grid_density: float,
         grid_label_density: float = 1.0,
     ) -> None:
+        # Apply grid lines to a 3D axis.
+        # Similar to 2D but only handles major grid (no minor ticks in 3D).
         if not enabled:
             ax.grid(False, which="major")
             return
@@ -618,8 +731,8 @@ class UiSettingsPage(QObject):
         Y = np.linspace(-5, 5, 60)
         X, Y = np.meshgrid(X, Y)
         Z = np.sin(np.sqrt(X**2 + Y**2))
-        Z_norm = (Z - Z.min()) / (Z.max() - Z.min() + 1e-9)
-        n_cmap = 256
+        Z_norm = (Z - Z.min()) / (Z.max() - Z.min() + DEFAULT_NORMALIZED_EPSILON)
+        n_cmap = DEFAULT_COLORMAP_RESOLUTION
         cmap_colors = [gen.getColorAt(i / (n_cmap - 1)) for i in range(n_cmap)]
         cmap = mpl.colors.ListedColormap(cmap_colors)
         facecolors = cmap(Z_norm)

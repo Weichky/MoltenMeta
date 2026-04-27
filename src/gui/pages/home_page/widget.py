@@ -28,6 +28,7 @@ class HomePage(QtWidgets.QWidget):
         self._apply_title_color()
 
     def _connect_signals(self):
+        # Tile order: [Project, Data, Simulation, Settings] — must match ui.py layout.
         PROJECT_INDEX = 0
         DATABASE_INDEX = 1
         SIMULATION_INDEX = 2
@@ -47,14 +48,15 @@ class HomePage(QtWidgets.QWidget):
         self._apply_title_color()
 
     def _apply_theme_colors(self):
-        primary = self._theme_service._primary_color
+        primary = self._theme_service.primary_color
         self.ui.accent_line.setStyleSheet(f"background-color: {primary}; border: none;")
 
     def _apply_title_color(self):
-        primary = self._theme_service._primary_color
+        primary = self._theme_service.primary_color
         self.ui.setupTitleLabel(primary)
 
     def resizeEvent(self, event):
+        # Reserved for responsive layout. Currently a no-op.
         super().resizeEvent(event)
 
     def retranslateUi(self):

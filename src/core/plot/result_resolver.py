@@ -13,10 +13,10 @@ class ResolvedData(TypedDict):
     y_axis: list[ResolvedAxis]
     z_axis: ResolvedAxis | None
     dims: list[str]
-    available_coords: list[dict]
-    current_coord_index: int
-    plot_type: str
-    mesh_data: dict | None
+    availableCoords: list[dict]
+    currentCoordIndex: int
+    plotType: str
+    meshData: dict | None
     conditions: dict
     title: str
 
@@ -24,15 +24,15 @@ class ResolvedData(TypedDict):
 class ResultResolver:
     def __init__(self, config: dict):
         self._config = config
-        self._plot_type = config.get("plotType", "line_2d")
+        self._plotType = config.get("plotType", "line_2d")
         coords = config.get("coords", {})
         self._scatters = coords.get("scatters")
-        self._default_coord_index = config.get("default_coord_index", 0)
-        self._x_label_override = coords.get("xLabel", "")
-        self._y_label_override = coords.get("yLabel", "")
-        self._z_label_override = coords.get("zLabel", "")
-        self._current_coord_index = 0
-        self._title_template = config.get("title", "")
+        self._defaultCoordIndex = config.get("default_coord_index", 0)
+        self._xLabelOverride = coords.get("xLabel", "")
+        self._yLabelOverride = coords.get("yLabel", "")
+        self._zLabelOverride = coords.get("zLabel", "")
+        self._currentCoordIndex = 0
+        self._titleTemplate = config.get("title", "")
 
         if self._scatters is None:
             single_coord = {
@@ -49,16 +49,19 @@ class ResultResolver:
         return title
 
     def resolve(self, result: dict) -> ResolvedData | None:
-        if self._plot_type == "contour":
-            return self._resolve_contour(result)
-        elif self._plot_type == "contour_triangular":
-            return self._resolve_contour_triangular(result)
-        elif self._plot_type == "scatter_3d":
-            return self._resolve_scatter_3d(result)
+        # Dispatch to the appropriate resolution path based on plot type.
+        # Each path returns a ResolvedData structure with axis definitions,
+        # raw values, and metadata for the GUI layer to render.
+        if self._plotType == "contour":
+            return self._resolveContour(result)
+        elif self._plotType == "contour_triangular":
+            return self._resolveContourTriangular(result)
+        elif self._plotType == "scatter_3d":
+            return self._resolveScatter3d(result)
         else:
-            return self._resolve_2d(result)
+            return self._resolve2d(result)
 
-    def _resolve_contour(self, result: dict) -> ResolvedData | None:
+    def _resolveContour(self, result: dict) -> ResolvedData | None:
         latex = result.get("latex", {})
         units = result.get("units", {})
 
@@ -90,17 +93,20 @@ class ResultResolver:
                 "data": [],
             },
             "dims": result.get("dims", []),
-            "available_coords": [],
-            "current_coord_index": 0,
-            "plot_type": "contour",
-            "mesh_data": mesh_data,
+            "availableCoords": [],
+            "currentCoordIndex": 0,
+            "plotType": "contour",
+            "meshData": mesh_data,
             "conditions": result.get("conditions", {}),
             "title": self._replaceTitlePlaceholders(
-                self._title_template, result.get("conditions", {})
+                self._titleTemplate, result.get("conditions", {})
             ),
         }
 
-    def _resolve_contour_triangular(self, result: dict) -> ResolvedData | None:
+    def _resolveContourTriangular(self, result: dict) -> ResolvedData | None:
+        # For triangular contour, the resolver extracts the Z key (the property being plotted)
+        # by scanning for the first key in values[0] that is not a composition coordinate.
+        # Fallback: scan dims if values is empty or not a dict.
         latex = result.get("latex", {})
         units = result.get("units", {})
         dims = result.get("dims", [])
@@ -138,28 +144,28 @@ class ResultResolver:
                 "data": [],
             },
             "dims": result.get("dims", []),
-            "available_coords": [],
-            "current_coord_index": 0,
-            "plot_type": "contour_triangular",
+            "availableCoords": [],
+            "currentCoordIndex": 0,
+            "plotType": "contour_triangular",
             "values": result.get("values", []),
             "conditions": result.get("conditions", {}),
             "title": self._replaceTitlePlaceholders(
-                self._title_template, result.get("conditions", {})
+                self._titleTemplate, result.get("conditions", {})
             ),
         }
 
-    def _resolve_scatter_3d(self, result: dict) -> ResolvedData | None:
+    def _resolveScatter3d(self, result: dict) -> ResolvedData | None:
         if not self._scatters:
             return None
 
-        coord = self._scatters[self._current_coord_index]
+        coord = self._scatters[self._currentCoordIndex]
         values = result.get("values", [])
         latex = result.get("latex", {})
         units = result.get("units", {})
         dims = result.get("dims", [])
         main_dim = result.get("main_dim")
 
-        def _resolve_key(coord_key: str, fallback_key: str | None) -> str:
+        def resolveKey(coord_key: str, fallback_key: str | None) -> str:
             if coord_key in dims and (not values or coord_key in values[0]):
                 return coord_key
             if fallback_key and fallback_key in dims:
@@ -176,14 +182,14 @@ class ResultResolver:
             y_keys = y_value
         z_key = coord.get("z", "")
 
-        x_key = _resolve_key(x_key, None)
-        y_keys = [_resolve_key(k, dims[1] if len(dims) > 1 else None) for k in y_keys]
-        z_key = _resolve_key(z_key, main_dim)
+        x_key = resolveKey(x_key, None)
+        y_keys = [resolveKey(k, dims[1] if len(dims) > 1 else None) for k in y_keys]
+        z_key = resolveKey(z_key, main_dim)
 
         x_data = [v.get(x_key, 0) for v in values]
 
-        if self._x_label_override:
-            x_label = self._x_label_override
+        if self._xLabelOverride:
+            x_label = self._xLabelOverride
         else:
             x_label = latex.get(x_key, x_key)
         x_unit = units.get(x_key, "")
@@ -192,8 +198,8 @@ class ResultResolver:
 
         y_axis = []
         for y_key in y_keys:
-            if self._y_label_override:
-                y_label = self._y_label_override
+            if self._yLabelOverride:
+                y_label = self._yLabelOverride
             else:
                 y_label = latex.get(y_key, y_key)
             y_unit = units.get(y_key, "")
@@ -210,8 +216,8 @@ class ResultResolver:
 
         z_axis = None
         if z_key:
-            if self._z_label_override:
-                z_label = self._z_label_override
+            if self._zLabelOverride:
+                z_label = self._zLabelOverride
             else:
                 z_label = latex.get(z_key, z_key)
             z_unit = units.get(z_key, "")
@@ -234,28 +240,28 @@ class ResultResolver:
             "y_axis": y_axis,
             "z_axis": z_axis,
             "dims": dims,
-            "available_coords": self._scatters,
-            "current_coord_index": self._current_coord_index,
-            "plot_type": "scatter_3d",
-            "mesh_data": None,
+            "availableCoords": self._scatters,
+            "currentCoordIndex": self._currentCoordIndex,
+            "plotType": "scatter_3d",
+            "meshData": None,
             "conditions": result.get("conditions", {}),
             "title": self._replaceTitlePlaceholders(
-                self._title_template, result.get("conditions", {})
+                self._titleTemplate, result.get("conditions", {})
             ),
         }
 
-    def _resolve_2d(self, result: dict) -> ResolvedData | None:
+    def _resolve2d(self, result: dict) -> ResolvedData | None:
         if not self._scatters:
             return None
 
-        coord = self._scatters[self._current_coord_index]
+        coord = self._scatters[self._currentCoordIndex]
         values = result.get("values", [])
         latex = result.get("latex", {})
         units = result.get("units", {})
         dims = result.get("dims", [])
         main_dim = result.get("main_dim")
 
-        def _resolve_key(coord_key: str, fallback_key: str | None) -> str:
+        def resolveKey(coord_key: str, fallback_key: str | None) -> str:
             if coord_key in dims and (not values or coord_key in values[0]):
                 return coord_key
             if fallback_key and fallback_key in dims:
@@ -271,8 +277,8 @@ class ResultResolver:
         else:
             y_keys = y_value
 
-        x_key = _resolve_key(x_key, dims[1] if len(dims) > 1 else None)
-        y_keys = [_resolve_key(k, main_dim) for k in y_keys]
+        x_key = resolveKey(x_key, dims[1] if len(dims) > 1 else None)
+        y_keys = [resolveKey(k, main_dim) for k in y_keys]
 
         x_data = [v.get(x_key, 0) for v in values]
 
@@ -306,32 +312,32 @@ class ResultResolver:
             "y_axis": y_axis,
             "z_axis": None,
             "dims": dims,
-            "available_coords": self._scatters,
-            "current_coord_index": self._current_coord_index,
-            "plot_type": self._plot_type,
-            "mesh_data": None,
+            "availableCoords": self._scatters,
+            "currentCoordIndex": self._currentCoordIndex,
+            "plotType": self._plotType,
+            "meshData": None,
             "conditions": result.get("conditions", {}),
             "title": self._replaceTitlePlaceholders(
-                self._title_template, result.get("conditions", {})
+                self._titleTemplate, result.get("conditions", {})
             ),
         }
 
     def setCurrentCoord(self, index: int) -> None:
         if 0 <= index < len(self._scatters):
-            self._current_coord_index = index
+            self._currentCoordIndex = index
 
     def useDefaultCoord(self) -> None:
-        if 0 <= self._default_coord_index < len(self._scatters):
-            self._current_coord_index = self._default_coord_index
+        if 0 <= self._defaultCoordIndex < len(self._scatters):
+            self._currentCoordIndex = self._defaultCoordIndex
 
     @property
-    def available_coords(self) -> list[dict]:
+    def availableCoords(self) -> list[dict]:
         return self._scatters
 
     @property
-    def has_multiple_coords(self) -> bool:
+    def hasMultipleCoords(self) -> bool:
         return len(self._scatters) > 1
 
     @property
-    def plot_type(self) -> str:
-        return self._plot_type
+    def plotType(self) -> str:
+        return self._plotType

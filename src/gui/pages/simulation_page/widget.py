@@ -3,10 +3,9 @@ from PySide6.QtCore import Qt
 
 from .ui import UiSimulationPage
 from .controller import SimulationController
-from .plot_panel import PlotPanel
-from .result_resolver import ResultResolver
+from .plot_panel.panel import PlotPanel
 
-from core.plot import PlotStyleService
+from core.plot import PlotStyleService, ResultResolver
 
 
 class ResultTableModel(QtCore.QAbstractTableModel):
@@ -52,9 +51,6 @@ class ResultTableModel(QtCore.QAbstractTableModel):
 
 
 class SimulationPage(QtWidgets.QWidget):
-    configureClicked = QtCore.Signal()
-    calculateClicked = QtCore.Signal()
-
     def __init__(self, context):
         super().__init__(parent=None)
         self._context = context
@@ -82,7 +78,6 @@ class SimulationPage(QtWidgets.QWidget):
 
         self._connectSignals()
         self._populateCategories()
-        self._applyTheme()
         if self._context.core_db is not None:
             self._context.core_db.settingsReloaded.connect(self._onSettingsReloaded)
 
@@ -110,18 +105,8 @@ class SimulationPage(QtWidgets.QWidget):
         self.ui.configureBtn.clicked.connect(self._onConfigureClicked)
         self.ui.calculateBtn.clicked.connect(self._onCalculateClicked)
         self._i18n.language_changed.connect(self._retranslateUi)
-        self._theme_service.theme_changed.connect(self._applyTheme)
         if hasattr(self.ui, "coordSelector"):
             self.ui.coordSelector.currentIndexChanged.connect(self._onCoordChanged)
-
-    def _applyTheme(self) -> None:
-        settings = self._context.settings
-        plot_color_scheme = settings.plot_color_scheme
-        if plot_color_scheme == "follow":
-            scheme = self._theme_service.scheme
-        else:
-            scheme = plot_color_scheme
-        self._plot_panel.setScheme(scheme)
 
     def _populateCategories(self) -> None:
         categories = self._controller.getCategories()
@@ -225,13 +210,13 @@ class SimulationPage(QtWidgets.QWidget):
             return
 
         if hasattr(self.ui, "coordSelector"):
-            if not self._result_resolver.has_multiple_coords:
+            if not self._result_resolver.hasMultipleCoords:
                 self.ui.coordSelector.setVisible(False)
                 return
 
             self.ui.coordSelector.setVisible(True)
             self.ui.coordSelector.clear()
-            for coord in self._result_resolver.available_coords:
+            for coord in self._result_resolver.availableCoords:
                 labels = []
                 if coord.get("x"):
                     labels.append(coord["x"])
@@ -285,17 +270,14 @@ class SimulationPage(QtWidgets.QWidget):
             module_config, method_config, settings
         )
 
-        plot_color_scheme = settings.plot_color_scheme
-        if plot_color_scheme == "follow":
-            scheme = self._theme_service.scheme
-        else:
-            scheme = plot_color_scheme
-        self._plot_panel.setScheme(scheme)
+        self._plot_panel.setColors(plot_config.bg, plot_config.fg)
 
-        plot_type = resolved.get("plot_type", "line_2d")
+        plot_type = resolved.get("plotType", "line_2d")
         x_data = resolved["x_axis"]["data"]
         x_label = resolved["x_axis"]["label"]
 
+        # Dispatch to the appropriate plot method based on resolved plotType.
+        # Each branch handles its own data extraction and error checking.
         if plot_type == "scatter_3d":
             y_data = resolved["y_axis"][0]["data"] if resolved["y_axis"] else []
             z_data = resolved["z_axis"]["data"] if resolved["z_axis"] else []
@@ -320,7 +302,7 @@ class SimulationPage(QtWidgets.QWidget):
                 return
 
         elif plot_type == "contour":
-            mesh_data = resolved.get("mesh_data", {})
+            mesh_data = resolved.get("meshData", {})
             x_mesh = mesh_data.get("x_i", [])
             y_mesh = mesh_data.get("x_j", [])
             z_mesh = mesh_data.get("Z_ABC", [])
@@ -402,3 +384,9 @@ class SimulationPage(QtWidgets.QWidget):
 
     def _retranslateUi(self) -> None:
         pass
+
+    # Called when plot settings (e.g. triangular alpha/levels) change in the
+    # Settings page. Re-renders the current result with the new plot config.
+    def _onPlotSettingsChanged(self) -> None:
+        if self._current_result:
+            self._displayResult(self._current_result)

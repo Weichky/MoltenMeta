@@ -392,8 +392,6 @@ class HillertToopCalc:
                 extra_conditions={"output_symbol": output_symbol},
             )
 
-        V_BC_list = [(1.0 + x_B - x_C) / 2.0 for x_B, x_C in zip(x_B_list, x_C_list)]
-
         Z_ABC_list = self.calculatePropertyList(
             x_A_list, x_B_list, x_C_list, Z_AB_list, Z_AC_list, Z_BC_list
         )
@@ -407,9 +405,14 @@ class HillertToopCalc:
                 extra_conditions={"output_symbol": output_symbol},
             )
 
+        # Filter out NaN values that arise at triangle vertices and edges.
+        # The Hillert-Toop formula divides by V_BC*V_CB which becomes zero
+        # at pure component corners (x_B=0, x_C=0) or midpoints (x_B=x_C=0.5)
+        # on an edge. SQLite NOT NULL constraint disallows nan as a valid value.
         values = [
             {output_symbol: z, "x_A": a, "x_B": b, "x_C": c}
             for a, b, c, z in zip(x_A_list, x_B_list, x_C_list, Z_ABC_list)
+            if z is not None and z == z
         ]
 
         return {

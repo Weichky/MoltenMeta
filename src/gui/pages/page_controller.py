@@ -91,6 +91,18 @@ class PageController(QObject):
     def showSettings(self):
         self._showPage(self._settings_spec)
 
+    # Connect SettingsController.plot_settings_changed to SimulationPage so that
+    # triangular plot settings changes in the Settings page trigger re-rendering
+    # in the Simulation page without needing to re-run the calculation.
+    def _connectSimulationToSettingsPlotSignals(self, simulation_page):
+        settings_dock = self.pages.get("settings")
+        if settings_dock:
+            settings_widget = settings_dock.widget()
+            if settings_widget and hasattr(settings_widget, 'controller'):
+                settings_widget.controller.plot_settings_changed.connect(
+                    simulation_page._onPlotSettingsChanged
+                )
+
     def showProject(self):
         self.logger.debug("Project page not implemented yet")
 
@@ -99,6 +111,12 @@ class PageController(QObject):
 
     def showSimulation(self):
         self._showPage(self._simulation_spec)
+        # Connect plot settings signals after the simulation page is created
+        simulation_dock = self.pages.get(self._simulation_spec.key)
+        if simulation_dock:
+            simulation_widget = simulation_dock.widget()
+            if simulation_widget:
+                self._connectSimulationToSettingsPlotSignals(simulation_widget)
 
     # A dock is visible if it is not floating or hidden
     def _hasVisibleDock(self) -> bool:

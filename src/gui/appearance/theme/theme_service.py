@@ -228,6 +228,14 @@ class ThemeService(QObject):
             return "dark" if self._isSystemDark() else "light"
         return self._scheme
 
+    @property
+    def primary_color(self) -> str:
+        return self._primary_color
+
+    @property
+    def secondary_color(self) -> str:
+        return self._secondary_color
+
     def addStyleSheet(self, css: Path) -> None:
         self._logger.debug("Adding stylesheet: %s", css)
 

@@ -39,6 +39,10 @@ double calculateSingleProperty(double x_A, double x_B, double x_C, double Z_AB, 
 
     double term_AB = frac_B * Z_AB;
     double term_AC = frac_C * Z_AC;
+    // Third term divides by V_BC * V_CB which is zero at triangle corners:
+    //   x_B=0, x_C=1 → V_BC=0
+    //   x_B=1, x_C=0 → V_CB=0
+    // When denominator is zero the result is NaN, which propagates to SQLite.
     double term_BC = (x_B * x_C) / (V_BC * V_CB) * Z_BC;
 
     return term_AB + term_AC + term_BC;
@@ -64,6 +68,8 @@ py::array_t<double> calculatePropertyList(
     py::array_t<double> result(n);
     double* ptr_res = static_cast<double*>(result.request().ptr);
 
+    // NOTE: V_BC*V_CB becomes zero at triangle corners/edges, producing NaN.
+    // Python layer filters these out before SQLite insertion.
     for (Py_ssize_t i = 0; i < n; ++i) {
         double x_A = ptr_xA[i];
         double x_B = ptr_xB[i];

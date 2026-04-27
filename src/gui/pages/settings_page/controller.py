@@ -137,6 +137,26 @@ class SettingsController(QObject):
         self.ui.legend_font_size_spin.valueChanged.connect(
             self._onLegendFontSizeChanged
         )
+        # returnPressed does not pass arguments; use lambda to pass current text
+        self.ui.bg_color_input.returnPressed.connect(
+            lambda: self._onBgColorSubmitted(self.ui.bg_color_input.text())
+        )
+        # returnPressed does not pass arguments; use lambda to pass current text
+        self.ui.fg_color_input.returnPressed.connect(
+            lambda: self._onFgColorSubmitted(self.ui.fg_color_input.text())
+        )
+        self.ui.triangular_levels_spin.valueChanged.connect(
+            self._onTriangularLevelsChanged
+        )
+        self.ui.triangular_alpha_spin.valueChanged.connect(
+            self._onTriangularAlphaChanged
+        )
+        self.ui.triangular_grid_alpha_spin.valueChanged.connect(
+            self._onTriangularGridAlphaChanged
+        )
+        self.ui.triangular_grid_line_width_spin.valueChanged.connect(
+            self._onTriangularGridLineWidthChanged
+        )
 
         # i18n
         # Connect to self.ui instead of self.
@@ -165,6 +185,7 @@ class SettingsController(QObject):
         )
 
     def _scheduleUpdatePlotPreview(self) -> None:
+        # Debounce rapid slider changes - only redraw after user stops dragging.
         self._preview_debounce_timer.start(_PREVIEW_UPDATE_DEBOUNCE_MS)
 
     def _updatePlotPreview(self) -> None:
@@ -373,3 +394,52 @@ class SettingsController(QObject):
     def _onLegendFontSizeChanged(self, value: int):
         self._saveAndReload([SettingsSnapshot("plot", "legendFontSize", str(value))])
         self._scheduleUpdatePlotPreview()
+
+    def _onBgColorSubmitted(self, text: str):
+        if self._validateColor(text):
+            text = self._normalizeColor(text)
+            self.ui.bg_color_input.setText(text)
+            self._saveAndReload([SettingsSnapshot("plot", "bg", text)])
+            self._scheduleUpdatePlotPreview()
+
+    def _onFgColorSubmitted(self, text: str):
+        if self._validateColor(text):
+            text = self._normalizeColor(text)
+            self.ui.fg_color_input.setText(text)
+            self._saveAndReload([SettingsSnapshot("plot", "fg", text)])
+            self._scheduleUpdatePlotPreview()
+
+    # Emit plot_settings_changed so SimulationPage can re-render triangular plots
+    def _onTriangularLevelsChanged(self, value: int):
+        self._saveAndReload([SettingsSnapshot("plot", "triangular_levels", str(value))])
+        self._scheduleUpdatePlotPreview()
+        self.plot_settings_changed.emit()
+
+    # Emit plot_settings_changed so SimulationPage can re-render triangular plots
+    def _onTriangularAlphaChanged(self, value: float):
+        self._saveAndReload([SettingsSnapshot("plot", "triangular_alpha", str(value))])
+        self._scheduleUpdatePlotPreview()
+        self.plot_settings_changed.emit()
+
+    # Emit plot_settings_changed so SimulationPage can re-render triangular plots
+    def _onTriangularGridAlphaChanged(self, value: float):
+        self._saveAndReload([SettingsSnapshot("plot", "triangular_grid_alpha", str(value))])
+        self._scheduleUpdatePlotPreview()
+        self.plot_settings_changed.emit()
+
+    # Emit plot_settings_changed so SimulationPage can re-render triangular plots
+    def _onTriangularGridLineWidthChanged(self, value: float):
+        self._saveAndReload([SettingsSnapshot("plot", "triangular_grid_line_width", str(value))])
+        self._scheduleUpdatePlotPreview()
+        self.plot_settings_changed.emit()
+
+    def _validateColor(self, text: str) -> bool:
+        import re
+        color_pattern = re.compile(r"^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")
+        return bool(color_pattern.match(text.strip()))
+
+    def _normalizeColor(self, text: str) -> str:
+        text = text.strip()
+        if len(text) == 4:
+            text = f"#{text[1]}{text[1]}{text[2]}{text[2]}{text[3]}{text[3]}"
+        return text.upper()
