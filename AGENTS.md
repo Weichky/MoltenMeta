@@ -1,13 +1,5 @@
 # AGENTS.md - AI Agent Guidelines for MoltenMeta
 
-## Skills
-
-| Skill | Description |
-|-------|-------------|
-| `spec-skill` | Objective code review with weighted scoring (Correctness 40%, Readability 25%, Maintainability 20%, Performance 15%). Supports parallel subagent execution and result aggregation. |
-
----
-
 ## Guidelines for AI Agents
 
 1. **Clean Architecture**: Dependency points inward — UI, Services, Use Cases, Entities. Outer layers depend on inner layers, never vice versa.
