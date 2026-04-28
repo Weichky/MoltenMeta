@@ -694,11 +694,4 @@ class KohlerCalc(GeometricModelCalculator):
         }
 
 
-def _linspace(start: float, end: float, num: int) -> list[float]:
-    """Generate evenly spaced points."""
-    if num <= 0:
-        return []
-    if num <= 1:
-        return [start]
-    step = (end - start) / (num - 1)
-    return [start + i * step for i in range(num)]
+

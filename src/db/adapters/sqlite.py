@@ -109,6 +109,13 @@ class SQLiteConnection(DatabaseConnection):
         cursor = self._connection.execute(sql, params or [])
         return SQLiteCursor(cursor)
 
+    def executemany(self, sql: str, params: list[list[Any]]) -> DatabaseCursor:
+        if not self._connection:
+            raise RuntimeError("Database connection not established")
+
+        cursor = self._connection.executemany(sql, params)
+        return SQLiteCursor(cursor)
+
     def commit(self) -> None:
         if self._connection:
             self._connection.commit()

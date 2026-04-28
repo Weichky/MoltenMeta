@@ -141,6 +141,14 @@ class PostgreSQLConnection(DatabaseConnInfo):
         cursor.execute(sql, params)
         return PostgreSQLCursor(cursor)
 
+    def executemany(self, sql: str, params: list[list[Any]]) -> DatabaseCursor:
+        if not self._connection:
+            raise RuntimeError("Database connection not established")
+
+        cursor = self._connection.cursor()
+        cursor.executemany(sql, params)
+        return PostgreSQLCursor(cursor)
+
     def commit(self) -> None:
         if self._connection:
             self._connection.commit()

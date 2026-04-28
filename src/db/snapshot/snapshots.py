@@ -1,12 +1,15 @@
 from dataclasses import dataclass, field
 from datetime import datetime
+
 from .snapshot_base import SnapshotBase
 
 
 def _getRequired(row: dict, *keys: str) -> tuple:
     missing = [k for k in keys if k not in row]
     if missing:
-        raise ValueError(f"fromRow: missing required field(s) {missing} in row with keys {list(row.keys())}")
+        raise ValueError(
+            f"fromRow: missing required field(s) {missing} in row with keys {list(row.keys())}"
+        )
     return tuple(row[k] for k in keys)
 
 
@@ -41,7 +44,7 @@ class SymbolSnapshot(SnapshotBase):
 
     @classmethod
     def fromRow(cls, row) -> "SymbolSnapshot":
-        symbol, = _getRequired(row, "symbol")
+        (symbol,) = _getRequired(row, "symbol")
         instance = cls(
             symbol=symbol,
             name=row.get("name"),
@@ -65,7 +68,7 @@ class UnitSnapshot(SnapshotBase):
 
     @classmethod
     def fromRow(cls, row) -> "UnitSnapshot":
-        symbol, = _getRequired(row, "symbol")
+        (symbol,) = _getRequired(row, "symbol")
         instance = cls(symbol=symbol)
         object.__setattr__(instance, "id", row.get("id"))
         return instance
@@ -87,7 +90,7 @@ class ElementSnapshot(SnapshotBase):
 
     @classmethod
     def fromRow(cls, row) -> "ElementSnapshot":
-        symbol_id, = _getRequired(row, "symbol_id")
+        (symbol_id,) = _getRequired(row, "symbol_id")
         instance = cls(
             symbol_id=symbol_id,
             atomic_mass=row.get("atomic_mass"),
@@ -116,7 +119,7 @@ class SystemSnapshot(SnapshotBase):
 
     @classmethod
     def fromRow(cls, row) -> "SystemSnapshot":
-        label, = _getRequired(row, "label")
+        (label,) = _getRequired(row, "label")
         instance = cls(
             label=label,
             n_component=row.get("n_component"),
@@ -139,7 +142,9 @@ class SystemCompositionSnapshot(SnapshotBase):
 
     @classmethod
     def fromRow(cls, row) -> "SystemCompositionSnapshot":
-        system_id, element_id, fraction = _getRequired(row, "system_id", "element_id", "fraction")
+        system_id, element_id, fraction = _getRequired(
+            row, "system_id", "element_id", "fraction"
+        )
         instance = cls(
             system_id=system_id,
             element_id=element_id,
@@ -193,7 +198,7 @@ class MethodSnapshot(SnapshotBase):
 
     @classmethod
     def fromRow(cls, row) -> "MethodSnapshot":
-        name, = _getRequired(row, "name")
+        (name,) = _getRequired(row, "name")
         instance = cls(
             name=name,
             type=row.get("type"),
@@ -243,7 +248,9 @@ class PropertyValueSnapshot(SnapshotBase):
 
     @classmethod
     def fromRow(cls, row) -> "PropertyValueSnapshot":
-        system_id, property_id, value = _getRequired(row, "system_id", "property_id", "value")
+        system_id, property_id, value = _getRequired(
+            row, "system_id", "property_id", "value"
+        )
         instance = cls(
             system_id=system_id,
             property_id=property_id,
@@ -309,11 +316,9 @@ class MetaSnapshot(SnapshotBase):
 
     @classmethod
     def fromRow(cls, row) -> "MetaSnapshot":
-        value_id, = _getRequired(row, "value_id")
+        (value_id,) = _getRequired(row, "value_id")
         created_at = row.get("created_at")
         if isinstance(created_at, str):
-            from datetime import datetime
-
             created_at = datetime.fromisoformat(created_at)
 
         instance = cls(
@@ -356,8 +361,6 @@ class ComputationCacheSnapshot(SnapshotBase):
     def fromRow(cls, row) -> "ComputationCacheSnapshot":
         created_at = row.get("created_at")
         if isinstance(created_at, str):
-            from datetime import datetime
-
             created_at = datetime.fromisoformat(created_at)
 
         run_id, module_id, method_name, value = _getRequired(
@@ -408,8 +411,6 @@ class PropertyTagSnapshot(SnapshotBase):
     def fromRow(cls, row) -> "PropertyTagSnapshot":
         created_at = row.get("created_at")
         if isinstance(created_at, str):
-            from datetime import datetime
-
             created_at = datetime.fromisoformat(created_at)
 
         property_id, tag = _getRequired(row, "property_id", "tag")
@@ -440,11 +441,9 @@ class DataGroupSnapshot(SnapshotBase):
     def fromRow(cls, row) -> "DataGroupSnapshot":
         created_at = row.get("created_at")
         if isinstance(created_at, str):
-            from datetime import datetime
-
             created_at = datetime.fromisoformat(created_at)
 
-        name, = _getRequired(row, "name")
+        (name,) = _getRequired(row, "name")
         instance = cls(
             name=name,
             priority=row.get("priority") or 0,

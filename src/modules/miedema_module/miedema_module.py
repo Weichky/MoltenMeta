@@ -72,6 +72,8 @@ class MiedemaCalc:
                 }
 
     def _getElementProperties(self, elem_id: int):
+        if elem_id not in self._element_data:
+            raise ValueError(f"Element data not found for elem_id: {elem_id}")
         data = self._element_data[elem_id]
         return _miedema_core.ElementProperties(
             data["v_23"],

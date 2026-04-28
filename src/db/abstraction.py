@@ -1,5 +1,3 @@
-# Manual rewriting is urgently needed
-
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 
@@ -74,6 +72,11 @@ class DatabaseConnection(ABC):
     @abstractmethod
     def execute(self, sql: str, params: list[Any] | None = None) -> "DatabaseCursor":
         """Execute SQL query"""
+        ...
+
+    @abstractmethod
+    def executemany(self, sql: str, params: list[list[Any]]) -> "DatabaseCursor":
+        """Execute SQL query with multiple parameter sets"""
         ...
 
     @abstractmethod

@@ -264,6 +264,18 @@ class HillertToopCalc(GeometricModelCalculator):
                 f"Z_BC_list has {len(Z_BC_list)} values, expected {len(V_BC_list)}"
             )
 
+        V_AB_list = [(1.0 + x_A - x_B) / 2.0 for x_A, x_B in zip(x_A_list, x_B_list)]
+        if len(Z_AB_list) != len(V_AB_list):
+            raise ValueError(
+                f"Z_AB_list has {len(Z_AB_list)} values, expected {len(V_AB_list)}"
+            )
+
+        V_AC_list = [(1.0 + x_A - x_C) / 2.0 for x_A, x_C in zip(x_A_list, x_C_list)]
+        if len(Z_AC_list) != len(V_AC_list):
+            raise ValueError(
+                f"Z_AC_list has {len(Z_AC_list)} values, expected {len(V_AC_list)}"
+            )
+
         Z_ABC_list = self.calculatePropertyList(
             x_A_list, x_B_list, x_C_list, Z_AB_list, Z_AC_list, Z_BC_list
         )
@@ -401,11 +413,4 @@ class HillertToopCalc(GeometricModelCalculator):
         }
 
 
-def _linspace(start: float, end: float, num: int) -> list[float]:
-    """Generate evenly spaced points."""
-    if num <= 0:
-        return []
-    if num <= 1:
-        return [start]
-    step = (end - start) / (num - 1)
-    return [start + i * step for i in range(num)]
+

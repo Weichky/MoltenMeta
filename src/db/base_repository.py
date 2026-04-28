@@ -19,10 +19,8 @@ T = TypeVar("T", bound=EntityProtocol)
 
 
 class BaseRepository(ABC, Generic[T]):
-    def __init__(
-        self, log_service: LogService, db_manager: DatabaseManager | None = None
-    ):
-        self._db_manager = db_manager if db_manager else DatabaseManager()
+    def __init__(self, log_service: LogService, db_manager: DatabaseManager):
+        self._db_manager = db_manager
         self._logger = log_service.getLogger(self.__class__.__name__)
 
     @property
@@ -51,16 +49,8 @@ class BaseRepository(ABC, Generic[T]):
         self.connection.commit()
         self._logger.info(f"Created table {self.getTableName()}")
 
-    # TODO: Add initializate method
-    # def initialize(self) -> None:
-
     @abstractmethod
     def _getCreateTableSql(self) -> str: ...
-
-    # TODO: Add abstract method to get data for intialization
-    # @abstractmethod
-    # def _getInitializationSql(self) -> str:
-    #   ...
 
     def insert(self, entity: T) -> int:
         table = self.getTableName()

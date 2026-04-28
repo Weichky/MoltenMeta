@@ -110,15 +110,18 @@ class SystemCompositionsRepository(BaseRepository[SystemCompositionSnapshot]):
 
         table = self.getTableName()
         dialect = self.dialect
-        placeholders = ", ".join(
-            [dialect.getPlaceholder() for _ in items[0].toRecord().keys()]
-        )
-        sql = f"INSERT OR IGNORE INTO {table} ({', '.join(items[0].toRecord().keys())}) VALUES ({placeholders})"
+        record_keys = list(items[0].toRecord().keys())
+        placeholders = ", ".join([dialect.getPlaceholder() for _ in record_keys])
+
+        if dialect.supportsInsertOrReplace():
+            sql = f"INSERT OR IGNORE INTO {table} ({', '.join(record_keys)}) VALUES ({placeholders})"
+        else:
+            columns = ", ".join(record_keys)
+            sql = f"INSERT INTO {table} ({columns}) VALUES ({placeholders}) ON CONFLICT DO NOTHING"
 
         try:
-            for item in items:
-                record = item.toRecord()
-                self.connection.execute(sql, list(record.values()))
+            params = [item.toRecord().values() for item in items]
+            self.connection.executemany(sql, list(params))
             self.connection.commit()
         except Exception:
             self.connection.rollback()
@@ -261,8 +264,8 @@ class PropertyValuesRepository(BaseRepository[PropertyValueSnapshot]):
         self, group_id: int, limit: int, offset: int
     ) -> List[PropertyValueSnapshot]:
         placeholder = self.dialect.getPlaceholder()
-        sql = f"SELECT * FROM property_values WHERE group_id = {placeholder} ORDER BY id LIMIT {placeholder} OFFSET {placeholder}"
-        cursor = self.connection.execute(sql, [group_id, limit, offset])
+        sql = f"SELECT * FROM property_values WHERE group_id = {placeholder} ORDER BY id LIMIT {limit} OFFSET {offset}"
+        cursor = self.connection.execute(sql, [group_id])
         rows = cursor.fetchall()
         return [PropertyValueSnapshot.fromRow(row) for row in rows]
 
@@ -276,8 +279,8 @@ class PropertyValuesRepository(BaseRepository[PropertyValueSnapshot]):
     def findUngroupedPaginated(
         self, limit: int, offset: int
     ) -> List[PropertyValueSnapshot]:
-        sql = f"SELECT * FROM property_values WHERE group_id IS NULL ORDER BY id LIMIT {self.dialect.getPlaceholder()} OFFSET {self.dialect.getPlaceholder()}"
-        cursor = self.connection.execute(sql, [limit, offset])
+        sql = f"SELECT * FROM property_values WHERE group_id IS NULL ORDER BY id LIMIT {limit} OFFSET {offset}"
+        cursor = self.connection.execute(sql)
         rows = cursor.fetchall()
         return [PropertyValueSnapshot.fromRow(row) for row in rows]
 
@@ -578,9 +581,8 @@ class ComputationCacheRepository(BaseRepository[ComputationCacheSnapshot]):
         placeholders = ", ".join([dialect.getPlaceholder() for _ in columns])
         sql = f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({placeholders})"
         try:
-            for entry in entries:
-                record = entry.toRecord()
-                self.connection.execute(sql, list(record.values()))
+            params = [entry.toRecord().values() for entry in entries]
+            self.connection.executemany(sql, list(params))
             self.connection.commit()
         except Exception:
             self.connection.rollback()
@@ -655,10 +657,26 @@ class PropertyTagsRepository(BaseRepository[PropertyTagSnapshot]):
         return cursor.rowCount
 
     def addTags(self, property_id: int, tags: List[str]) -> int:
-        total = 0
-        for tag in tags:
-            total += self.addTag(property_id, tag)
-        return total
+        if not tags:
+            return 0
+
+        dialect = self.dialect
+        placeholder = dialect.getPlaceholder()
+
+        if dialect.supportsInsertOrReplace():
+            sql = f"INSERT OR IGNORE INTO property_tags (property_id, tag) VALUES ({placeholder}, {placeholder})"
+        else:
+            sql = f"INSERT INTO property_tags (property_id, tag) VALUES ({placeholder}, {placeholder}) ON CONFLICT DO NOTHING"
+
+        try:
+            params = [[property_id, tag] for tag in tags]
+            self.connection.executemany(sql, params)
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+
+        return len(tags)
 
     def removeTag(self, property_id: int, tag: str) -> bool:
         placeholder = self.dialect.getPlaceholder()
