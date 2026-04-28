@@ -152,7 +152,7 @@ class KohlerCalc(GeometricModelCalculator):
             x_A / (x_A + x_B) if (x_A + x_B) > 0 else 0
             for x_A, x_B in zip(x_A_list, x_B_list)
         ]
-        Z_AB_list = self._provider.get_values(elem_A, elem_B, w_AB_list)
+        Z_AB_list = self._provider.getValues(elem_A, elem_B, w_AB_list)
         if len(Z_AB_list) != len(w_AB_list):
             raise ValueError(
                 f"Provider Z_AB returned {len(Z_AB_list)} values, expected {len(w_AB_list)}"
@@ -162,7 +162,7 @@ class KohlerCalc(GeometricModelCalculator):
             x_B / (x_B + x_C) if (x_B + x_C) > 0 else 0
             for x_B, x_C in zip(x_B_list, x_C_list)
         ]
-        Z_BC_list = self._provider.get_values(elem_B, elem_C, w_BC_list)
+        Z_BC_list = self._provider.getValues(elem_B, elem_C, w_BC_list)
         if len(Z_BC_list) != len(w_BC_list):
             raise ValueError(
                 f"Provider Z_BC returned {len(Z_BC_list)} values, expected {len(w_BC_list)}"
@@ -172,7 +172,7 @@ class KohlerCalc(GeometricModelCalculator):
             x_A / (x_A + x_C) if (x_A + x_C) > 0 else 0
             for x_A, x_C in zip(x_A_list, x_C_list)
         ]
-        Z_AC_list = self._provider.get_values(elem_A, elem_C, w_AC_list)
+        Z_AC_list = self._provider.getValues(elem_A, elem_C, w_AC_list)
         if len(Z_AC_list) != len(w_AC_list):
             raise ValueError(
                 f"Provider Z_AC returned {len(Z_AC_list)} values, expected {len(w_AC_list)}"
@@ -334,7 +334,7 @@ class KohlerCalc(GeometricModelCalculator):
                 x_A_flat / (x_A_flat + x_B_flat),
                 0.0,
             )
-        Z_AB_list = self._provider.get_values(elem_A, elem_B, w_AB_flat.tolist())
+        Z_AB_list = self._provider.getValues(elem_A, elem_B, w_AB_flat.tolist())
         if len(Z_AB_list) != len(w_AB_flat):
             raise ValueError(
                 f"Provider Z_AB returned {len(Z_AB_list)} values, expected {len(w_AB_flat)}"
@@ -346,7 +346,7 @@ class KohlerCalc(GeometricModelCalculator):
                 x_B_flat / (x_B_flat + x_C_flat),
                 0.0,
             )
-        Z_BC_list = self._provider.get_values(elem_B, elem_C, w_BC_flat.tolist())
+        Z_BC_list = self._provider.getValues(elem_B, elem_C, w_BC_flat.tolist())
         if len(Z_BC_list) != len(w_BC_flat):
             raise ValueError(
                 f"Provider Z_BC returned {len(Z_BC_list)} values, expected {len(w_BC_flat)}"
@@ -358,7 +358,7 @@ class KohlerCalc(GeometricModelCalculator):
                 x_A_flat / (x_A_flat + x_C_flat),
                 0.0,
             )
-        Z_AC_list = self._provider.get_values(elem_A, elem_C, w_AC_flat.tolist())
+        Z_AC_list = self._provider.getValues(elem_A, elem_C, w_AC_flat.tolist())
         if len(Z_AC_list) != len(w_AC_flat):
             raise ValueError(
                 f"Provider Z_AC returned {len(Z_AC_list)} values, expected {len(w_AC_flat)}"

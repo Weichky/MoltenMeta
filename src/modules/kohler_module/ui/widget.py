@@ -194,17 +194,17 @@ class KohlerWizardDialog(QDialog):
         wABList = [
             xA / (xA + xB) if (xA + xB) > 0 else 0 for xA, xB in zip(xAList, xBList)
         ]
-        zABList = zAbSource.get_values(elemA, elemB, wABList)
+        zABList = zAbSource.getValues(elemA, elemB, wABList)
 
         wBCList = [
             xB / (xB + xC) if (xB + xC) > 0 else 0 for xB, xC in zip(xBList, xCList)
         ]
-        zBCList = zBcSource.get_values(elemB, elemC, wBCList)
+        zBCList = zBcSource.getValues(elemB, elemC, wBCList)
 
         wACList = [
             xA / (xA + xC) if (xA + xC) > 0 else 0 for xA, xC in zip(xAList, xCList)
         ]
-        zACList = zAcSource.get_values(elemA, elemC, wACList)
+        zACList = zAcSource.getValues(elemA, elemC, wACList)
 
         zSymbol, zLatex, zUnit = self._getOutputSymbolLatexUnit(zAbSource)
 

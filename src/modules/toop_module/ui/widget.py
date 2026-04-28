@@ -230,13 +230,13 @@ class ToopWizardDialog(QDialog):
         zAcSource = sources["Z_AC"]
         zBcSource = sources["Z_BC"]
 
-        zABList = zAbSource.get_values(elemA, elemB, xAList)
-        zACList = zAcSource.get_values(elemA, elemC, xAList)
+        zABList = zAbSource.getValues(elemA, elemB, xAList)
+        zACList = zAcSource.getValues(elemA, elemC, xAList)
 
         wBList = [
             xB / (xB + xC) if (xB + xC) > 0 else 0 for xB, xC in zip(xBList, xCList)
         ]
-        zBCList = zBcSource.get_values(elemB, elemC, wBList)
+        zBCList = zBcSource.getValues(elemB, elemC, wBList)
 
         zSymbol, zLatex, zUnit = self._getOutputSymbolLatexUnit(zAbSource)
 

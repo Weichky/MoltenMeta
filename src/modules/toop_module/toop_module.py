@@ -145,13 +145,13 @@ class ToopCalc(GeometricModelCalculator):
                 extra_conditions={"output_symbol": z_symbol} if z_symbol else None,
             )
 
-        Z_AB_list = self._provider.get_values(elem_A, elem_B, x_A_list)
+        Z_AB_list = self._provider.getValues(elem_A, elem_B, x_A_list)
         if len(Z_AB_list) != len(x_A_list):
             raise ValueError(
                 f"Provider Z_AB returned {len(Z_AB_list)} values, expected {len(x_A_list)}"
             )
 
-        Z_AC_list = self._provider.get_values(elem_A, elem_C, x_A_list)
+        Z_AC_list = self._provider.getValues(elem_A, elem_C, x_A_list)
         if len(Z_AC_list) != len(x_A_list):
             raise ValueError(
                 f"Provider Z_AC returned {len(Z_AC_list)} values, expected {len(x_A_list)}"
@@ -161,7 +161,7 @@ class ToopCalc(GeometricModelCalculator):
             x_B / (x_B + x_C) if (x_B + x_C) > 0 else 0
             for x_B, x_C in zip(x_B_list, x_C_list)
         ]
-        Z_BC_list = self._provider.get_values(elem_B, elem_C, w_B_list)
+        Z_BC_list = self._provider.getValues(elem_B, elem_C, w_B_list)
         if len(Z_BC_list) != len(w_B_list):
             raise ValueError(
                 f"Provider Z_BC returned {len(Z_BC_list)} values, expected {len(w_B_list)}"
@@ -317,13 +317,13 @@ class ToopCalc(GeometricModelCalculator):
                 "plane": plane,
             }
 
-        Z_AB_list = self._provider.get_values(elem_A, elem_B, x_A_flat.tolist())
+        Z_AB_list = self._provider.getValues(elem_A, elem_B, x_A_flat.tolist())
         if len(Z_AB_list) != len(x_A_flat):
             raise ValueError(
                 f"Provider Z_AB returned {len(Z_AB_list)} values, expected {len(x_A_flat)}"
             )
 
-        Z_AC_list = self._provider.get_values(elem_A, elem_C, x_A_flat.tolist())
+        Z_AC_list = self._provider.getValues(elem_A, elem_C, x_A_flat.tolist())
         if len(Z_AC_list) != len(x_A_flat):
             raise ValueError(
                 f"Provider Z_AC returned {len(Z_AC_list)} values, expected {len(x_A_flat)}"
@@ -335,7 +335,7 @@ class ToopCalc(GeometricModelCalculator):
                 x_B_flat / (x_B_flat + x_C_flat),
                 0.0,
             )
-        Z_BC_list = self._provider.get_values(elem_B, elem_C, w_B_flat.tolist())
+        Z_BC_list = self._provider.getValues(elem_B, elem_C, w_B_flat.tolist())
         if len(Z_BC_list) != len(w_B_flat):
             raise ValueError(
                 f"Provider Z_BC returned {len(Z_BC_list)} values, expected {len(w_B_flat)}"

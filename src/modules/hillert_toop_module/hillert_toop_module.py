@@ -145,11 +145,11 @@ class HillertToopCalc(GeometricModelCalculator):
                 extra_conditions={"output_symbol": output_symbol},
             )
 
-        Z_AB_list = self._provider.get_values(elem_A, elem_B, x_A_list)
-        Z_AC_list = self._provider.get_values(elem_A, elem_C, x_A_list)
+        Z_AB_list = self._provider.getValues(elem_A, elem_B, x_A_list)
+        Z_AC_list = self._provider.getValues(elem_A, elem_C, x_A_list)
 
         V_BC_list = [(1.0 + x_B - x_C) / 2.0 for x_B, x_C in zip(x_B_list, x_C_list)]
-        Z_BC_list = self._provider.get_values(elem_B, elem_C, V_BC_list)
+        Z_BC_list = self._provider.getValues(elem_B, elem_C, V_BC_list)
 
         Z_ABC_list = self.calculatePropertyList(
             x_A_list, x_B_list, x_C_list, Z_AB_list, Z_AC_list, Z_BC_list

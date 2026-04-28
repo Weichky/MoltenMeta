@@ -133,11 +133,11 @@ class HillertToopScatterWizardDialog(QDialog):
             )
             return
 
-        zABList = zAbSource.get_values(elemA, elemB, xAList)
-        zACList = zAcSource.get_values(elemA, elemC, xAList)
+        zABList = zAbSource.getValues(elemA, elemB, xAList)
+        zACList = zAcSource.getValues(elemA, elemC, xAList)
 
         V_BC_list = [(1.0 + xB - xC) / 2.0 for xB, xC in zip(xBList, xCList)]
-        zBCList = zBcSource.get_values(elemB, elemC, V_BC_list)
+        zBCList = zBcSource.getValues(elemB, elemC, V_BC_list)
 
         zSymbol, zLatex, zUnit = self._getOutputSymbolLatexUnit(zAbSource)
 

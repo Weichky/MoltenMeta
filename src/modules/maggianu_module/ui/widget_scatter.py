@@ -134,13 +134,13 @@ class MaggianuScatterWizardDialog(QDialog):
             return
 
         V_AB_list = [(1.0 + xA - xB) / 2.0 for xA, xB in zip(xAList, xBList)]
-        zABList = zAbSource.get_values(elemA, elemB, V_AB_list)
+        zABList = zAbSource.getValues(elemA, elemB, V_AB_list)
 
         V_BC_list = [(1.0 + xB - xC) / 2.0 for xB, xC in zip(xBList, xCList)]
-        zBCList = zBcSource.get_values(elemB, elemC, V_BC_list)
+        zBCList = zBcSource.getValues(elemB, elemC, V_BC_list)
 
         V_AC_list = [(1.0 + xA - xC) / 2.0 for xA, xC in zip(xAList, xCList)]
-        zACList = zAcSource.get_values(elemA, elemC, V_AC_list)
+        zACList = zAcSource.getValues(elemA, elemC, V_AC_list)
 
         zSymbol, zLatex, zUnit = self._getOutputSymbolLatexUnit(zAbSource)
 

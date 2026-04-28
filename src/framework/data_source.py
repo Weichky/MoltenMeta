@@ -13,11 +13,11 @@ class DataSource(ABC):
         """Returns 'Miedema' or 'Fe-Cu-001' etc"""
 
     @abstractmethod
-    def get_value(self, elem_1: int, elem_2: int, x: float) -> float:
+    def getValue(self, elem_1: int, elem_2: int, x: float) -> float:
         """Single point query"""
 
     @abstractmethod
-    def get_values(self, elem_1: int, elem_2: int, x_array: list[float]) -> list[float]:
+    def getValues(self, elem_1: int, elem_2: int, x_array: list[float]) -> list[float]:
         """Batch query"""
 
 
@@ -46,7 +46,7 @@ class ModuleDataSource(DataSource):
     def output_symbol(self) -> str:
         return self._output_symbol
 
-    def get_value(self, elem_1: int, elem_2: int, x: float) -> float:
+    def getValue(self, elem_1: int, elem_2: int, x: float) -> float:
         result = self._ms.callMethod(
             self._module,
             self._method,
@@ -57,7 +57,7 @@ class ModuleDataSource(DataSource):
         )
         return result["values"][0][self._output_symbol]
 
-    def get_values(self, elem_1: int, elem_2: int, x_array: list[float]) -> list[float]:
+    def getValues(self, elem_1: int, elem_2: int, x_array: list[float]) -> list[float]:
         result = self._ms.callMethod(
             self._module,
             self._method,
@@ -81,9 +81,9 @@ class DatabaseDataSource(DataSource):
     def source_name(self) -> str:
         return self._record.get("name", "Unknown")
 
-    def get_value(self, elem_1: int, elem_2: int, x: float) -> float:
+    def getValue(self, elem_1: int, elem_2: int, x: float) -> float:
         return self._record.get("value", 0.0)
 
-    def get_values(self, elem_1: int, elem_2: int, x_array: list[float]) -> list[float]:
+    def getValues(self, elem_1: int, elem_2: int, x_array: list[float]) -> list[float]:
         value = self._record.get("value", 0.0)
         return [{"value": value} for _ in x_array]
