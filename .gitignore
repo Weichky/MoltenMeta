@@ -1,5 +1,8 @@
 # Note that there is an exclusion list at the end
 
+# uv
+uv.lock
+
 # .so
 *.so
 
