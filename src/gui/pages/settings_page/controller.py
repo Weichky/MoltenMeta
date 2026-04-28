@@ -117,8 +117,8 @@ class SettingsController(QObject):
             self._onDensityScaleChanged
         )
 
-        self.ui.primary_color_input.textChanged.connect(self._onPrimaryColorChanged)
-        self.ui.secondary_color_input.textChanged.connect(self._onSecondaryColorChanged)
+        self.ui.primary_color_input.textChanged.connect(self._onPrimaryColorSubmitted)
+        self.ui.secondary_color_input.textChanged.connect(self._onSecondaryColorSubmitted)
 
         self.ui.palette_combo.currentIndexChanged.connect(self._onColorschemeChanged)
         self.ui.algorithm_combo.currentIndexChanged.connect(
