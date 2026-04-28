@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from framework.binary_provider import BinaryDataProvider
 
 from .element_map import elemIdToSymbol
-from ..grid_module.grid import generateTriangularGrid
+from modules.geometric_model_core import GeometricModelCalculator
 
 _MODULE_DIR = Path(__file__).parent
 
@@ -28,12 +28,16 @@ with open(_MODULE_DIR / "config.toml", "rb") as _f:
     MODULE_INFO = tomllib.load(_f)
 
 
-class ToopCalc:
+class ToopCalc(GeometricModelCalculator):
     def __init__(self, binary_provider: "BinaryDataProvider | None" = None):
+        super().__init__()
         self._provider = binary_provider
 
     def setProvider(self, provider: "BinaryDataProvider") -> None:
         self._provider = provider
+
+    def _getMethodName(self) -> str:
+        return "Toop"
 
     def calculateSingleProperty(
         self,
@@ -101,17 +105,6 @@ class ToopCalc:
             x_B_arr, x_C_arr, Z_AB_arr, Z_AC_arr, Z_BC_arr
         )
         return result.tolist()
-
-    def _generateGrid(
-        self, n_points: int
-    ) -> tuple[list[float], list[float], list[float]]:
-        """Generate triangular grid points on x_A + x_B + x_C = 1 via C++."""
-        if n_points <= 0:
-            return [], [], []
-        if n_points == 1:
-            return [0.0], [0.0], [1.0]
-        x_A_arr, x_B_arr, x_C_arr = generateTriangularGrid(n_points)
-        return list(x_A_arr), list(x_B_arr), list(x_C_arr)
 
     def calculateScatter(
         self,
@@ -369,53 +362,6 @@ class ToopCalc:
             "x_j": x_j_mesh.tolist(),
             "Z_ABC": Z_ABC_mesh.tolist(),
             "plane": plane,
-        }
-
-    def _emptyResult(
-        self,
-        elem_A: int,
-        elem_B: int,
-        elem_C: int,
-        cfg: dict,
-        extra_conditions: dict | None = None,
-    ) -> dict:
-        """Return an empty result structure for edge cases."""
-        fallback_symbol = cfg["outputs"]["symbol"][0]
-        output_symbol = (
-            extra_conditions.get("output_symbol", fallback_symbol)
-            if extra_conditions
-            else fallback_symbol
-        )
-        conditions = {
-            "elem_A": elemIdToSymbol(elem_A),
-            "elem_B": elemIdToSymbol(elem_B),
-            "elem_C": elemIdToSymbol(elem_C),
-        }
-        if extra_conditions:
-            conditions.update(extra_conditions)
-
-        return {
-            "conditions": conditions,
-            "values": [],
-            "units": {
-                "x_A": "",
-                "x_B": "",
-                "x_C": "",
-                output_symbol: cfg["outputs"]["unit"].get(
-                    output_symbol, cfg["outputs"]["unit"].get(fallback_symbol, "")
-                ),
-            },
-            "latex": {
-                "x_A": "x_A",
-                "x_B": "x_B",
-                "x_C": "x_C",
-                output_symbol: cfg["outputs"]["latex"].get(
-                    output_symbol, cfg["outputs"]["latex"].get(fallback_symbol, "")
-                ),
-            },
-            "dims": ["x_A", "x_B", "x_C", output_symbol],
-            "main_dim": output_symbol,
-            "method": "Toop",
         }
 
     def calculateScatterWithData(

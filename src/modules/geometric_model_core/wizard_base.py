@@ -17,108 +17,9 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Signal
 
-ELEMENT_SYMBOLS = [
-    "H",
-    "He",
-    "Li",
-    "Be",
-    "B",
-    "C",
-    "N",
-    "O",
-    "F",
-    "Ne",
-    "Na",
-    "Mg",
-    "Al",
-    "Si",
-    "P",
-    "S",
-    "Cl",
-    "Ar",
-    "K",
-    "Ca",
-    "Sc",
-    "Ti",
-    "V",
-    "Cr",
-    "Mn",
-    "Fe",
-    "Co",
-    "Ni",
-    "Cu",
-    "Zn",
-    "Ga",
-    "Ge",
-    "As",
-    "Se",
-    "Br",
-    "Kr",
-    "Rb",
-    "Sr",
-    "Y",
-    "Zr",
-    "Nb",
-    "Mo",
-    "Tc",
-    "Ru",
-    "Rh",
-    "Pd",
-    "Ag",
-    "Cd",
-    "In",
-    "Sn",
-    "Sb",
-    "Te",
-    "I",
-    "Xe",
-    "Cs",
-    "Ba",
-    "La",
-    "Ce",
-    "Pr",
-    "Nd",
-    "Pm",
-    "Sm",
-    "Eu",
-    "Gd",
-    "Tb",
-    "Dy",
-    "Ho",
-    "Er",
-    "Tm",
-    "Yb",
-    "Lu",
-    "Hf",
-    "Ta",
-    "W",
-    "Re",
-    "Os",
-    "Ir",
-    "Pt",
-    "Au",
-    "Hg",
-    "Tl",
-    "Pb",
-    "Bi",
-    "Po",
-    "At",
-    "Rn",
-    "Fr",
-    "Ra",
-    "Ac",
-    "Th",
-    "Pa",
-    "U",
-    "Np",
-    "Pu",
-    "Am",
-    "Cm",
-    "Bk",
-    "Cf",
-    "Es",
-    "Fm",
-]
+from modules.element_map.element_map import ELEMENT_ID_TO_SYMBOL, elemSymbolToId
+
+ELEMENT_SYMBOLS = list(ELEMENT_ID_TO_SYMBOL.values())
 
 
 class StepIndicator(QWidget):
@@ -190,15 +91,7 @@ class ElementSelectionPage(QWidget):
             lambda: self.selectionChanged.emit()
         )
 
-    def setElements(self, elemA: int, elemB: int, elemC: int) -> None:
-        from ..element_map.element_map import elemSymbolToId
-
-        self._elemACombo.setCurrentText(elemSymbolToId(elemA))
-        self._elemBCombo.setCurrentText(elemSymbolToId(elemB))
-        self._elemCCombo.setCurrentText(elemSymbolToId(elemC))
-
     def getElements(self) -> tuple[int, int, int]:
-        from ..element_map.element_map import elemSymbolToId
 
         a = elemSymbolToId(self._elemACombo.currentText())
         b = elemSymbolToId(self._elemBCombo.currentText())

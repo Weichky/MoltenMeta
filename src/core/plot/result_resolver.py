@@ -323,8 +323,9 @@ class ResultResolver:
         }
 
     def setCurrentCoord(self, index: int) -> None:
-        if 0 <= index < len(self._scatters):
-            self._currentCoordIndex = index
+        if index < 0 or index >= len(self._scatters):
+            return
+        self._currentCoordIndex = index
 
     def useDefaultCoord(self) -> None:
         if 0 <= self._defaultCoordIndex < len(self._scatters):

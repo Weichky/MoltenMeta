@@ -1,4 +1,5 @@
 from .data_source_discovery import BinaryDataSourceDiscovery
+from .base_calculator import GeometricModelCalculator
 from .wizard_base import (
     StepIndicator,
     ElementSelectionPage,
@@ -10,6 +11,7 @@ from .wizard_base import (
 
 __all__ = [
     "BinaryDataSourceDiscovery",
+    "GeometricModelCalculator",
     "StepIndicator",
     "ElementSelectionPage",
     "GeometricModelWizardMixin",

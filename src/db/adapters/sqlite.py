@@ -5,6 +5,7 @@ from pathlib import Path
 from db.abstraction import (
     DatabaseDialect,
     DatabaseCursor,
+    DatabaseConnection,
 )
 
 from catalog import DatabaseConnInfo
@@ -72,20 +73,21 @@ class SQLiteCursor(DatabaseCursor):
         return self._cursor.lastrowid
 
 
-class SQLiteConnection(DatabaseConnInfo):
+class SQLiteConnection(DatabaseConnection):
     """SQLite connection implementation"""
 
     def __init__(self, config: DatabaseConnInfo, log_service: LogService):
-        self.config = config
+        super().__init__()
+        self._config = config
         self._connection: sqlite3.Connection | None = None
         self._dialect = SQLiteDialect()
         self._logger = log_service.getLogger(__name__)
 
     def connect(self) -> None:
-        if self.config.file_path is None:
+        if self._config.file_path is None:
             raise ValueError("SQLite requires file_path in config")
 
-        db_path = Path(self.config.file_path)
+        db_path = Path(self._config.file_path)
         db_path.parent.mkdir(parents=True, exist_ok=True)
 
         self._connection = sqlite3.connect(db_path)

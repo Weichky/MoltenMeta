@@ -131,6 +131,9 @@ class BaseRepository(ABC, Generic[T]):
         record = entity.toRecord()
         columns = list(record.keys())
         placeholder = self.dialect.getPlaceholder()
+        # NOTE: column names come from entity.toRecord().keys() which is internal app data,
+        # not user input. For this offline desktop app with local SQLite only, SQL injection
+        # is not a risk.
         set_clause = ", ".join([f"{col} = {placeholder}" for col in columns])
         values = list(record.values())
         values.append(entity.id)

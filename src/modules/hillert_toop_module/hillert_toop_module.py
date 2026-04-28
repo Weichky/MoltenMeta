@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from framework.binary_provider import BinaryDataProvider
 
 from .element_map import elemIdToSymbol
-from ..grid_module.grid import generateTriangularGrid
+from modules.geometric_model_core import GeometricModelCalculator
 
 _MODULE_DIR = Path(__file__).parent
 
@@ -28,12 +28,16 @@ with open(_MODULE_DIR / "config.toml", "rb") as _f:
     MODULE_INFO = tomllib.load(_f)
 
 
-class HillertToopCalc:
+class HillertToopCalc(GeometricModelCalculator):
     def __init__(self, binary_provider: "BinaryDataProvider | None" = None):
+        super().__init__()
         self._provider = binary_provider
 
     def setProvider(self, provider: "BinaryDataProvider") -> None:
         self._provider = provider
+
+    def _getMethodName(self) -> str:
+        return "HillertToop"
 
     def calculateSingleProperty(
         self,
@@ -105,17 +109,6 @@ class HillertToopCalc:
             x_A_arr, x_B_arr, x_C_arr, Z_AB_arr, Z_AC_arr, Z_BC_arr
         )
         return result.tolist()
-
-    def _generateGrid(
-        self, n_points: int
-    ) -> tuple[list[float], list[float], list[float]]:
-        """Generate triangular grid points on x_A + x_B + x_C = 1 via C++."""
-        if n_points <= 0:
-            return [], [], []
-        if n_points == 1:
-            return [0.0], [0.0], [1.0]
-        x_A_arr, x_B_arr, x_C_arr = generateTriangularGrid(n_points)
-        return list(x_A_arr), list(x_B_arr), list(x_C_arr)
 
     def calculateScatter(
         self,
@@ -317,38 +310,6 @@ class HillertToopCalc:
             "x_j": x_B_list,
             output_symbol: Z_ABC_list,
             "plane": plane,
-        }
-
-    def _emptyResult(self, elem_A, elem_B, elem_C, cfg, extra_conditions=None):
-        conditions = {
-            "elem_A": elemIdToSymbol(elem_A),
-            "elem_B": elemIdToSymbol(elem_B),
-            "elem_C": elemIdToSymbol(elem_C),
-        }
-        if extra_conditions:
-            conditions.update(extra_conditions)
-        return {
-            "conditions": conditions,
-            "values": [],
-            "units": {
-                "x_A": "",
-                "x_B": "",
-                "x_C": "",
-                cfg["outputs"]["symbol"][0]: cfg["outputs"]["unit"][
-                    cfg["outputs"]["symbol"][0]
-                ],
-            },
-            "latex": {
-                "x_A": "x_A",
-                "x_B": "x_B",
-                "x_C": "x_C",
-                cfg["outputs"]["symbol"][0]: cfg["outputs"]["latex"][
-                    cfg["outputs"]["symbol"][0]
-                ],
-            },
-            "dims": ["x_A", "x_B", "x_C", cfg["outputs"]["symbol"][0]],
-            "main_dim": cfg["outputs"]["symbol"][0],
-            "method": "HillertToop",
         }
 
     def calculateScatterWithData(
