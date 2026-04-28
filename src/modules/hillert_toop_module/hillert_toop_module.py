@@ -86,7 +86,7 @@ class HillertToopCalc(GeometricModelCalculator):
             "method": "HillertToop",
         }
 
-    def calculatePropertyList(
+    def _calculatePropertyListImpl(
         self,
         x_A_list: list[float],
         x_B_list: list[float],
@@ -411,6 +411,3 @@ class HillertToopCalc(GeometricModelCalculator):
             "main_dim": output_symbol,
             "method": "HillertToop",
         }
-
-
-

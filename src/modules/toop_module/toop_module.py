@@ -84,8 +84,9 @@ class ToopCalc(GeometricModelCalculator):
             "method": "Toop",
         }
 
-    def calculatePropertyList(
+    def _calculatePropertyListImpl(
         self,
+        x_A_list: list[float],
         x_B_list: list[float],
         x_C_list: list[float],
         Z_AB_list: list[float],
@@ -649,6 +650,3 @@ class ToopCalc(GeometricModelCalculator):
             output_symbol: Z_ABC_list,
             "plane": plane,
         }
-
-
-

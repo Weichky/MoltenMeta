@@ -35,6 +35,13 @@ if TYPE_CHECKING:
 _logger = logging.getLogger(__name__)
 
 
+class _NotGiven:
+    pass
+
+
+_NOT_GIVEN = _NotGiven()
+
+
 @dataclass(frozen=True)
 class PlotStyleConfig:
     plotType: str = DEFAULT_PLOT_TYPE
@@ -194,17 +201,17 @@ class PlotStyleService:
             or system_style.markerSize
         )
         grid = (
-            method_colorscheme.get("grid", NotImplemented)
+            method_colorscheme.get("grid", _NOT_GIVEN)
             if "grid" in method_colorscheme
-            else module_colorscheme.get("grid", NotImplemented)
+            else module_colorscheme.get("grid", _NOT_GIVEN)
             if "grid" in module_colorscheme
             else (
                 settings.get("plot", "grid") == "true"
                 if settings and settings.get("plot", "grid")
-                else NotImplemented
+                else _NOT_GIVEN
             )
         )
-        if grid is NotImplemented:
+        if grid is _NOT_GIVEN:
             grid = system_style.grid
 
         gridMode = (

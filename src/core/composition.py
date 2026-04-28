@@ -115,11 +115,10 @@ class CompositionTool:
             )
 
         if fraction_type == FractionType.MOLE:
-            expected = 1.0 if max(fractions) <= 1.0 else 100.0
             actual = sum(fractions)
-            if abs(actual - expected) > 1e-6:
+            if abs(actual - 1.0) > 1e-6 and abs(actual - 100.0) > 1e-6:
                 raise CompositionError(
-                    f"Total fractions must be {expected}, got {actual:.4f}"
+                    f"Total fractions must be 1.0 or 100.0, got {actual:.4f}"
                 )
         elif n_missing == 0:
             actual = sum(fractions)

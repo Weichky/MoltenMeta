@@ -87,15 +87,42 @@ class GeometricModelCalculator(ABC):
             "method": self._getMethodName(),
         }
 
-    @abstractmethod
     def calculatePropertyList(
         self,
         x_A_list: list[float],
         x_B_list: list[float],
         x_C_list: list[float],
-        *binary_values: list[float],
+        Z_AB_list: list[float],
+        Z_AC_list: list[float],
+        Z_BC_list: list[float],
     ) -> list[float]:
-        """Calculate ternary property from binary values. Must be implemented by subclass."""
+        if len(Z_AB_list) != len(x_A_list):
+            raise ValueError(
+                f"Z_AB_list length {len(Z_AB_list)} must match x_A_list length {len(x_A_list)}"
+            )
+        if len(Z_AC_list) != len(x_A_list):
+            raise ValueError(
+                f"Z_AC_list length {len(Z_AC_list)} must match x_A_list length {len(x_A_list)}"
+            )
+        if len(Z_BC_list) != len(x_A_list):
+            raise ValueError(
+                f"Z_BC_list length {len(Z_BC_list)} must match x_A_list length {len(x_A_list)}"
+            )
+        return self._calculatePropertyListImpl(
+            x_A_list, x_B_list, x_C_list, Z_AB_list, Z_AC_list, Z_BC_list
+        )
+
+    @abstractmethod
+    def _calculatePropertyListImpl(
+        self,
+        x_A_list: list[float],
+        x_B_list: list[float],
+        x_C_list: list[float],
+        Z_AB_list: list[float],
+        Z_AC_list: list[float],
+        Z_BC_list: list[float],
+    ) -> list[float]:
+        """Internal implementation of ternary property calculation. Must be implemented by subclass."""
         ...
 
     @abstractmethod

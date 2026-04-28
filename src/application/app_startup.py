@@ -2,7 +2,12 @@ from core.log import LogService
 from core.platform import getArgs, getRuntimePath
 
 from db.core import DatabaseManager
-from catalog import DatabaseType, DatabaseConnInfo, UI_THEME_PRIMARY_DEFAULT, UI_THEME_SECONDARY_DEFAULT
+from catalog import (
+    DatabaseType,
+    DatabaseConnInfo,
+    UI_THEME_PRIMARY_DEFAULT,
+    UI_THEME_SECONDARY_DEFAULT,
+)
 
 from .app_context import AppContext
 

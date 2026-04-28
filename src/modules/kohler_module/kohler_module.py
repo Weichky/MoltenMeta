@@ -86,14 +86,14 @@ class KohlerCalc(GeometricModelCalculator):
             "method": "Kohler",
         }
 
-    def calculatePropertyList(
+    def _calculatePropertyListImpl(
         self,
         x_A_list: list[float],
         x_B_list: list[float],
         x_C_list: list[float],
         Z_AB_list: list[float],
-        Z_BC_list: list[float],
         Z_AC_list: list[float],
+        Z_BC_list: list[float],
     ) -> list[float]:
         """Call C++ batch calculation."""
         import numpy as np
@@ -692,6 +692,3 @@ class KohlerCalc(GeometricModelCalculator):
             output_symbol: Z_ABC_list,
             "plane": plane,
         }
-
-
-

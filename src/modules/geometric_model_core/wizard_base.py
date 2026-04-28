@@ -150,6 +150,8 @@ class GeometricModelWizardMixin(ABC):
         if source is None:
             return "", "", ""
         moduleName = source.source_name
+        if not moduleName:
+            return "", "", ""
         outputSymbol = source.output_symbol
         config = module_service.getModuleConfig(moduleName)
         if not config:

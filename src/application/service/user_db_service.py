@@ -1,4 +1,5 @@
 import csv
+import os
 from dataclasses import dataclass, field
 
 from PySide6.QtCore import QObject, Signal
@@ -197,7 +198,7 @@ class UserDbService(QObject):
             system_cache: dict[str, int] = {}
             compo_items: list[SystemCompositionSnapshot] = []
             property_values: list[PropertyValueSnapshot] = []
-            source_file = file_path.split("/")[-1]
+            source_file = os.path.basename(file_path)
 
             for row_idx, row in enumerate(rows, start=2):
                 system_label = row.get("system_label", "").strip()
@@ -322,6 +323,7 @@ class UserDbService(QObject):
                 self._system_composition_repo.insertBatch(compo_items)
 
             conn = self._db_manager.connection
+            dialect = conn.getDialect()
             conn.execute("BEGIN TRANSACTION")
             try:
                 for pv in property_values:
@@ -332,7 +334,9 @@ class UserDbService(QObject):
                         if k != "id" or pv_record.get("id") is not None
                     ]
                     pv_values = [pv_record[k] for k in pv_columns]
-                    placeholders = ", ".join(["?" for _ in pv_columns])
+                    placeholders = ", ".join(
+                        [dialect.getPlaceholder() for _ in pv_columns]
+                    )
                     sql = f"INSERT INTO property_values ({', '.join(pv_columns)}) VALUES ({placeholders})"
                     cursor = conn.execute(sql, pv_values)
                     value_id = cursor.lastRowId
@@ -350,12 +354,15 @@ class UserDbService(QObject):
                         if k != "id" or meta_record.get("id") is not None
                     ]
                     meta_values = [meta_record[k] for k in meta_columns]
-                    meta_sql = f"INSERT INTO meta ({', '.join(meta_columns)}) VALUES ({', '.join(['?' for _ in meta_columns])})"
+                    meta_placeholders = ", ".join(
+                        [dialect.getPlaceholder() for _ in meta_columns]
+                    )
+                    meta_sql = f"INSERT INTO meta ({', '.join(meta_columns)}) VALUES ({meta_placeholders})"
                     conn.execute(meta_sql, meta_values)
 
                 conn.commit()
             except Exception as e:
-                conn.execute("ROLLBACK")
+                conn.rollback()
                 self._data_groups_repo.delete(group_id)
                 return ImportResult(
                     success=False,

@@ -28,12 +28,6 @@ class BinaryDataSourceDiscovery:
     ):
         self._ms = module_service
         self._user_db = user_db_service
-        self._unified_query = None
-
-    def _getUnifiedQuery(self):
-        if self._unified_query is None:
-            return None
-        return self._unified_query
 
     def findSources(self, tag: str, elem_1: int, elem_2: int) -> list:
         """

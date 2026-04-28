@@ -48,6 +48,22 @@ class ResultResolver:
                 title = title.replace(placeholder, str(value))
         return title
 
+    def _resolveKey(
+        self,
+        coord_key: str,
+        dims: list[str],
+        values: list,
+        main_dim: str | None,
+        fallback_key: str | None,
+    ) -> str:
+        if coord_key in dims and (not values or coord_key in values[0]):
+            return coord_key
+        if fallback_key and fallback_key in dims:
+            return fallback_key
+        if main_dim and main_dim in dims:
+            return main_dim
+        return coord_key
+
     def resolve(self, result: dict) -> ResolvedData | None:
         # Dispatch to the appropriate resolution path based on plot type.
         # Each path returns a ResolvedData structure with axis definitions,
@@ -147,6 +163,7 @@ class ResultResolver:
             "availableCoords": [],
             "currentCoordIndex": 0,
             "plotType": "contour_triangular",
+            "meshData": None,
             "values": result.get("values", []),
             "conditions": result.get("conditions", {}),
             "title": self._replaceTitlePlaceholders(
@@ -165,15 +182,6 @@ class ResultResolver:
         dims = result.get("dims", [])
         main_dim = result.get("main_dim")
 
-        def resolveKey(coord_key: str, fallback_key: str | None) -> str:
-            if coord_key in dims and (not values or coord_key in values[0]):
-                return coord_key
-            if fallback_key and fallback_key in dims:
-                return fallback_key
-            if main_dim and main_dim in dims:
-                return main_dim
-            return coord_key
-
         x_key = coord.get("x", "")
         y_value = coord.get("y", [])
         if isinstance(y_value, str):
@@ -182,9 +190,14 @@ class ResultResolver:
             y_keys = y_value
         z_key = coord.get("z", "")
 
-        x_key = resolveKey(x_key, None)
-        y_keys = [resolveKey(k, dims[1] if len(dims) > 1 else None) for k in y_keys]
-        z_key = resolveKey(z_key, main_dim)
+        x_key = self._resolveKey(x_key, dims, values, main_dim, None)
+        y_keys = [
+            self._resolveKey(
+                k, dims, values, main_dim, dims[1] if len(dims) > 1 else None
+            )
+            for k in y_keys
+        ]
+        z_key = self._resolveKey(z_key, dims, values, main_dim, main_dim)
 
         x_data = [v.get(x_key, 0) for v in values]
 
@@ -261,15 +274,6 @@ class ResultResolver:
         dims = result.get("dims", [])
         main_dim = result.get("main_dim")
 
-        def resolveKey(coord_key: str, fallback_key: str | None) -> str:
-            if coord_key in dims and (not values or coord_key in values[0]):
-                return coord_key
-            if fallback_key and fallback_key in dims:
-                return fallback_key
-            if main_dim and main_dim in dims:
-                return main_dim
-            return coord_key
-
         x_key = coord.get("x", "")
         y_value = coord.get("y", [])
         if isinstance(y_value, str):
@@ -277,8 +281,10 @@ class ResultResolver:
         else:
             y_keys = y_value
 
-        x_key = resolveKey(x_key, dims[1] if len(dims) > 1 else None)
-        y_keys = [resolveKey(k, main_dim) for k in y_keys]
+        x_key = self._resolveKey(
+            x_key, dims, values, main_dim, dims[1] if len(dims) > 1 else None
+        )
+        y_keys = [self._resolveKey(k, dims, values, main_dim, main_dim) for k in y_keys]
 
         x_data = [v.get(x_key, 0) for v in values]
 

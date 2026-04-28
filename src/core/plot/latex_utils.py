@@ -11,6 +11,6 @@ def wrap_latex(text: str) -> str:
     try:
         ax.set_xlabel(f"${text}$")
         ax.set_ylabel(f"${text}$")
-    except Exception:
+    except ValueError:
         return text
     return f"${text}$"
