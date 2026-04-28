@@ -29,6 +29,8 @@ def massToMole(
     elements: list[str],
     atomic_masses: dict[str, float],
 ) -> list[float]:
+    if any(f < 0 for f in mass_fractions):
+        raise CompositionError("Mass fractions cannot be negative")
     moles = []
     for elem, mass_frac in zip(elements, mass_fractions):
         atomic_mass = atomic_masses.get(elem)
@@ -45,10 +47,12 @@ def massToMole(
 class CompositionTool:
     def parseAndValidate(
         self,
-        composition_str: str,
+        composition_str: str | None,
         fraction_type: FractionType,
         max_components: int = 2,
     ) -> ParsedComposition:
+        if composition_str is None:
+            raise CompositionError("Composition string cannot be None")
         element_symbols = _ELEMENT_PATTERN.findall(composition_str)
         if not element_symbols:
             raise CompositionError("No valid elements found in input")

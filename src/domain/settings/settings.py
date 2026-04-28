@@ -62,7 +62,11 @@ class Settings:
 
     @property
     def density_scale(self) -> int:
-        return int(self.get("appearance", "density_scale", "-2"))
+        val = self.get("appearance", "density_scale", "-2")
+        try:
+            return int(val)
+        except (ValueError, TypeError):
+            return -2
 
     # appearance
     @property
@@ -105,12 +109,18 @@ class Settings:
     @property
     def plot_line_width(self) -> float | None:
         val = self.get("plot", "lineWidth")
-        return float(val) if val else None
+        try:
+            return float(val) if val else None
+        except (ValueError, TypeError):
+            return None
 
     @property
     def plot_marker_size(self) -> float | None:
         val = self.get("plot", "markerSize")
-        return float(val) if val else None
+        try:
+            return float(val) if val else None
+        except (ValueError, TypeError):
+            return None
 
     @property
     def plot_grid(self) -> bool | None:
@@ -126,49 +136,79 @@ class Settings:
     @property
     def plot_grid_density(self) -> float | None:
         val = self.get("plot", "gridDensity")
-        return float(val) if val else None
+        try:
+            return float(val) if val else None
+        except (ValueError, TypeError):
+            return None
 
     @property
     def plot_grid_label_density(self) -> float | None:
         val = self.get("plot", "gridLabelDensity")
-        return float(val) if val else None
+        try:
+            return float(val) if val else None
+        except (ValueError, TypeError):
+            return None
 
     @property
     def plot_title_font_size(self) -> int | None:
         val = self.get("plot", "titleFontSize")
-        return int(val) if val else None
+        try:
+            return int(val) if val else None
+        except (ValueError, TypeError):
+            return None
 
     @property
     def plot_label_font_size(self) -> int | None:
         val = self.get("plot", "labelFontSize")
-        return int(val) if val else None
+        try:
+            return int(val) if val else None
+        except (ValueError, TypeError):
+            return None
 
     @property
     def plot_tick_font_size(self) -> int | None:
         val = self.get("plot", "tickFontSize")
-        return int(val) if val else None
+        try:
+            return int(val) if val else None
+        except (ValueError, TypeError):
+            return None
 
     @property
     def plot_legend_font_size(self) -> int | None:
         val = self.get("plot", "legendFontSize")
-        return int(val) if val else None
+        try:
+            return int(val) if val else None
+        except (ValueError, TypeError):
+            return None
 
     @property
     def plot_triangular_levels(self) -> int | None:
         val = self.get("plot", "triangular_levels")
-        return int(val) if val else None
+        try:
+            return int(val) if val else None
+        except (ValueError, TypeError):
+            return None
 
     @property
     def plot_triangular_alpha(self) -> float | None:
         val = self.get("plot", "triangular_alpha")
-        return float(val) if val else None
+        try:
+            return float(val) if val else None
+        except (ValueError, TypeError):
+            return None
 
     @property
     def plot_triangular_grid_alpha(self) -> float | None:
         val = self.get("plot", "triangular_grid_alpha")
-        return float(val) if val else None
+        try:
+            return float(val) if val else None
+        except (ValueError, TypeError):
+            return None
 
     @property
     def plot_triangular_grid_line_width(self) -> float | None:
         val = self.get("plot", "triangular_grid_line_width")
-        return float(val) if val else None
+        try:
+            return float(val) if val else None
+        except (ValueError, TypeError):
+            return None

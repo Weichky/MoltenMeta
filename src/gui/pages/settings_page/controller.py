@@ -52,6 +52,9 @@ class QtLogHandler(logging.Handler):
         except Exception:
             self.handleError(record)
 
+    def handleError(self, record: logging.LogRecord) -> None:
+        logging.error(f"Log handler error: {record.exc_info}")
+
 
 class SettingsController(QObject):
     plot_settings_changed = Signal()
