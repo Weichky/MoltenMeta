@@ -85,6 +85,10 @@ class PageController(QObject):
             self._simulation_spec.key: self._simulation_spec,
         }
 
+        # Pre-load settings page widget to avoid cold start when user first navigates
+        self._settings_widget_cache = self._settings_spec.factory()
+        self._pageCache = set(self.pageSpecs.keys()) - {self._settings_spec.key}
+
     def showHome(self):
         self._showPage(self._home_spec)
 
@@ -98,7 +102,7 @@ class PageController(QObject):
         settings_dock = self.pages.get("settings")
         if settings_dock:
             settings_widget = settings_dock.widget()
-            if settings_widget and hasattr(settings_widget, 'controller'):
+            if settings_widget and hasattr(settings_widget, "controller"):
                 settings_widget.controller.plot_settings_changed.connect(
                     simulation_page._onPlotSettingsChanged
                 )
@@ -155,7 +159,12 @@ class PageController(QObject):
         dock = self.pages.get(spec.key)
 
         if dock is None:
-            dock = self._createPage(spec)
+            # Use pre-created widget for settings page (pre-loaded to avoid cold start)
+            if spec.key == self._settings_spec.key:
+                widget = self._settings_widget_cache
+            else:
+                widget = spec.factory()
+            dock = self._createPageWithWidget(spec, widget)
 
             self.pages[spec.key] = dock
 
@@ -202,10 +211,26 @@ class PageController(QObject):
         dock.setObjectName(spec.key)
         dock.setWidget(widget)
         dock.visibilityChanged.connect(self._onDockVisibilityChanged)
-        dock.visibilityChanged.connect(lambda visible: self._onDockVisibility(spec.key, visible))
+        dock.visibilityChanged.connect(
+            lambda visible: self._onDockVisibility(spec.key, visible)
+        )
         if spec.onCreate:
             spec.onCreate(widget)
 
+        return dock
+
+    def _createPageWithWidget(
+        self, spec: DockPageSpec, widget: QtWidgets.QWidget
+    ) -> QtAds.CDockWidget:
+        dock = QtAds.CDockWidget(self.dock_manager, "")
+        dock.setObjectName(spec.key)
+        dock.setWidget(widget)
+        dock.visibilityChanged.connect(self._onDockVisibilityChanged)
+        dock.visibilityChanged.connect(
+            lambda visible: self._onDockVisibility(spec.key, visible)
+        )
+        if spec.onCreate:
+            spec.onCreate(widget)
         return dock
 
     def _connectHomeSignals(self, page: HomePage):
