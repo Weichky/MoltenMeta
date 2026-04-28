@@ -6,14 +6,12 @@
 |-------|-------------|
 | `spec-skill` | Objective code review with weighted scoring (Correctness 40%, Readability 25%, Maintainability 20%, Performance 15%). Supports parallel subagent execution and result aggregation. |
 
-Load with: `docs/spec-skill/skill.md`
-
 ---
 
 ## Guidelines for AI Agents
 
-1. **Clean Architecture**: Keep domain, application, infrastructure layers separate
-2. **Frozen dataclasses**: Use frozen dataclass for immutable domain objects (snapshots)
+1. **Clean Architecture**: Dependency points inward — UI, Services, Use Cases, Entities. Outer layers depend on inner layers, never vice versa.
+2. **Frozen dataclasses**: Use frozen dataclass for immutable data models (snapshots)
 3. **Private by default**: Use `_` prefix for internal implementation
 4. **Type hints**: Use Python 3.14 union syntax (`int | None`)
 5. **Dependency injection**: Pass dependencies via constructors, not global getters
@@ -45,10 +43,24 @@ from core.log.log import Logger
 ## Architecture
 
 ```
-UI (gui/) → Application (service/) → Domain → Infrastructure (db/, core/, framework/)
+┌─────────────────────────────────────────┐
+│            UI (gui/pages/)              │  ← Qt GUI, Matplotlib
+├─────────────────────────────────────────┤
+│         Application (service/)          │  ← Use Cases, Orchestration
+├─────────────────────────────────────────┤
+│    Modules (plugins via config.toml)    │  ← Calculation models
+├─────────────────────────────────────────┤
+│   Data (db/, application/settings/)     │  ← Entities (snapshots)
+└─────────────────────────────────────────┘
 ```
 
-**Module System**: Modules in `runtime/modules/` with `config.toml`. No base class — duck typing.
+**Clean Architecture Layers**:
+- **Entities**: Snapshots — frozen dataclasses representing stable data structures
+- **Use Cases**: Modules (Kohler, Toop, Maggianu, etc.) — calculation and analysis logic
+- **Interface Adapters**: DataSource, BinaryProvider, Database adapters
+- **Frameworks**: Qt GUI, Matplotlib, SQLite
+
+**Plugin Architecture**: Modules are loaded dynamically via `config.toml` — no base class required, duck typing.
 
 **Two-Phase Init**: `bootstrap()` creates services, `initApp()` loads settings.
 
@@ -58,21 +70,25 @@ UI (gui/) → Application (service/) → Domain → Infrastructure (db/, core/, 
 
 ```
 src/
-├── application/service/   # Services
-├── catalog/              # Enums, constants
-├── core/                 # Config, log, plot, composition
-├── db/                   # Adapters, repos (core/, user/, repo/)
-├── domain/               # Entities, snapshots (query/, settings/, snapshot/)
-├── framework/            # ModuleManager, DataSource
-├── gui/pages/            # Pages (home, settings, data, simulation, analysis, table_manager)
+├── application/
+│   ├── service/         # Application Services
+│   └── settings/        # Settings model
+├── catalog/             # Enums, constants
+├── core/                # Config, log, plot, composition, element_map
+├── db/                  # Database layer
+│   ├── adapters/        # DB adapters (SQLite)
+│   ├── core/repo/       # Core repositories
+│   ├── snapshot/        # Data model snapshots
+│   ├── seeds/           # Database seeds
+│   └── user/repo/       # User data repositories
+├── framework/           # ModuleManager, DataSource, BinaryProvider
+├── gui/pages/           # UI pages (home, settings, data, simulation, analysis, table_manager)
 ├── i18n/
-├── modules/              # Modules (miedema, toop, kohler, etc.)
+├── modules/             # Calculation modules (toop, miedema, etc.)
 └── resources/           # Data, i18n, images, qtads
 ```
 
 ## Database Schema
-
-Layered DDD: Language → Ontology → Concept → Fact
 
 Key tables: `symbols`, `units`, `elements`, `systems`, `system_compositions`, `properties`, `methods`, `property_values`, `data_groups`, `meta`
 
