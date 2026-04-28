@@ -18,7 +18,7 @@
 | Classes | PascalCase | `MainWindow`, `CoreDbService` |
 | Functions/Methods | camelCase | `_loadSettings`, `fromRow` |
 | Variables | snake_case | `log_service`, `settings` |
-| Private | `_` prefix | `_settings_repo` |
+| Private | `_` prefix | `_settings_repo`, `_elementsToId` |
 | Constants | SCREAMING_SNAKE_CASE | `MAX_CONNECTIONS` |
 | Files | snake_case | `core_db_service.py` |
 
