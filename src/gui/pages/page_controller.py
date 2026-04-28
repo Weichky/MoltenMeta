@@ -85,9 +85,16 @@ class PageController(QObject):
             self._simulation_spec.key: self._simulation_spec,
         }
 
-        # Pre-load settings page widget to avoid cold start when user first navigates
-        self._settings_widget_cache = self._settings_spec.factory()
-        self._pageCache = set(self.pageSpecs.keys()) - {self._settings_spec.key}
+        # Pre-load settings page to avoid cold start when user first navigates to it
+        self._preloadPage(self._settings_spec)
+
+    def _preloadPage(self, spec: DockPageSpec) -> None:
+        dock = self._createPage(spec)
+        self.pages[spec.key] = dock
+        self.dock_manager.addDockWidget(
+            QtAds.DockWidgetArea.CenterDockWidgetArea, dock, self._getArea()
+        )
+        dock.toggleView()
 
     def showHome(self):
         self._showPage(self._home_spec)
@@ -159,12 +166,7 @@ class PageController(QObject):
         dock = self.pages.get(spec.key)
 
         if dock is None:
-            # Use pre-created widget for settings page (pre-loaded to avoid cold start)
-            if spec.key == self._settings_spec.key:
-                widget = self._settings_widget_cache
-            else:
-                widget = spec.factory()
-            dock = self._createPageWithWidget(spec, widget)
+            dock = self._createPage(spec)
 
             self.pages[spec.key] = dock
 
@@ -217,20 +219,6 @@ class PageController(QObject):
         if spec.onCreate:
             spec.onCreate(widget)
 
-        return dock
-
-    def _createPageWithWidget(
-        self, spec: DockPageSpec, widget: QtWidgets.QWidget
-    ) -> QtAds.CDockWidget:
-        dock = QtAds.CDockWidget(self.dock_manager, "")
-        dock.setObjectName(spec.key)
-        dock.setWidget(widget)
-        dock.visibilityChanged.connect(self._onDockVisibilityChanged)
-        dock.visibilityChanged.connect(
-            lambda visible: self._onDockVisibility(spec.key, visible)
-        )
-        if spec.onCreate:
-            spec.onCreate(widget)
         return dock
 
     def _connectHomeSignals(self, page: HomePage):
