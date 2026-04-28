@@ -86,4 +86,4 @@ class DatabaseDataSource(DataSource):
 
     def get_values(self, elem_1: int, elem_2: int, x_array: list[float]) -> list[float]:
         value = self._record.get("value", 0.0)
-        return [value] * len(x_array)
+        return [{"value": value} for _ in x_array]

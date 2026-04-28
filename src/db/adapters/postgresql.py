@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 from ..abstraction import (
     DatabaseDialect,
     DatabaseCursor,
+    DatabaseConnection,
 )
 
 from catalog import DatabaseConnInfo
@@ -89,7 +90,7 @@ class PostgreSQLCursor(DatabaseCursor):
         return None
 
 
-class PostgreSQLConnection(DatabaseConnInfo):
+class PostgreSQLConnection(DatabaseConnection):
     """PostgreSQL connection implementation"""
 
     def __init__(self, config: DatabaseConnInfo, log_service: LogService):
