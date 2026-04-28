@@ -65,7 +65,7 @@ class Settings:
         val = self.get("appearance", "density_scale", -2)
         try:
             return int(val)
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             return -2
 
     # appearance
@@ -111,7 +111,7 @@ class Settings:
         val = self.get("plot", "lineWidth")
         try:
             return float(val) if val else None
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             return None
 
     @property
@@ -119,7 +119,7 @@ class Settings:
         val = self.get("plot", "markerSize")
         try:
             return float(val) if val else None
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             return None
 
     @property
@@ -138,7 +138,7 @@ class Settings:
         val = self.get("plot", "gridDensity")
         try:
             return float(val) if val else None
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             return None
 
     @property
@@ -146,7 +146,7 @@ class Settings:
         val = self.get("plot", "gridLabelDensity")
         try:
             return float(val) if val else None
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             return None
 
     @property
@@ -154,7 +154,7 @@ class Settings:
         val = self.get("plot", "titleFontSize")
         try:
             return int(val) if val else None
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             return None
 
     @property
@@ -162,7 +162,7 @@ class Settings:
         val = self.get("plot", "labelFontSize")
         try:
             return int(val) if val else None
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             return None
 
     @property
@@ -170,7 +170,7 @@ class Settings:
         val = self.get("plot", "tickFontSize")
         try:
             return int(val) if val else None
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             return None
 
     @property
@@ -178,7 +178,7 @@ class Settings:
         val = self.get("plot", "legendFontSize")
         try:
             return int(val) if val else None
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             return None
 
     @property
@@ -186,7 +186,7 @@ class Settings:
         val = self.get("plot", "triangular_levels")
         try:
             return int(val) if val else None
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             return None
 
     @property
@@ -194,7 +194,7 @@ class Settings:
         val = self.get("plot", "triangular_alpha")
         try:
             return float(val) if val else None
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             return None
 
     @property
@@ -202,7 +202,7 @@ class Settings:
         val = self.get("plot", "triangular_grid_alpha")
         try:
             return float(val) if val else None
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             return None
 
     @property
@@ -210,5 +210,5 @@ class Settings:
         val = self.get("plot", "triangular_grid_line_width")
         try:
             return float(val) if val else None
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             return None
