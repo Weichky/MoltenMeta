@@ -4,7 +4,7 @@ from PySide6 import QtWidgets, QtCore
 from PySide6.QtCore import QObject, Signal
 
 from application import AppContext
-from domain import DataGroupSnapshot
+from db.snapshot import DataGroupSnapshot
 
 from .context_menu import ContextMenuFactory
 from .model import NodeType, TreeNodeData, PAGE_SIZE

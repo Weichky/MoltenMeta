@@ -1,5 +1,5 @@
 from db.base_repository import BaseRepository
-from domain import (
+from db.snapshot import (
     SymbolSnapshot,
     UnitSnapshot,
     ElementSnapshot,

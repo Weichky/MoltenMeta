@@ -21,7 +21,7 @@ from catalog.plot_style import (
     DEFAULT_TRIANGULAR_GRID_LINE_WIDTH,
 )
 
-from domain.settings import Settings
+from application.settings import Settings
 
 
 class UiSettingsPage(QObject):

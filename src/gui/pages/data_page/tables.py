@@ -1,4 +1,4 @@
-from domain.snapshot import (
+from db.snapshot import (
     SymbolSnapshot,
     UnitSnapshot,
     ElementSnapshot,

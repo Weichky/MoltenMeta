@@ -3,7 +3,7 @@ from PySide6.QtCore import QObject, Signal
 from db.core import SettingsRepository, DatabaseManager
 from .db_service import DatabaseService
 
-from domain.settings import Settings
+from application.settings import Settings
 
 from core.log import LogService
 

@@ -6,7 +6,7 @@ from catalog import DatabaseType, DatabaseConnInfo, UI_THEME_PRIMARY_DEFAULT, UI
 
 from .app_context import AppContext
 
-from domain.settings import Settings
+from application.settings import Settings
 
 from application.service.core_db_service import CoreDbService
 from application.service.user_db_service import UserDbService

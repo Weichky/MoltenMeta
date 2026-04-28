@@ -30,7 +30,7 @@ from core.plot.color import ColorPalette, ColorGenerator, ThemeColors
 from core.plot.style import PlotStyle, getDefaultPlotStyle
 
 if TYPE_CHECKING:
-    from domain.settings import Settings
+    from application.settings import Settings
 
 _logger = logging.getLogger(__name__)
 

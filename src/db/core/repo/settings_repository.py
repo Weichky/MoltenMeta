@@ -1,5 +1,5 @@
 from db.base_repository import BaseRepository
-from domain.snapshot import SettingsSnapshot
+from db.snapshot import SettingsSnapshot
 from db.db_manager import DatabaseManager
 from core.log import LogService
 

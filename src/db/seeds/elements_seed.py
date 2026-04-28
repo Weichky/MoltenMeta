@@ -1,7 +1,7 @@
 import csv
 from importlib.resources import files
 
-from domain.snapshot import ElementSnapshot
+from db.snapshot import ElementSnapshot
 
 DEFAULT_ELEMENTS_CSV = files("resources.data") / "elements.csv"
 

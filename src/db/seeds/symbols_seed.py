@@ -1,7 +1,7 @@
 import csv
 from importlib.resources import files
 
-from domain.snapshot import SymbolSnapshot
+from db.snapshot import SymbolSnapshot
 
 DEFAULT_SYMBOLS_CSV = files("resources.data") / "symbols.csv"
 

@@ -122,7 +122,7 @@ class UserDbService(QObject):
         return count
 
     def importPropertyValuesFromCsv(self, file_path: str) -> ImportResult:
-        from domain import (
+        from db.snapshot import (
             PropertyValueSnapshot,
             SystemSnapshot,
             SystemCompositionSnapshot,

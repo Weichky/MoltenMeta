@@ -1,4 +1,4 @@
-from domain.snapshot import SettingsSnapshot
+from db.snapshot import SettingsSnapshot
 
 
 class Settings:

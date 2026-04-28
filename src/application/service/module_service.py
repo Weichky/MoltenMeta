@@ -4,7 +4,7 @@ import json
 
 from core.log import LogService
 from framework.module_manager import ModuleManager
-from domain import ComputationCacheSnapshot, SymbolSnapshot
+from db.snapshot import ComputationCacheSnapshot, SymbolSnapshot
 
 
 class ModuleService:
@@ -253,7 +253,7 @@ class ModuleService:
                     if unit_symbol:
                         unit_id = self._units_repo.upsertBySymbolId(unit_symbol.id)
 
-                from domain import PropertySnapshot
+                from db.snapshot import PropertySnapshot
 
                 new_prop = PropertySnapshot(
                     name=symbol,

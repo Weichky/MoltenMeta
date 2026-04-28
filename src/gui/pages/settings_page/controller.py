@@ -8,8 +8,8 @@ from application import AppContext
 
 from .ui import UiSettingsPage
 
-from domain.snapshot import SettingsSnapshot
-from domain.settings import Settings
+from db.snapshot import SettingsSnapshot
+from application.settings import Settings
 
 from core.plot.config import PlotStyleService
 from catalog import ColorAlgorithm

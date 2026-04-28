@@ -1,8 +1,8 @@
 import tomllib
 from importlib.resources import files
 
-from domain.snapshot import SettingsSnapshot
-from domain.settings import serializeSettingValue
+from db.snapshot import SettingsSnapshot
+from application.settings import serializeSettingValue
 
 DEFAULT_SETTINGS_PATH = files("resources.default") / "default_settings.toml"
 
