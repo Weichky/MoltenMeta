@@ -303,12 +303,6 @@ class SettingsController(QObject):
             snapshots.append(SettingsSnapshot("plot", "custom_secondary", colors[1]))
         self._saveAndReload(snapshots)
 
-    def _onPrimaryColorChanged(self, text: str):
-        pass
-
-    def _onSecondaryColorChanged(self, text: str):
-        pass
-
     def _onPrimaryColorSubmitted(self, text: str):
         import re
 

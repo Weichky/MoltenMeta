@@ -95,9 +95,6 @@ class SimulationPage(QtWidgets.QWidget):
             self._module_widget.setParent(None)
             self._module_widget = None
 
-    def _loadModuleWidget(self) -> None:
-        pass
-
     def _connectSignals(self) -> None:
         self.ui.categoryCombo.currentIndexChanged.connect(self._onCategoryChanged)
         self.ui.moduleCombo.currentIndexChanged.connect(self._onModuleChanged)
@@ -383,6 +380,7 @@ class SimulationPage(QtWidgets.QWidget):
         self._result_model.update(columns, data)
 
     def _retranslateUi(self) -> None:
+        # TODO: Implement language-specific UI text updates for this page
         pass
 
     # Called when plot settings (e.g. triangular alpha/levels) change in the

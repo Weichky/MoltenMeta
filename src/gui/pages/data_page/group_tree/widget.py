@@ -42,6 +42,7 @@ class _GroupTreeView(QtWidgets.QTreeView):
         # Skip Qt's internal row-moving logic; we handle drops ourselves in _onDropEvent.
         # Without this, Qt tries to move rows internally which conflicts with our
         # loadGroups() refresh that clears and rebuilds the model, causing crashes.
+        # Note: Override replaces Qt's default behavior intentionally.
         pass
 
 

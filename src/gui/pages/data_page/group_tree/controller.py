@@ -36,6 +36,7 @@ class GroupTreeController(QObject):
         self._connectSignals()
 
     def connectSignals(self) -> None:
+        # TODO: Public API for external signal connection - implement or remove
         pass
 
     def _connectSignals(self) -> None:

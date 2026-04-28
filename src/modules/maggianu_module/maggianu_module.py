@@ -119,7 +119,7 @@ class MaggianuCalc(GeometricModelCalculator):
         z_symbol: str | None = None,
     ) -> dict:
         """
-        Calculate Kohler model for a triangular grid.
+        Calculate Maggianu model for a triangular grid.
 
         Args:
             elem_A: Atomic number of element A
@@ -394,7 +394,7 @@ class MaggianuCalc(GeometricModelCalculator):
         z_symbol: str | None = None,
     ) -> dict:
         """
-        Calculate Kohler model for a triangular grid with direct data input.
+        Calculate Maggianu model for a triangular grid with direct data input.
 
         Args:
             elem_A: Atomic number of element A

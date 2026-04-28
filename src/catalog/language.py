@@ -3,7 +3,7 @@ def getSupportedLanguagesNameMap() -> dict:
 
 
 def getSupportedTranslationLanguages() -> list:
-    return {"zh_CN"}
+    return ["zh_CN"]
 
 
 def isSupportedLanguage(language: str) -> bool:
