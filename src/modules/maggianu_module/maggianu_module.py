@@ -170,7 +170,7 @@ class MaggianuCalc(GeometricModelCalculator):
             )
 
         Z_ABC_list = self.calculatePropertyList(
-            x_A_list, x_B_list, x_C_list, Z_AB_list, Z_BC_list, Z_AC_list
+            x_A_list, x_B_list, x_C_list, Z_AB_list, Z_AC_list, Z_BC_list
         )
 
         cfg = MODULE_INFO["calculateScatter"]
@@ -458,7 +458,7 @@ class MaggianuCalc(GeometricModelCalculator):
             )
 
         Z_ABC_list = self.calculatePropertyList(
-            x_A_list, x_B_list, x_C_list, Z_AB_list, Z_BC_list, Z_AC_list
+            x_A_list, x_B_list, x_C_list, Z_AB_list, Z_AC_list, Z_BC_list
         )
 
         if not Z_ABC_list or len(Z_ABC_list) != len(x_A_list):
@@ -609,7 +609,7 @@ class MaggianuCalc(GeometricModelCalculator):
             )
 
         Z_ABC_list = self.calculatePropertyList(
-            x_A_list, x_B_list, x_C_list, Z_AB_list, Z_BC_list, Z_AC_list
+            x_A_list, x_B_list, x_C_list, Z_AB_list, Z_AC_list, Z_BC_list
         )
 
         if not Z_ABC_list or len(Z_ABC_list) != len(x_A_list):
