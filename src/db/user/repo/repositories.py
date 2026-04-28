@@ -120,8 +120,8 @@ class SystemCompositionsRepository(BaseRepository[SystemCompositionSnapshot]):
             sql = f"INSERT INTO {table} ({columns}) VALUES ({placeholders}) ON CONFLICT DO NOTHING"
 
         try:
-            params = [item.toRecord().values() for item in items]
-            self.connection.executemany(sql, list(params))
+            params = [tuple(item.toRecord().values()) for item in items]
+            self.connection.executemany(sql, params)
             self.connection.commit()
         except Exception:
             self.connection.rollback()
@@ -581,8 +581,8 @@ class ComputationCacheRepository(BaseRepository[ComputationCacheSnapshot]):
         placeholders = ", ".join([dialect.getPlaceholder() for _ in columns])
         sql = f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({placeholders})"
         try:
-            params = [entry.toRecord().values() for entry in entries]
-            self.connection.executemany(sql, list(params))
+            params = [tuple(entry.toRecord().values()) for entry in entries]
+            self.connection.executemany(sql, params)
             self.connection.commit()
         except Exception:
             self.connection.rollback()
