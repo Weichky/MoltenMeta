@@ -68,7 +68,7 @@ class BaseRepository(ABC, Generic[T]):
 
         # Handle last ID differently for different databases
         if hasattr(entity, "id"):
-            if cursor.lastRowId:
+            if cursor.lastRowId is not None:
                 object.__setattr__(entity, "id", cursor.lastRowId)
             elif dialect.getLastIdSyntax():
                 # For databases that don't have lastrowid (like PostgreSQL)
