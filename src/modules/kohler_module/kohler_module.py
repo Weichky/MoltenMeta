@@ -106,7 +106,7 @@ class KohlerCalc(GeometricModelCalculator):
         Z_AC_arr = np.array(Z_AC_list, dtype=np.float64)
 
         result = _kohler_algorithm.calculatePropertyList(
-            x_A_arr, x_B_arr, x_C_arr, Z_AB_arr, Z_BC_arr, Z_AC_arr
+            x_A_arr, x_B_arr, x_C_arr, Z_AB_arr, Z_AC_arr, Z_BC_arr
         )
         return result.tolist()
 

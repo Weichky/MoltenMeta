@@ -1,15 +1,12 @@
 /**
  * Toop module for calculating thermodynamic properties.
- * 
- * Input:
- *  - x_B: mole fraction of element B [0, 1]
- *  - x_C: mole fraction of element C [0, 1]
- *  - Z_AB: Any thermodynamic property at composition of x_B B and 1 - x_B - x_C A
- *  - Z_AC: Any thermodynamic property at composition of x_C C and 1 - x_B - x_C A
- *  - Z_BC: Any thermodynamic property at composition of x_B B and x_C C
- * 
+ *
+ * Parameter Order Convention: AB -> AC -> BC (alphabetical)
+ *   - x_A, x_B, x_C: mole fractions (x_A = 1 - x_B - x_C for Toop model)
+ *   - Z_AB, Z_AC, Z_BC: binary properties at corresponding compositions
+ *
  * Output: Z_ABC
- * 
+ *
  * Original formula in LaTeX:
  * $$
  * Z_{ABC} = \frac{x_B}{x_B+x_C} \cdot Z_{AB}(x_A, 1-x_A) + \frac{x_C}{x_B+x_C} \cdot Z_{AC}(x_A, 1-x_A) + (x_B+x_C)^2 \cdot Z_{BC}\left(\frac{x_B}{x_B+x_C}, \frac{x_C}{x_B+x_C}\right)

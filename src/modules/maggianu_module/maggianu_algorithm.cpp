@@ -1,13 +1,9 @@
 /**
  * Maggianu module for calculating thermodynamic properties.
  *
- * Input:
- *  - x_A: mole fraction of element A [0, 1]
- *  - x_B: mole fraction of element B [0, 1]
- *  - x_C: mole fraction of element C [0, 1]
- *  - Z_AB: Binary property at normalized composition V_AB
- *  - Z_BC: Binary property at normalized composition V_BC
- *  - Z_AC: Binary property at normalized composition V_AC
+ * Parameter Order Convention: AB -> AC -> BC (alphabetical)
+ *   - x_A, x_B, x_C: mole fractions
+ *   - Z_AB, Z_AC, Z_BC: binary properties at corresponding compositions
  *
  * Output: Z_ABC
  *
@@ -38,7 +34,7 @@
 
 namespace py = pybind11;
 
-double calculateSingleProperty(double x_A, double x_B, double x_C, double Z_AB, double Z_BC, double Z_AC) {
+double calculateSingleProperty(double x_A, double x_B, double x_C, double Z_AB, double Z_AC, double Z_BC) {
     double V_AB = (1.0 + x_A - x_B) / 2.0;
     double V_BA = (1.0 + x_B - x_A) / 2.0;
     double V_AC = (1.0 + x_A - x_C) / 2.0;
@@ -58,8 +54,8 @@ py::array_t<double> calculatePropertyList(
     py::array_t<double> x_B_list,
     py::array_t<double> x_C_list,
     py::array_t<double> Z_AB_list,
-    py::array_t<double> Z_BC_list,
-    py::array_t<double> Z_AC_list) {
+    py::array_t<double> Z_AC_list,
+    py::array_t<double> Z_BC_list) {
 
     size_t n = x_A_list.size();
 
@@ -67,8 +63,8 @@ py::array_t<double> calculatePropertyList(
     double* ptr_xB = static_cast<double*>(x_B_list.request().ptr);
     double* ptr_xC = static_cast<double*>(x_C_list.request().ptr);
     double* ptr_AB = static_cast<double*>(Z_AB_list.request().ptr);
-    double* ptr_BC = static_cast<double*>(Z_BC_list.request().ptr);
     double* ptr_AC = static_cast<double*>(Z_AC_list.request().ptr);
+    double* ptr_BC = static_cast<double*>(Z_BC_list.request().ptr);
 
     py::array_t<double> result(n);
     double* ptr_res = static_cast<double*>(result.request().ptr);

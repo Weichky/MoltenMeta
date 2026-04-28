@@ -1,13 +1,9 @@
 /**
  * Hillert-Toop module for calculating thermodynamic properties.
  *
- * Input:
- *  - x_A: mole fraction of element A [0, 1]
- *  - x_B: mole fraction of element B [0, 1]
- *  - x_C: mole fraction of element C [0, 1]
- *  - Z_AB: Any thermodynamic property at composition of x_A A and x_B B
- *  - Z_AC: Any thermodynamic property at composition of x_A A and x_C C
- *  - Z_BC: Any thermodynamic property at composition of x_B B and x_C C
+ * Parameter Order Convention: AB -> AC -> BC (alphabetical)
+ *   - x_A, x_B, x_C: mole fractions
+ *   - Z_AB, Z_AC, Z_BC: binary properties at corresponding compositions
  *
  * Output: Z_ABC
  *

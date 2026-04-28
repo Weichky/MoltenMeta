@@ -1,24 +1,20 @@
 /**
  * Kohler module for calculating thermodynamic properties.
- * 
- * Input:
- *  - x_A: mole fraction of element A [0, 1]
- *  - x_B: mole fraction of element B [0, 1]
- *  - x_C: mole fraction of element C [0, 1]
- *  - Z_AB: Any thermodynamic property at composition of x_A A and x_B B
- *  - Z_BC: Any thermodynamic property at composition of x_B B and x_C C
- *  - Z_AC: Any thermodynamic property at composition of x_A A and x_C C
- * 
+ *
+ * Parameter Order Convention: AB -> AC -> BC (alphabetical)
+ *   - x_A, x_B, x_C: mole fractions
+ *   - Z_AB, Z_AC, Z_BC: binary properties at corresponding compositions
+ *
  * Output: Z_ABC
- * 
+ *
  * Original formula in LaTeX:
  * $$
- * Z_{ABC} = (x_A+x_B)^2 \cdot Z_{AB}\left(\frac{x_A}{x_A+x_B}, \frac{x_B}{x_A+x_B}\right) 
- *         + (x_B+x_C)^2 \cdot Z_{BC}\left(\frac{x_B}{x_B+x_C}, \frac{x_C}{x_B+x_C}\right) 
+ * Z_{ABC} = (x_A+x_B)^2 \cdot Z_{AB}\left(\frac{x_A}{x_A+x_B}, \frac{x_B}{x_A+x_B}\right)
+ *         + (x_B+x_C)^2 \cdot Z_{BC}\left(\frac{x_B}{x_B+x_C}, \frac{x_C}{x_B+x_C}\right)
  *         + (x_A+x_C)^2 \cdot Z_{AC}\left(\frac{x_A}{x_A+x_C}, \frac{x_C}{x_A+x_C}\right)
  * $$
- * 
- * This is the cyclic symmetric form of the Toop model, where each term follows 
+ *
+ * This is the cyclic symmetric form of the Toop model, where each term follows
  * the same pattern as the Toop's third term.
  **/
 
@@ -31,11 +27,11 @@
 
 namespace py = pybind11;
 
-double calculateSingleProperty(double x_A, double x_B, double x_C, double Z_AB, double Z_BC, double Z_AC) {
+double calculateSingleProperty(double x_A, double x_B, double x_C, double Z_AB, double Z_AC, double Z_BC) {
     double term_AB = (x_A + x_B) * (x_A + x_B) * Z_AB;
-    double term_BC = (x_B + x_C) * (x_B + x_C) * Z_BC;
     double term_AC = (x_A + x_C) * (x_A + x_C) * Z_AC;
-    return term_AB + term_BC + term_AC;
+    double term_BC = (x_B + x_C) * (x_B + x_C) * Z_BC;
+    return term_AB + term_AC + term_BC;
 }
 
 // Note: This is an optimized version of the loop.
@@ -45,8 +41,8 @@ py::array_t<double> calculatePropertyList(
     py::array_t<double> x_B_list,
     py::array_t<double> x_C_list,
     py::array_t<double> Z_AB_list,
-    py::array_t<double> Z_BC_list,
-    py::array_t<double> Z_AC_list) {
+    py::array_t<double> Z_AC_list,
+    py::array_t<double> Z_BC_list) {
 
     size_t n = x_A_list.size();
 
@@ -56,8 +52,8 @@ py::array_t<double> calculatePropertyList(
     double* ptr_xB = static_cast<double*>(x_B_list.request().ptr);
     double* ptr_xC = static_cast<double*>(x_C_list.request().ptr);
     double* ptr_AB = static_cast<double*>(Z_AB_list.request().ptr);
-    double* ptr_BC = static_cast<double*>(Z_BC_list.request().ptr);
     double* ptr_AC = static_cast<double*>(Z_AC_list.request().ptr);
+    double* ptr_BC = static_cast<double*>(Z_BC_list.request().ptr);
 
     // Create result array and get its buffer pointer for writing
     py::array_t<double> result(n);

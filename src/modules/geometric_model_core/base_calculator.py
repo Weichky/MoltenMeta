@@ -96,6 +96,14 @@ class GeometricModelCalculator(ABC):
         Z_AC_list: list[float],
         Z_BC_list: list[float],
     ) -> list[float]:
+        """Calculate ternary property from binary values.
+
+        Parameter Order Convention: AB -> AC -> BC (alphabetical)
+            - x_A_list, x_B_list, x_C_list: mole fractions (same length)
+            - Z_AB_list: binary property at AB composition
+            - Z_AC_list: binary property at AC composition
+            - Z_BC_list: binary property at BC composition
+        """
         if len(Z_AB_list) != len(x_A_list):
             raise ValueError(
                 f"Z_AB_list length {len(Z_AB_list)} must match x_A_list length {len(x_A_list)}"
