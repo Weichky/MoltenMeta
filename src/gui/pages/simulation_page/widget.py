@@ -128,9 +128,6 @@ class SimulationPage(QtWidgets.QWidget):
 
         self._clearModuleWidget()
 
-        if self._controller.hasModuleWidget(self._current_module):
-            self._loadModuleWidget()
-
         if self._current_module:
             methods = self._controller.getMethodsByModule(self._current_module)
             self.ui.methodCombo.clear()
