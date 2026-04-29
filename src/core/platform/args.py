@@ -32,28 +32,32 @@ def getArgs() -> argparse.Namespace:
     return _args
 
 
+import sys
+import os
+from pathlib import Path
+
 def getRuntimePath() -> Path:
     """
-    Retrieves the base execution directory. 
-    Priority: 
-    1. Command line argument --runtime-path
-    2. Executable directory (if compiled via Nuitka/PyInstaller)
-    3. Current working directory (if running as source)
+    Retrieves the base execution directory (the 'runtime' folder).
     """
-    # Attempt to get path from custom arguments (assumes getArgs() is defined)
+    # 1. Prioritize command-line arguments (Explicit is better than implicit)
     try:
-        runtime_path = getArgs().runtime_path
-    except (NameError, AttributeError):
-        runtime_path = None
+        arg_path = getArgs().runtime_path
+        if arg_path:
+            return Path(arg_path).resolve()
+    except Exception:
+        pass
 
-    if not runtime_path:
-        # Check if the script is compiled (Nuitka adds __compiled__ to globals)
-        if "__compiled__" in globals() or getattr(sys, 'frozen', False):
-            # sys.executable points to the actual .exe file
-            runtime_path = Path(sys.executable).parent
-        else:
-            # Fallback for source development (.py)
-            # You can also use Path(__file__).resolve().parent.parent if preferred
-            runtime_path = Path.cwd()
+    # 2. Check if running in a packaged environment (Nuitka / PyInstaller)
+    # Checking for specific flags in sys.modules is more robust than checking globals()
+    is_compiled = "__nuitka__" in sys.modules or getattr(sys, 'frozen', False)
 
-    return Path(runtime_path).resolve()
+    if is_compiled:
+        # In "Onefile" mode, sys.executable always points to the physical location of the .exe file.
+        # Regardless of which cache folder the code was unpacked into, this will always return the /runtime/ directory.
+        return Path(sys.executable).parent.resolve()
+
+        # 3. Fallback logic for source code development environments
+        # It is recommended *not* to use Path.cwd(), as running commands from different directories would lead to inconsistent results.
+        # It is recommended to use the location of main.py as the baseline (assuming main.py resides in the src/ directory).
+    return Path(__file__).resolve().parent.parent # Points to the project root directory
