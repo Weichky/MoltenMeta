@@ -1,5 +1,8 @@
 import sys
-import tomllib
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
 import importlib.util
 from pathlib import Path
 from typing import TYPE_CHECKING

@@ -25,7 +25,10 @@ Step 4: Return the result in structured format with element symbols
 
 import csv
 import sys
-import tomllib
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
 import importlib.util
 from pathlib import Path
 

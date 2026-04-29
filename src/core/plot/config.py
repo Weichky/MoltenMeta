@@ -4,7 +4,10 @@ from dataclasses import dataclass, field
 from importlib.resources import files
 from typing import TYPE_CHECKING
 
-import tomllib
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
 
 from catalog import (
     DEFAULT_PLOT_TYPE,

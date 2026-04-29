@@ -1,4 +1,7 @@
-import tomllib
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
 from importlib.resources import files
 
 from db.snapshot import SettingsSnapshot

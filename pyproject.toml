@@ -3,7 +3,7 @@ name = "moltenmeta"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.10, <3.14"
+requires-python = ">=3.10, <3.11"
 dependencies = [
     "matplotlib",
     "numpy",
@@ -12,6 +12,7 @@ dependencies = [
     "pyside6-essentials",
     "pyside6-qtads",
     "scipy",
+    "tomli>=1.1.0; python_version < '3.11'",
 ]
 
 [project.optional-dependencies]
