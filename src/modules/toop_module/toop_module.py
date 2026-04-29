@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from framework.binary_provider import BinaryDataProvider
 
 from .element_map import elemIdToSymbol
-from modules.geometric_model_core import GeometricModelCalculator
+from ..geometric_model_core import GeometricModelCalculator
 
 _MODULE_DIR = Path(__file__).parent
 

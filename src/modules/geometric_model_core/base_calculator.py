@@ -7,8 +7,8 @@ Provides common infrastructure for all geometric models (Kohler, Toop, Maggianu,
 from abc import ABC, abstractmethod
 from typing import TypedDict
 
-from modules.element_map.element_map import elemIdToSymbol
-from modules.grid_module.grid import generateTriangularGrid
+from ..element_map.element_map import elemIdToSymbol
+from ..grid_module.grid import generateTriangularGrid
 
 
 class EmptyResultDict(TypedDict):

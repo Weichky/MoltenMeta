@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Signal
 
-from modules.element_map.element_map import ELEMENT_ID_TO_SYMBOL, elemSymbolToId
+from ..element_map.element_map import ELEMENT_ID_TO_SYMBOL, elemSymbolToId
 
 ELEMENT_SYMBOLS = list(ELEMENT_ID_TO_SYMBOL.values())
 
