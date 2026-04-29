@@ -8,6 +8,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    # NOTE: This import is only for static type checking (IDE autocomplete, mypy, etc.).
+    # It is wrapped in TYPE_CHECKING to avoid runtime dependency on 'framework' module,
+    # which is bundled inside the standalone executable and not accessible to plugins.
+    # The actual binary provider (_toop_algorithm) is loaded via importlib.util below.
     from framework.binary_provider import BinaryDataProvider
 
 from .element_map import elemIdToSymbol

@@ -4,9 +4,6 @@ from .data_source_discovery import ToopDataSourceDiscovery
 __all__ = ["ToopCalc", "ToopDataSourceDiscovery", "registerDataSources"]
 
 
-def registerDataSources() -> None:
+def registerDataSources(registry) -> None:
     """Register data sources provided by this module."""
     pass
-
-
-registerDataSources()

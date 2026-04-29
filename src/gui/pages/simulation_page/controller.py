@@ -104,11 +104,11 @@ class SimulationController:
             import sys
             from importlib import import_module
 
-            runtime_parent = str(getRuntimePath().parent)
-            if runtime_parent not in sys.path:
-                sys.path.insert(0, runtime_parent)
+            runtime_path = str(getRuntimePath())
+            if runtime_path not in sys.path:
+                sys.path.insert(0, runtime_path)
 
-            ui_module_name = f"runtime.modules.{package_name}.ui"
+            ui_module_name = f"modules.{package_name}.ui"
             ui_module = import_module(ui_module_name)
 
             wizard_factory = getattr(ui_module, "createWizard", None)

@@ -4,13 +4,15 @@ import json
 
 from core.log import LogService
 from framework.module_manager import ModuleManager
+from framework.data_source_registry import DataSourceRegistry
 from db.snapshot import ComputationCacheSnapshot, SymbolSnapshot
 
 
 class ModuleService:
     def __init__(self, runtime_path: Path, log_service: LogService):
         self._logger = log_service.getLogger(__name__)
-        self._manager = ModuleManager(runtime_path, log_service)
+        self._data_source_registry = DataSourceRegistry
+        self._manager = ModuleManager(runtime_path, log_service, self._data_source_registry)
         self._computation_cache_repo = None
         self._property_tags_repo = None
         self._symbols_repo = None
@@ -275,3 +277,7 @@ class ModuleService:
     def getPropertyIdBySymbol(self, symbol: str) -> int | None:
         """Look up a property_id by its symbol name."""
         return self._symbol_to_property_id.get(symbol)
+
+    def getDataSourceRegistry(self) -> DataSourceRegistry:
+        """Return the DataSourceRegistry instance for module data source discovery."""
+        return self._data_source_registry

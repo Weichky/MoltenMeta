@@ -26,7 +26,9 @@ class HillertToopScatterWizardDialog(QDialog):
     def _setupUi(self):
         from ..data_source_discovery import BinaryDataSourceDiscovery
 
-        self._discovery = BinaryDataSourceDiscovery(self._ms, self._userDb)
+        self._discovery = BinaryDataSourceDiscovery(
+            self._ms, self._userDb, self._ms.getDataSourceRegistry()
+        )
 
         from .wizard_pages import ElementSelectionPage
 

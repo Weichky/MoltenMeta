@@ -26,7 +26,9 @@ class MaggianuScatterWizardDialog(QDialog):
     def _setupUi(self):
         from ..data_source_discovery import MaggianuDataSourceDiscovery
 
-        self._discovery = MaggianuDataSourceDiscovery(self._ms, self._userDb)
+        self._discovery = MaggianuDataSourceDiscovery(
+            self._ms, self._userDb, self._ms.getDataSourceRegistry()
+        )
 
         from .wizard_pages import ElementSelectionPage
 

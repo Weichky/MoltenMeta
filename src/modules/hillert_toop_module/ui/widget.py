@@ -32,7 +32,9 @@ class HillertToopWizardDialog(QDialog):
     def _setupUi(self):
         from ..data_source_discovery import BinaryDataSourceDiscovery
 
-        self._discovery = BinaryDataSourceDiscovery(self._ms, self._userDb)
+        self._discovery = BinaryDataSourceDiscovery(
+            self._ms, self._userDb, self._ms.getDataSourceRegistry()
+        )
 
         mainLayout = QVBoxLayout(self)
         mainLayout.setSpacing(24)

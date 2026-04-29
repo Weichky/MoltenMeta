@@ -31,7 +31,9 @@ class KohlerWizardDialog(QDialog):
     def _setupUi(self):
         from ..data_source_discovery import KohlerDataSourceDiscovery
 
-        self._discovery = KohlerDataSourceDiscovery(self._ms, self._userDb)
+        self._discovery = KohlerDataSourceDiscovery(
+            self._ms, self._userDb, self._ms.getDataSourceRegistry()
+        )
 
         mainLayout = QVBoxLayout(self)
         mainLayout.setSpacing(24)
