@@ -19,6 +19,14 @@ from typing import Callable
 # src/DockWidget.h
 
 
+@dataclass
+class DockPageSpec:
+    key: str
+    titleProvider: Callable[[], str]
+    factory: Callable[[], QtWidgets.QWidget]
+    onCreate: Callable[[QtWidgets.QWidget], None] | None = None
+
+
 class PageController(QObject):
     page_changed = Signal(str)
 
@@ -234,14 +242,3 @@ class PageController(QObject):
         for key, dock in self.pages.items():
             spec = self.pageSpecs[key]
             dock.setWindowTitle(spec.titleProvider())
-
-
-###############################################################################
-
-
-@dataclass
-class DockPageSpec:
-    key: str
-    titleProvider: Callable[[], str]
-    factory: Callable[[], QtWidgets.QWidget]
-    onCreate: Callable[[QtWidgets.QWidget], None] | None = None

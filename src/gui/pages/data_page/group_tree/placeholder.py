@@ -1,3 +1,5 @@
+from typing import Any
+
 from PySide6 import QtWidgets, QtCore
 from PySide6.QtCore import QObject
 
@@ -72,9 +74,9 @@ class PlaceholderTreeModel(QtCore.QAbstractItemModel):
 
     def data(
         self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole
-    ) -> QtCore.QVariant:
+    ) -> Any:
         if not index.isValid():
-            return QtCore.QVariant()
+            return None
 
         item = self._itemFromIndex(index)
         return item.data(index.column(), role)
