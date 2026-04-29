@@ -41,7 +41,7 @@ class ModuleService:
             raise
 
     def listModules(self) -> list[dict]:
-        return self._manager.list()
+        return self._manager.listModules()
 
     def getMethods(self, package_name: str) -> list[str]:
         try:
@@ -186,7 +186,7 @@ class ModuleService:
             List of (package_name, method_name) tuples
         """
         results = []
-        for module_info in self._manager.list():
+        for module_info in self._manager.listModules():
             package_name = module_info.get("package_name")
             if not package_name:
                 continue
@@ -267,7 +267,7 @@ class ModuleService:
 
     def registerAllModulesProperties(self) -> None:
         """Register properties for all discovered modules."""
-        for module_info in self._manager.list():
+        for module_info in self._manager.listModules():
             package_name = module_info.get("package_name")
             if package_name:
                 self.registerModuleProperties(package_name)

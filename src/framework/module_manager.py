@@ -62,7 +62,7 @@ class ModuleManager:
             raise KeyError(f"Module not found: {package_name}")
         return self._modules[package_name]
 
-    def list(self) -> list[dict]:
+    def listModules(self) -> list[dict]:
         return [
             {
                 "package_name": info["module"]["package_name"],
