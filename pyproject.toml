@@ -3,33 +3,20 @@ name = "moltenmeta"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.14.2"
+requires-python = ">=3.12"
 dependencies = [
-    "cffi==2.0.0",
-    "colorama==0.4.6",
-    "cryptography==46.0.3",
-    "matplotlib>=3.10.8",
-    "nuitka==2.8.9",
-    "numpy==2.3.5",
-    "ordered-set==4.1.0",
-    "pandas==2.3.3",
-    "prettytable==3.17.0",
-    "pybind11==3.0.1",
-    "pycparser==2.23",
-    "pyqtgraph==0.14.0",
-    "pyside6==6.10.1",
-    "pyside6-addons==6.10.1",
-    "pyside6-essentials==6.10.1",
-    "pyside6-qtads>=4.4.1.2",
-    "python-dateutil==2.9.0.post0",
-    "pytz==2025.2",
-    "qt-material>=2.17",
-    "ruff>=0.15.5",
-    "scipy==1.16.3",
-    "shiboken6==6.10.1",
-    "six==1.17.0",
-    "typing-extensions==4.15.0",
-    "tzdata==2025.3",
-    "wcwidth==0.2.14",
-    "zstandard==0.25.0",
+    "matplotlib",
+    "numpy",
+    "pyside6",
+    "pyside6-addons",
+    "pyside6-essentials",
+    "pyside6-qtads",
+    "scipy",
+]
+
+[project.optional-dependencies]
+dev = [
+    "nuitka",
+    "pybind11",
+    "ruff",
 ]
