@@ -33,12 +33,27 @@ def getArgs() -> argparse.Namespace:
 
 
 def getRuntimePath() -> Path:
-    runtime_path = getArgs().runtime_path
+    """
+    Retrieves the base execution directory. 
+    Priority: 
+    1. Command line argument --runtime-path
+    2. Executable directory (if compiled via Nuitka/PyInstaller)
+    3. Current working directory (if running as source)
+    """
+    # Attempt to get path from custom arguments (assumes getArgs() is defined)
+    try:
+        runtime_path = getArgs().runtime_path
+    except (NameError, AttributeError):
+        runtime_path = None
+
     if not runtime_path:
-        if getattr(sys, 'frozen', False):
-            runtime_path = str(Path(sys.executable).parent)
+        # Check if the script is compiled (Nuitka adds __compiled__ to globals)
+        if "__compiled__" in globals() or getattr(sys, 'frozen', False):
+            # sys.executable points to the actual .exe file
+            runtime_path = Path(sys.executable).parent
         else:
-            raise RuntimeError(
-                "Runtime path not configured. Use --runtime-path to set the runtime directory."
-            )
+            # Fallback for source development (.py)
+            # You can also use Path(__file__).resolve().parent.parent if preferred
+            runtime_path = Path.cwd()
+
     return Path(runtime_path).resolve()
