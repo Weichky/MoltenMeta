@@ -1,4 +1,5 @@
 import argparse
+import sys
 from pathlib import Path
 
 from core.log import LogLevel
@@ -34,7 +35,10 @@ def getArgs() -> argparse.Namespace:
 def getRuntimePath() -> Path:
     runtime_path = getArgs().runtime_path
     if not runtime_path:
-        raise RuntimeError(
-            "Runtime path not configured. Use --runtime-path to set the runtime directory."
-        )
+        if getattr(sys, 'frozen', False):
+            runtime_path = str(Path(sys.executable).parent)
+        else:
+            raise RuntimeError(
+                "Runtime path not configured. Use --runtime-path to set the runtime directory."
+            )
     return Path(runtime_path).resolve()
