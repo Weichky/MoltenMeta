@@ -200,6 +200,154 @@ class HillertToopCalc(GeometricModelCalculator):
             "method": "HillertToop",
         }
 
+    def calculateContour(
+        self,
+        elem_A: int,
+        elem_B: int,
+        elem_C: int,
+        plane: str,
+        n_points: int = 50,
+    ) -> dict:
+        """Calculate contour data for x_i-x_j plane.
+
+        Args:
+            elem_A: Atomic number of element A
+            elem_B: Atomic number of element B
+            elem_C: Atomic number of element C
+            plane: Projection plane - "x_A-x_B", "x_A-x_C", or "x_B-x_C"
+            n_points: Number of points per axis (grid will be n_points x n_points)
+
+        Returns:
+            Dictionary containing meshgrid data for contour plotting:
+            - x_i, x_j: 2D arrays forming the meshgrid
+            - Z_ABC: 2D array of calculated values
+            - plane: The projection plane used
+        """
+        if n_points < 0:
+            raise ValueError(f"n_points must be non-negative, got {n_points}")
+
+        if plane not in ("x_A-x_B", "x_A-x_C", "x_B-x_C"):
+            raise ValueError(f"plane must be x_A-x_B, x_A-x_C, or x_B-x_C, got {plane}")
+
+        if self._provider is None:
+            raise RuntimeError("No BinaryDataProvider configured for HillertToopCalc")
+
+        if n_points == 0:
+            return {
+                "conditions": {
+                    "elem_A": elemIdToSymbol(elem_A),
+                    "elem_B": elemIdToSymbol(elem_B),
+                    "elem_C": elemIdToSymbol(elem_C),
+                    "plane": plane,
+                },
+                "x_i": [],
+                "x_j": [],
+                "Z_ABC": [],
+                "plane": plane,
+            }
+
+        import numpy as np
+
+        if plane == "x_A-x_B":
+            x_i_arr = np.linspace(0, 1, n_points)
+            x_j_arr = np.linspace(0, 1, n_points)
+            x_i_mesh, x_j_mesh = np.meshgrid(x_i_arr, x_j_arr)
+
+            x_A_flat = x_i_mesh.flatten()
+            x_B_flat = x_j_mesh.flatten()
+            x_C_flat = 1 - x_A_flat - x_B_flat
+
+            valid_mask = x_C_flat >= 0
+            x_A_flat = x_A_flat[valid_mask]
+            x_B_flat = x_B_flat[valid_mask]
+            x_C_flat = x_C_flat[valid_mask]
+
+        elif plane == "x_A-x_C":
+            x_i_arr = np.linspace(0, 1, n_points)
+            x_j_arr = np.linspace(0, 1, n_points)
+            x_i_mesh, x_j_mesh = np.meshgrid(x_i_arr, x_j_arr)
+
+            x_A_flat = x_i_mesh.flatten()
+            x_C_flat = x_j_mesh.flatten()
+            x_B_flat = 1 - x_A_flat - x_C_flat
+
+            valid_mask = x_B_flat >= 0
+            x_A_flat = x_A_flat[valid_mask]
+            x_B_flat = x_B_flat[valid_mask]
+            x_C_flat = x_C_flat[valid_mask]
+
+        else:
+            x_i_arr = np.linspace(0, 1, n_points)
+            x_j_arr = np.linspace(0, 1, n_points)
+            x_i_mesh, x_j_mesh = np.meshgrid(x_i_arr, x_j_arr)
+
+            x_B_flat = x_i_mesh.flatten()
+            x_C_flat = x_j_mesh.flatten()
+            x_A_flat = 1 - x_B_flat - x_C_flat
+
+            valid_mask = x_A_flat >= 0
+            x_A_flat = x_A_flat[valid_mask]
+            x_B_flat = x_B_flat[valid_mask]
+            x_C_flat = x_C_flat[valid_mask]
+
+        if len(x_A_flat) == 0:
+            return {
+                "conditions": {
+                    "elem_A": elemIdToSymbol(elem_A),
+                    "elem_B": elemIdToSymbol(elem_B),
+                    "elem_C": elemIdToSymbol(elem_C),
+                    "plane": plane,
+                },
+                "x_i": [],
+                "x_j": [],
+                "Z_ABC": [],
+                "plane": plane,
+            }
+
+        Z_AB_list = self._provider.getValues(elem_A, elem_B, x_A_flat.tolist())
+        if len(Z_AB_list) != len(x_A_flat):
+            raise ValueError(
+                f"Provider Z_AB returned {len(Z_AB_list)} values, expected {len(x_A_flat)}"
+            )
+
+        Z_AC_list = self._provider.getValues(elem_A, elem_C, x_A_flat.tolist())
+        if len(Z_AC_list) != len(x_A_flat):
+            raise ValueError(
+                f"Provider Z_AC returned {len(Z_AC_list)} values, expected {len(x_A_flat)}"
+            )
+
+        V_BC_flat = (1.0 + x_B_flat - x_C_flat) / 2.0
+        Z_BC_list = self._provider.getValues(elem_B, elem_C, V_BC_flat.tolist())
+        if len(Z_BC_list) != len(V_BC_flat):
+            raise ValueError(
+                f"Provider Z_BC returned {len(Z_BC_list)} values, expected {len(V_BC_flat)}"
+            )
+
+        Z_ABC_flat = self.calculatePropertyList(
+            x_A_flat.tolist(),
+            x_B_flat.tolist(),
+            x_C_flat.tolist(),
+            Z_AB_list,
+            Z_AC_list,
+            Z_BC_list,
+        )
+
+        Z_ABC_mesh = np.full_like(x_i_mesh, np.nan, dtype=float)
+        Z_ABC_mesh.flat[valid_mask] = Z_ABC_flat
+
+        return {
+            "conditions": {
+                "elem_A": elemIdToSymbol(elem_A),
+                "elem_B": elemIdToSymbol(elem_B),
+                "elem_C": elemIdToSymbol(elem_C),
+                "plane": plane,
+            },
+            "x_i": x_i_mesh.tolist(),
+            "x_j": x_j_mesh.tolist(),
+            "Z_ABC": Z_ABC_mesh.tolist(),
+            "plane": plane,
+        }
+
     def calculateContourWithData(
         self,
         elem_A: int,

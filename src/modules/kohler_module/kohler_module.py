@@ -376,8 +376,8 @@ class KohlerCalc(GeometricModelCalculator):
             x_B_flat.tolist(),
             x_C_flat.tolist(),
             Z_AB_list,
-            Z_BC_list,
             Z_AC_list,
+            Z_BC_list,
         )
 
         Z_ABC_mesh = np.full_like(x_i_mesh, np.nan, dtype=float)
