@@ -38,6 +38,47 @@ from pathlib import Path
 from logging import getLogger
 
 logger = getLogger(__name__)
+logger.warning("=== Runtime Environment Debug ===")
+
+# 1. Execution identity
+logger.warning(f"sys.executable: {sys.executable}")
+logger.warning(f"sys.argv: {sys.argv}")
+logger.warning(f"cwd: {Path.cwd()}")
+
+# 2. Compilation detection flags
+logger.warning(f"__nuitka__ in sys.modules: {'__nuitka__' in sys.modules}")
+logger.warning(f"sys.frozen: {getattr(sys, 'frozen', None)}")
+logger.warning(f"hasattr(sys, '__compiled__'): {hasattr(sys, '__compiled__')}")
+
+# 3. File context (VERY IMPORTANT)
+logger.warning(f"__file__: {__file__}")
+logger.warning(f"resolved __file__: {Path(__file__).resolve()}")
+
+# 4. Inspect module location (to detect if running from build dir)
+try:
+    import core.platform.args as this_module
+    logger.warning(f"module __file__: {this_module.__file__}")
+except Exception as e:
+    logger.warning(f"module inspection failed: {e}")
+
+# 5. sys.path snapshot (only first few to avoid spam)
+for i, p in enumerate(sys.path[:5]):
+    logger.warning(f"sys.path[{i}]: {p}")
+
+# 6. Environment hints
+logger.warning(f"PATH (truncated): {os.environ.get('PATH', '')[:200]}")
+
+# 7. Dist structure probe
+exe_dir = Path(sys.executable).resolve().parent
+logger.warning(f"exe_dir exists: {exe_dir.exists()}")
+logger.warning(f"exe_dir: {exe_dir}")
+
+for name in ["modules", "resources", "core"]:
+    p = exe_dir / name
+    logger.warning(f"{name} exists at exe_dir: {p.exists()} -> {p}")
+
+logger.warning("=== End Runtime Debug ===")
+
 def getRuntimePath() -> Path:
     """
     Resolve the runtime root directory in a robust and consistent way.
