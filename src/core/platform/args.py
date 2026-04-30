@@ -31,112 +31,56 @@ def getArgs() -> argparse.Namespace:
         _initArgs()
     return _args
 
-
-import sys
-import os
-from pathlib import Path
 from logging import getLogger
 
 logger = getLogger(__name__)
-logger.warning("=== Runtime Environment Debug ===")
 
-# 1. Execution identity
-logger.warning(f"sys.executable: {sys.executable}")
-logger.warning(f"sys.argv: {sys.argv}")
-logger.warning(f"cwd: {Path.cwd()}")
-
-# 2. Compilation detection flags
-logger.warning(f"__nuitka__ in sys.modules: {'__nuitka__' in sys.modules}")
-logger.warning(f"sys.frozen: {getattr(sys, 'frozen', None)}")
-logger.warning(f"hasattr(sys, '__compiled__'): {hasattr(sys, '__compiled__')}")
-
-# 3. File context (VERY IMPORTANT)
-logger.warning(f"__file__: {__file__}")
-logger.warning(f"resolved __file__: {Path(__file__).resolve()}")
-
-# 4. Inspect module location (to detect if running from build dir)
-try:
-    import core.platform.args as this_module
-    logger.warning(f"module __file__: {this_module.__file__}")
-except Exception as e:
-    logger.warning(f"module inspection failed: {e}")
-
-# 5. sys.path snapshot (only first few to avoid spam)
-for i, p in enumerate(sys.path[:5]):
-    logger.warning(f"sys.path[{i}]: {p}")
-
-# 6. Environment hints
-logger.warning(f"PATH (truncated): {os.environ.get('PATH', '')[:200]}")
-
-# 7. Dist structure probe
-exe_dir = Path(sys.executable).resolve().parent
-logger.warning(f"exe_dir exists: {exe_dir.exists()}")
-logger.warning(f"exe_dir: {exe_dir}")
-
-for name in ["modules", "resources", "core"]:
-    p = exe_dir / name
-    logger.warning(f"{name} exists at exe_dir: {p.exists()} -> {p}")
-
-logger.warning("=== End Runtime Debug ===")
+runtimepath_cache = None
 
 def getRuntimePath() -> Path:
     """
-    Resolve the runtime root directory in a robust and consistent way.
+    Resolve runtime root directory in a robust and portable way.
 
     Priority:
-    1. Explicit CLI argument (--runtime-path)
-    2. Packaged environment (Nuitka / PyInstaller) → directory of executable
-    3. Development fallback → project root inferred from this file
-
-    The returned path is always expected to contain runtime resources such as:
-    - modules/
-    - resources/
+    1. Cache
+    2. CLI override (--runtime-path)
+    3. Executable location (most reliable across Nuitka / onefile / standalone)
+    4. Runtime Error if all else fails
     """
 
-    # 1. Explicit override from CLI arguments
+    if runtimepath_cache is not None:
+        if runtimepath_cache.exists():
+            return runtimepath_cache
+        else:
+            logger.warning(f"[RuntimePath] Cache path does not exist: {runtimepath_cache}")
+            runtimepath_cache = None
+        
+    # 2. CLI override
     try:
         arg_path = getArgs().runtime_path
         if arg_path:
-            path = Path(arg_path).resolve()
-            if path.exists():
-                return path
-            else:
-                logger.warning(f"[RuntimePath] Provided runtime_path does not exist: {path}")
+            p = Path(arg_path).resolve()
+            runtimepath_cache = p
+            if p.exists():
+                logger.info(f"[RuntimePath] Using CLI override: {p}")
+                return p
+            logger.warning(f"[RuntimePath] CLI path does not exist: {p}")
     except Exception as e:
-        logger.warning(f"[RuntimePath] Failed to read CLI runtime_path: {e}")
+        logger.warning(f"[RuntimePath] CLI parse failed: {e}")
 
-    # 2. Detect packaged environment (Nuitka / PyInstaller)
+    # 3. Runtime anchor: argv[0] (MOST IMPORTANT)
     try:
-        is_compiled = "__nuitka__" in sys.modules or getattr(sys, "frozen", False)
+        exe_path = Path(sys.argv[0]).resolve()
+        runtime_path = exe_path.parent
 
-        if is_compiled:
-            exe_path = Path(sys.executable).resolve()
-            runtime_path = exe_path.parent
+        logger.info(f"[RuntimePath] argv[0]: {exe_path}")
+        logger.info(f"[RuntimePath] resolved runtime root: {runtime_path}")
+    
+        runtimepath_cache = runtime_path
 
-            if runtime_path.exists():
-                return runtime_path
-            else:
-                logger.warning(f"[RuntimePath] Executable parent does not exist: {runtime_path}")
-
-    except Exception as e:
-        logger.warning(f"[RuntimePath] Failed to resolve packaged runtime path: {e}")
-
-    # 3. Development fallback
-    try:
-        # Assume this file is located at: src/core/platform/args.py
-        # Project root = go up 3 levels → src/ → project root
-        dev_path = Path(__file__).resolve().parents[3]
-
-        if dev_path.exists():
-            logger.warning(f"[RuntimePath] Falling back to development path: {dev_path}")
-            return dev_path
-        else:
-            logger.warning(f"[RuntimePath] Development path does not exist: {dev_path}")
+        return runtime_path
 
     except Exception as e:
-        logger.warning(f"[RuntimePath] Failed to resolve development path: {e}")
-
-    # 4. Final fallback (last resort)
-    cwd = Path.cwd().resolve()
-    logger.warning(f"[RuntimePath] Falling back to current working directory: {cwd}")
-    return cwd
+        logger.warning(f"[RuntimePath] argv[0] resolution failed: {e}")
+        
+    raise RuntimeError("Failed to resolve runtime path. Please specify with --runtime-path or ensure executable is properly located.")
