@@ -48,6 +48,8 @@ def getRuntimePath() -> Path:
     4. Runtime Error if all else fails
     """
 
+    global runtimepath_cache
+
     if runtimepath_cache is not None:
         if runtimepath_cache.exists():
             return runtimepath_cache
