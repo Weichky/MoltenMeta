@@ -35,15 +35,20 @@ class QtLogHandler(logging.Handler):
         def setTextEdit(self, text_edit: QtWidgets.QTextEdit):
             self._text_edit = text_edit
 
-    def __init__(self):
+    def __init__(self, log_service=None):
         super().__init__()
         self._emitter = self.SignalEmitter()
+        self._log_service = log_service
         self.setFormatter(
             logging.Formatter("[%(levelname)s](%(name)s)|%(asctime)s|%(message)s")
         )
 
     def setTextEdit(self, text_edit: QtWidgets.QTextEdit):
         self._emitter.setTextEdit(text_edit)
+        if self._log_service is not None:
+            for msg in self._log_service.getBufferedLogs():
+                text_edit.append(msg)
+        text_edit.moveCursor(QTextCursor.MoveOperation.End)
 
     def emit(self, record: logging.LogRecord):
         try:
@@ -78,7 +83,7 @@ class SettingsController(QObject):
         self._window_resize_pending = False
 
     def _setupLogHandler(self):
-        self._log_handler = QtLogHandler()
+        self._log_handler = QtLogHandler(self._log_service)
         self._log_handler.setTextEdit(self.ui.log_display)
         logging.getLogger().addHandler(self._log_handler)
 
