@@ -76,7 +76,7 @@ def getRuntimePath() -> Path:
         runtime_path = exe_path.parent
 
         logger.info(f"[RuntimePath] argv[0]: {exe_path}")
-        logger.info(f"[RuntimePath] resolved runtime root: {runtime_path}")
+        logger.warning(f"[RuntimePath] resolved runtime root: {runtime_path}")
     
         runtimepath_cache = runtime_path
 
