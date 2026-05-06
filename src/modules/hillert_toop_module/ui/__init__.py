@@ -1,19 +1,17 @@
-from .widget_scatter import HillertToopScatterWizardDialog
-from .widget_contour import HillertToopContourWizardDialog
+from .widget import HillertToopWizardDialog
 
 
 def createWizard(method_name: str, module_service, user_db_service):
     """Factory function to create the appropriate Hillert-Toop wizard dialog."""
     if method_name == "calculateScatter":
-        return HillertToopScatterWizardDialog(module_service, user_db_service)
+        return HillertToopWizardDialog(module_service, user_db_service, method_type="scatter")
     elif method_name == "calculateContour":
-        return HillertToopContourWizardDialog(module_service, user_db_service)
+        return HillertToopWizardDialog(module_service, user_db_service, method_type="contour")
     else:
         return None
 
 
 __all__ = [
-    "HillertToopScatterWizardDialog",
-    "HillertToopContourWizardDialog",
+    "HillertToopWizardDialog",
     "createWizard",
 ]

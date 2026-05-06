@@ -6,6 +6,10 @@ from PySide6.QtWidgets import (
     QPushButton,
     QStackedWidget,
     QMessageBox,
+    QWidget,
+    QComboBox,
+    QFormLayout,
+    QGroupBox,
 )
 from PySide6.QtCore import Signal
 
@@ -20,8 +24,9 @@ from ...geometric_model_core import (
 class HillertToopWizardDialog(QDialog):
     resultReady = Signal(dict)
 
-    def __init__(self, module_service, user_db_service, parent=None):
+    def __init__(self, module_service, user_db_service, method_type="scatter", parent=None):
         super().__init__(parent)
+        self._method_type = method_type
         self.setWindowTitle(self.tr("Hillert-Toop Model Configuration"))
         self.setMinimumSize(600, 500)
         self._ms = module_service
@@ -44,15 +49,25 @@ class HillertToopWizardDialog(QDialog):
         title.setObjectName("wizardTitle")
         mainLayout.addWidget(title)
 
-        self._stepIndicator = StepIndicator(
-            [
+        if self._method_type == "contour":
+            steps = [
+                self.tr("Elements"),
+                self.tr("Z_AB"),
+                self.tr("Z_AC"),
+                self.tr("Z_BC"),
+                self.tr("Plane"),
+                self.tr("Options"),
+            ]
+        else:
+            steps = [
                 self.tr("Elements"),
                 self.tr("Z_AB"),
                 self.tr("Z_AC"),
                 self.tr("Z_BC"),
                 self.tr("Options"),
             ]
-        )
+
+        self._stepIndicator = StepIndicator(steps)
         mainLayout.addWidget(self._stepIndicator)
 
         self._stacked = QStackedWidget()
@@ -64,11 +79,26 @@ class HillertToopWizardDialog(QDialog):
         self._zAbPage = DataSourceSelectionPage(self.tr("Z_AB Data Source"), "Z_AB")
         self._zAcPage = DataSourceSelectionPage(self.tr("Z_AC Data Source"), "Z_AC")
         self._zBcPage = DataSourceSelectionPage(self.tr("Z_BC Data Source"), "Z_BC")
-        self._optionsPage = CalculationOptionsPage()
 
         self._stacked.addWidget(self._zAbPage)
         self._stacked.addWidget(self._zAcPage)
         self._stacked.addWidget(self._zBcPage)
+
+        if self._method_type == "contour":
+            self._planePage = QWidget()
+            planeLayout = QVBoxLayout(self._planePage)
+            planeLayout.setContentsMargins(32, 32, 32, 32)
+            planeGroup = QGroupBox(self.tr("Projection Plane"))
+            planeForm = QFormLayout()
+            self._planeCombo = QComboBox()
+            self._planeCombo.addItems(["x_A-x_B", "x_A-x_C", "x_B-x_C"])
+            planeForm.addRow(self.tr("Plane:"), self._planeCombo)
+            planeGroup.setLayout(planeForm)
+            planeLayout.addWidget(planeGroup)
+            planeLayout.addStretch()
+            self._stacked.addWidget(self._planePage)
+
+        self._optionsPage = CalculationOptionsPage()
         self._stacked.addWidget(self._optionsPage)
 
         buttonLayout = QHBoxLayout()
@@ -80,24 +110,24 @@ class HillertToopWizardDialog(QDialog):
         self._prevBtn.setObjectName("secondary")
         self._nextBtn = QPushButton(self.tr("Next"))
         self._nextBtn.setObjectName("primary")
-        self._calcBtn = QPushButton(self.tr("Calculate"))
-        self._calcBtn.setObjectName("primary")
+        self._configBtn = QPushButton(self.tr("Configure"))
+        self._configBtn.setObjectName("primary")
 
         self._prevBtn.setEnabled(False)
-        self._calcBtn.setVisible(False)
+        self._configBtn.setVisible(False)
 
         buttonLayout.addWidget(self._cancelBtn)
         buttonLayout.addStretch()
         buttonLayout.addWidget(self._prevBtn)
         buttonLayout.addWidget(self._nextBtn)
-        buttonLayout.addWidget(self._calcBtn)
+        buttonLayout.addWidget(self._configBtn)
 
         mainLayout.addLayout(buttonLayout)
 
         self._cancelBtn.clicked.connect(self.reject)
         self._prevBtn.clicked.connect(self._onPrev)
         self._nextBtn.clicked.connect(self._onNext)
-        self._calcBtn.clicked.connect(self._onCalculate)
+        self._configBtn.clicked.connect(self._onConfigure)
 
         self._elementPage.selectionChanged.connect(self._onElementsChanged)
         self._zAbPage.selectionChanged.connect(self._onZAbChanged)
@@ -105,6 +135,7 @@ class HillertToopWizardDialog(QDialog):
         self._zBcPage.selectionChanged.connect(self._onZBcChanged)
 
         self._currentStep = 0
+        self._maxSteps = 5 if self._method_type == "contour" else 4
         self._updateSources()
 
     def _updateSources(self):
@@ -151,10 +182,10 @@ class HillertToopWizardDialog(QDialog):
 
     def _updateButtons(self):
         self._prevBtn.setEnabled(self._currentStep > 0)
-        self._nextBtn.setVisible(self._currentStep < 4)
-        self._calcBtn.setVisible(self._currentStep == 4)
+        self._nextBtn.setVisible(self._currentStep < self._maxSteps)
+        self._configBtn.setVisible(self._currentStep == self._maxSteps)
 
-    def _onCalculate(self):
+    def _onConfigure(self):
         if (
             not self._sources["Z_AB"]
             or not self._sources["Z_AC"]
@@ -167,20 +198,63 @@ class HillertToopWizardDialog(QDialog):
             )
             return
 
-        result = self.calculate(self.getInputs())
-        self.resultReady.emit(result)
+        params = self.getInputs()
+        self.resultReady.emit(params)
         self.accept()
 
     def getInputs(self) -> dict:
+        from ..hillert_toop_module import HillertToopCalc
+
         elemA, elemB, elemC = self._elementPage.getElements()
-        return {
-            "elem_A": elemA,
-            "elem_B": elemB,
-            "elem_C": elemC,
-            "n_points": self._optionsPage.getNPoints(),
-            "contour_points": self._optionsPage.getContourPoints(),
-            "sources": self._sources.copy(),
-        }
+        nPoints = self._optionsPage.getNPoints()
+        plane = self._planeCombo.currentText() if self._method_type == "contour" else None
+
+        hillert_toop = HillertToopCalc()
+        xAList, xBList, xCList = hillert_toop._generateGrid(nPoints)
+
+        zAbSource = self._sources["Z_AB"]
+        zAcSource = self._sources["Z_AC"]
+        zBcSource = self._sources["Z_BC"]
+
+        zABList = zAbSource.getValues(elemA, elemB, xAList)
+        zACList = zAcSource.getValues(elemA, elemC, xAList)
+
+        wBList = [
+            xB / (xB + xC) if (xB + xC) > 0 else 0 for xB, xC in zip(xBList, xCList)
+        ]
+        zBCList = zBcSource.getValues(elemB, elemC, wBList)
+
+        zSymbol, zLatex, zUnit = self._getOutputSymbolLatexUnit(zAbSource)
+
+        if self._method_type == "contour":
+            return {
+                "method_name": "calculateContourWithData",
+                "elem_A": elemA,
+                "elem_B": elemB,
+                "elem_C": elemC,
+                "plane": plane,
+                "n_points": nPoints,
+                "Z_AB_list": zABList,
+                "Z_AC_list": zACList,
+                "Z_BC_list": zBCList,
+                "z_latex": zLatex,
+                "z_unit": zUnit,
+                "z_symbol": zSymbol,
+            }
+        else:
+            return {
+                "method_name": "calculateScatterWithData",
+                "elem_A": elemA,
+                "elem_B": elemB,
+                "elem_C": elemC,
+                "n_points": nPoints,
+                "Z_AB_list": zABList,
+                "Z_AC_list": zACList,
+                "Z_BC_list": zBCList,
+                "z_latex": zLatex,
+                "z_unit": zUnit,
+                "z_symbol": zSymbol,
+            }
 
     def _getOutputSymbolLatexUnit(self, source) -> tuple[str, str, str]:
         if source is None:

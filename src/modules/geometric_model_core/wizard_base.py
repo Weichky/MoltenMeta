@@ -5,6 +5,18 @@ Provides common wizard infrastructure for all geometric models (Kohler, Toop, Ma
 Concrete implementations should inherit from GeometricModelWizardMixin and implement abstract methods.
 """
 
+from abc import ABC, abstractmethod
+from PySide6.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QSpinBox,
+    QComboBox,
+    QGridLayout,
+)
+from PySide6.QtCore import Signal
+
 from ..element_map.element_map import ELEMENT_ID_TO_SYMBOL, elemSymbolToId
 
 ELEMENT_SYMBOLS = list(ELEMENT_ID_TO_SYMBOL.values())

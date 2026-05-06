@@ -19,8 +19,6 @@ class CompositionWizardDialog(QDialog):
     def __init__(
         self,
         module_service,
-        module_id: str | None = None,
-        method_name: str | None = None,
         max_components: int = 2,
         map_data: list[list] | None = None,
         default_output: str = "atomic_number",
@@ -30,8 +28,6 @@ class CompositionWizardDialog(QDialog):
         self.setWindowTitle(self.tr("Composition Input"))
         self.setMinimumWidth(400)
         self._ms = module_service
-        self._module_id = module_id
-        self._method_name = method_name
         self._max_components = max_components
         self._map_data = map_data or []
         self._default_output = default_output
@@ -138,13 +134,7 @@ class CompositionWizardDialog(QDialog):
                 parsed, self._map_data, use_atomic_number=use_atomic_number
             )
 
-            if self._module_id and self._method_name:
-                result = self._ms.callMethod(self._module_id, self._method_name, **kwargs)
-                self._ms.cacheResult(self._module_id, self._method_name, result, **kwargs)
-            else:
-                result = kwargs
-
-            self.resultReady.emit(result)
+            self.resultReady.emit(kwargs)
             self.accept()
         except CompositionError as e:
             self._composition_error_label.setText(str(e))
@@ -158,16 +148,12 @@ def createWizard(method_name: str, module_service, user_db_service, config: dict
     if config is None:
         config = {}
 
-    module_id = config.get("module_id")
-    method_name = config.get("method_name")
     max_components = config.get("max_components", 2)
     map_data = config.get("map", [])
     default_output = config.get("default_output", "atomic_number")
 
     return CompositionWizardDialog(
         module_service,
-        module_id=module_id,
-        method_name=method_name,
         max_components=max_components,
         map_data=map_data,
         default_output=default_output,

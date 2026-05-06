@@ -111,6 +111,12 @@ class ModuleService:
                 val = value_record[main_dim]
                 if val is None:
                     continue
+                try:
+                    float_val = float(val)
+                    if str(float_val) == "nan" or str(float_val) == "inf":
+                        continue
+                except (ValueError, TypeError):
+                    continue
                 params = {
                     c: value_record[c] for c in condition_dims if c in value_record
                 }
@@ -118,7 +124,7 @@ class ModuleService:
                     run_id=run_id,
                     module_id=module_id,
                     method_name=method_name,
-                    value=float(val),
+                    value=float_val,
                     unit=units.get(main_dim, ""),
                     params_json=json.dumps(params) if params else None,
                     parent_run_id=parent_run_id,
@@ -134,11 +140,17 @@ class ModuleService:
                         val = value_record[dim]
                         if val is None:
                             continue
+                        try:
+                            float_val = float(val)
+                            if str(float_val) == "nan" or str(float_val) == "inf":
+                                continue
+                        except (ValueError, TypeError):
+                            continue
                         entry = ComputationCacheSnapshot(
                             run_id=run_id,
                             module_id=module_id,
                             method_name=method_name,
-                            value=float(val),
+                            value=float_val,
                             unit=units.get(dim, ""),
                             params_json=json.dumps(value_record),
                             parent_run_id=parent_run_id,

@@ -7,8 +7,7 @@ package_name = "miedema_module"
 entry_class = "MiedemaCalc"
 all_methods = [
     "calculateSingle",
-    "calculateRange",
-    "calculateSingleBatch"
+    "calculateRange"
 ]
 
 type = "simulation"

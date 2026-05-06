@@ -32,6 +32,10 @@ class _ModuleDataSource:
         return self._module
 
     @property
+    def display_name(self) -> str:
+        return f"{self._module} ({self._output_symbol})"
+
+    @property
     def output_symbol(self) -> str:
         return self._output_symbol
 

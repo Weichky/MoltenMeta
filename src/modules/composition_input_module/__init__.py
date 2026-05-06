@@ -12,7 +12,12 @@ __all__ = [
     "CompositionError",
     "massToMole",
     "CompositionTool",
+    "CompositionInputService",
     "createWizard",
 ]
 
 from .ui import createWizard
+
+
+class CompositionInputService:
+    pass

@@ -161,7 +161,7 @@ class SimulationPage(QtWidgets.QWidget):
             if dialog is None:
                 self.ui.statusLabel.setText("Error: No wizard for this method")
                 return
-            dialog.resultReady.connect(self._onModuleWidgetResult)
+            dialog.resultReady.connect(self._onWizardConfigured)
             dialog.exec()
         else:
             self.ui.statusLabel.setText("Error: No wizard available for this module")
@@ -170,24 +170,23 @@ class SimulationPage(QtWidgets.QWidget):
         if not self._current_module or not self._current_method:
             return
 
-        dialog = self._controller.getModuleWidget(
-            self._current_module, self._current_method
-        )
-        if dialog is None:
-            self.ui.statusLabel.setText("Error: No wizard for this method")
-            return
-        dialog.resultReady.connect(self._onModuleWidgetResult)
-        dialog.exec()
-
-    def _onModuleWidgetResult(self, result: dict) -> None:
-        if not self._current_module:
+        if not hasattr(self, "_pending_inputs") or not self._pending_inputs:
+            self._onConfigureClicked()
             return
 
         try:
+            method_name = self._pending_inputs.pop("method_name", self._current_method)
+            result = self._controller.callCalculation(
+                self._current_module, method_name, **self._pending_inputs
+            )
             self._displayResult(result)
             self.ui.statusLabel.setText("Calculation complete")
         except Exception as e:
             self.ui.statusLabel.setText(f"Error: {e}")
+
+    def _onWizardConfigured(self, params: dict) -> None:
+        self._pending_inputs = params
+        self.ui.statusLabel.setText(f"Configured: {len(params)} parameters")
 
     def _setupCoordSelector(self) -> None:
         if not self._result_resolver:

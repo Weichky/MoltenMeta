@@ -133,8 +133,6 @@ def createWizard(method_name: str, module_service, user_db_service):
     if method_name == "calculateSingle":
         return CompositionWizardDialog(
             module_service,
-            module_id="miedema_module",
-            method_name="calculateSingle",
             max_components=2,
             map_data=[["elem_A", 0], ["elem_B", 2], ["x_A", 1]],
             default_output="atomic_number",

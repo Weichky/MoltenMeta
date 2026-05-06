@@ -56,16 +56,16 @@ class ToopScatterWizardDialog(QDialog):
 
         buttonLayout = QHBoxLayout()
         self._cancelBtn = QPushButton(self.tr("Cancel"))
-        self._calcBtn = QPushButton(self.tr("Calculate"))
+        self._configBtn = QPushButton(self.tr("Configure"))
 
         buttonLayout.addWidget(self._cancelBtn)
         buttonLayout.addStretch()
-        buttonLayout.addWidget(self._calcBtn)
+        buttonLayout.addWidget(self._configBtn)
 
         mainLayout.addLayout(buttonLayout)
 
         self._cancelBtn.clicked.connect(self.reject)
-        self._calcBtn.clicked.connect(self._onCalculate)
+        self._configBtn.clicked.connect(self._onConfigure)
 
         self._elementPage.selectionChanged.connect(self._onElementsChanged)
 
@@ -113,15 +113,8 @@ class ToopScatterWizardDialog(QDialog):
                     return outputSymbol, latex, unit
         return "", "", ""
 
-    def _onCalculate(self):
+    def _onConfigure(self):
         from ..toop_module import ToopCalc
-
-        elemA, elemB, elemC = self._elementPage.getElements()
-        nPoints = self._nPointsSpin.value()
-
-        toop = ToopCalc()
-
-        xAList, xBList, xCList = toop._generateGrid(nPoints)
 
         zAbSource = self._sources["Z_AB"]
         zAcSource = self._sources["Z_AC"]
@@ -135,6 +128,13 @@ class ToopScatterWizardDialog(QDialog):
             )
             return
 
+        elemA, elemB, elemC = self._elementPage.getElements()
+        nPoints = self._nPointsSpin.value()
+
+        toop = ToopCalc()
+
+        xAList, xBList, xCList = toop._generateGrid(nPoints)
+
         zABList = zAbSource.getValues(elemA, elemB, xAList)
         zACList = zAcSource.getValues(elemA, elemC, xAList)
 
@@ -145,28 +145,19 @@ class ToopScatterWizardDialog(QDialog):
 
         zSymbol, zLatex, zUnit = self._getOutputSymbolLatexUnit(zAbSource)
 
-        result = toop.calculateScatterWithData(
-            elemA,
-            elemB,
-            elemC,
-            nPoints,
-            zABList,
-            zACList,
-            zBCList,
-            zLatex,
-            zUnit,
-            zSymbol,
-        )
+        params = {
+            "method_name": "calculateScatterWithData",
+            "elem_A": elemA,
+            "elem_B": elemB,
+            "elem_C": elemC,
+            "n_points": nPoints,
+            "Z_AB_list": zABList,
+            "Z_AC_list": zACList,
+            "Z_BC_list": zBCList,
+            "z_latex": zLatex,
+            "z_unit": zUnit,
+            "z_symbol": zSymbol,
+        }
 
-        self._ms.cacheResult(
-            "toop_module",
-            "calculateScatter",
-            result,
-            elem_A=elemA,
-            elem_B=elemB,
-            elem_C=elemC,
-            n_points=nPoints,
-        )
-
-        self.resultReady.emit(result)
+        self.resultReady.emit(params)
         self.accept()
