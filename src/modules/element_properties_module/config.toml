@@ -1,0 +1,15 @@
+[module]
+package_name = "element_properties_module"
+entry_class = "ElementPropertiesCalc"
+all_methods = []
+type = "data"
+category = "element_properties"
+name = "Element Properties Module"
+version = "1.0.0"
+author = "Weichky"
+license = "MIT"
+description = "Element properties data module"
+
+[data]
+csv = "element_properties.csv"
+table_name = "element_properties"
