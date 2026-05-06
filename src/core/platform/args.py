@@ -31,11 +31,13 @@ def getArgs() -> argparse.Namespace:
         _initArgs()
     return _args
 
+
 from logging import getLogger
 
 logger = getLogger(__name__)
 
 runtimepath_cache = None
+
 
 def getRuntimePath() -> Path:
     """
@@ -54,9 +56,11 @@ def getRuntimePath() -> Path:
         if runtimepath_cache.exists():
             return runtimepath_cache
         else:
-            logger.warning(f"[RuntimePath] Cache path does not exist: {runtimepath_cache}")
+            logger.warning(
+                f"[RuntimePath] Cache path does not exist: {runtimepath_cache}"
+            )
             runtimepath_cache = None
-        
+
     # 2. CLI override
     try:
         arg_path = getArgs().runtime_path
@@ -77,12 +81,14 @@ def getRuntimePath() -> Path:
 
         logger.info(f"[RuntimePath] argv[0]: {exe_path}")
         logger.warning(f"[RuntimePath] resolved runtime root: {runtime_path}")
-    
+
         runtimepath_cache = runtime_path
 
         return runtime_path
 
     except Exception as e:
         logger.warning(f"[RuntimePath] argv[0] resolution failed: {e}")
-        
-    raise RuntimeError("Failed to resolve runtime path. Please specify with --runtime-path or ensure executable is properly located.")
+
+    raise RuntimeError(
+        "Failed to resolve runtime path. Please specify with --runtime-path or ensure executable is properly located."
+    )

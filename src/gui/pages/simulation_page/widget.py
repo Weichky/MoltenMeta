@@ -164,30 +164,20 @@ class SimulationPage(QtWidgets.QWidget):
             dialog.resultReady.connect(self._onModuleWidgetResult)
             dialog.exec()
         else:
-            accepted, inputs = self._controller.showInputDialog(
-                self._current_method, self
-            )
-            if accepted:
-                self._pending_inputs = inputs
-                self.ui.statusLabel.setText(f"Ready: {len(inputs)} inputs configured")
+            self.ui.statusLabel.setText("Error: No wizard available for this module")
 
     def _onCalculateClicked(self) -> None:
         if not self._current_module or not self._current_method:
             return
 
-        inputs = getattr(self, "_pending_inputs", {})
-        if not inputs:
-            self._onConfigureClicked()
+        dialog = self._controller.getModuleWidget(
+            self._current_module, self._current_method
+        )
+        if dialog is None:
+            self.ui.statusLabel.setText("Error: No wizard for this method")
             return
-
-        try:
-            result = self._controller.callCalculation(
-                self._current_module, self._current_method, **inputs
-            )
-            self._displayResult(result)
-            self.ui.statusLabel.setText("Calculation complete")
-        except Exception as e:
-            self.ui.statusLabel.setText(f"Error: {e}")
+        dialog.resultReady.connect(self._onModuleWidgetResult)
+        dialog.exec()
 
     def _onModuleWidgetResult(self, result: dict) -> None:
         if not self._current_module:

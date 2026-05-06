@@ -128,6 +128,8 @@ ELEMENT_ID_TO_SYMBOL: dict[int, str] = {
 
 ELEMENT_SYMBOL_TO_ID: dict[str, int] = {v: k for k, v in ELEMENT_ID_TO_SYMBOL.items()}
 
+ELEMENT_SYMBOLS: list[str] = list(ELEMENT_ID_TO_SYMBOL.values())
+
 
 def elemIdToSymbol(id: int) -> str:
     return ELEMENT_ID_TO_SYMBOL[id]
@@ -140,6 +142,7 @@ def elemSymbolToId(symbol: str) -> int | None:
 __all__ = [
     "ELEMENT_ID_TO_SYMBOL",
     "ELEMENT_SYMBOL_TO_ID",
+    "ELEMENT_SYMBOLS",
     "elemIdToSymbol",
     "elemSymbolToId",
 ]

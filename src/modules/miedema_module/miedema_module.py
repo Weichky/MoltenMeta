@@ -25,6 +25,7 @@ Step 4: Return the result in structured format with element symbols
 
 import csv
 import sys
+
 try:
     import tomllib
 except ModuleNotFoundError:

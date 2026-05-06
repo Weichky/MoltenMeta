@@ -1,0 +1,13 @@
+[module]
+package_name = "composition_input_module"
+entry_class = "CompositionInputService"
+all_methods = []
+
+type = "ui_component"
+category = "input"
+name = "Composition Input Module"
+version = "1.0.0"
+description = "Reusable composition input dialog for all modules"
+
+[ui]
+composition_tool = true

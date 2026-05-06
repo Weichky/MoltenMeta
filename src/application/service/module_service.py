@@ -12,7 +12,9 @@ class ModuleService:
     def __init__(self, runtime_path: Path, log_service: LogService):
         self._logger = log_service.getLogger(__name__)
         self._data_source_registry = DataSourceRegistry
-        self._manager = ModuleManager(runtime_path, log_service, self._data_source_registry)
+        self._manager = ModuleManager(
+            runtime_path, log_service, self._data_source_registry
+        )
         self._computation_cache_repo = None
         self._property_tags_repo = None
         self._symbols_repo = None

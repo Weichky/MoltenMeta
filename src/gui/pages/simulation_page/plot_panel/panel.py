@@ -45,7 +45,9 @@ class PlotPanel(QtWidgets.QWidget):
         self._current_bg = None
         self._current_fg = None
 
-    def applyPlaceholder(self, grid: bool, gridMode: str, gridDensity: float, gridLabelDensity: float) -> None:
+    def applyPlaceholder(
+        self, grid: bool, gridMode: str, gridDensity: float, gridLabelDensity: float
+    ) -> None:
         applyGridToAxis(self._ax, grid, gridMode, gridDensity, gridLabelDensity)
         self._canvas.draw()
 
@@ -107,21 +109,20 @@ class PlotPanel(QtWidgets.QWidget):
             markersize=style.markerSize,
         )
         final_x_label, final_y_label = resolveLabels(x_label, y_label, config)
-        self._ax.set_xlabel(
-            wrap_latex(final_x_label), fontsize=style.labelFontSize
-        )
+        self._ax.set_xlabel(wrap_latex(final_x_label), fontsize=style.labelFontSize)
         self._ax.set_ylabel(
             wrap_latex(final_y_label),
             fontsize=style.labelFontSize,
         )
         if config.title:
-            self._ax.set_title(
-                wrap_latex(config.title), fontsize=style.titleFontSize
-            )
+            self._ax.set_title(wrap_latex(config.title), fontsize=style.titleFontSize)
         self._ax.tick_params(axis="both", labelsize=style.tickFontSize)
         applyGridToAxis(
             self._ax,
-            style.grid, style.gridMode, style.gridDensity, style.gridLabelDensity
+            style.grid,
+            style.gridMode,
+            style.gridDensity,
+            style.gridLabelDensity,
         )
         self._canvas.draw()
 
@@ -149,21 +150,20 @@ class PlotPanel(QtWidgets.QWidget):
             marker=style.marker,
         )
         final_x_label, final_y_label = resolveLabels(x_label, y_label, config)
-        self._ax.set_xlabel(
-            wrap_latex(final_x_label), fontsize=style.labelFontSize
-        )
+        self._ax.set_xlabel(wrap_latex(final_x_label), fontsize=style.labelFontSize)
         self._ax.set_ylabel(
             wrap_latex(final_y_label),
             fontsize=style.labelFontSize,
         )
         if config.title:
-            self._ax.set_title(
-                wrap_latex(config.title), fontsize=style.titleFontSize
-            )
+            self._ax.set_title(wrap_latex(config.title), fontsize=style.titleFontSize)
         self._ax.tick_params(axis="both", labelsize=style.tickFontSize)
         applyGridToAxis(
             self._ax,
-            style.grid, style.gridMode, style.gridDensity, style.gridLabelDensity
+            style.grid,
+            style.gridMode,
+            style.gridDensity,
+            style.gridLabelDensity,
         )
         self._canvas.draw()
 
@@ -200,23 +200,29 @@ class PlotPanel(QtWidgets.QWidget):
             alpha=DEFAULT_SCATTER_3D_ALPHA,
         )
 
-        self._ax.set_xlabel(
-            wrap_latex(x_label or "x"), fontsize=style.labelFontSize
-        )
-        self._ax.set_ylabel(
-            wrap_latex(y_label or "y"), fontsize=style.labelFontSize
-        )
-        self._ax.set_zlabel(
-            wrap_latex(z_label or "z"), fontsize=style.labelFontSize
-        )
+        self._ax.set_xlabel(wrap_latex(x_label or "x"), fontsize=style.labelFontSize)
+        self._ax.set_ylabel(wrap_latex(y_label or "y"), fontsize=style.labelFontSize)
+        self._ax.set_zlabel(wrap_latex(z_label or "z"), fontsize=style.labelFontSize)
 
         if title:
             self._ax.set_title(wrap_latex(title), fontsize=style.titleFontSize)
 
         self._ax.tick_params(axis="both", labelsize=style.tickFontSize)
         self._ax.tick_params(axis="z", labelsize=style.tickFontSize)
-        applyGridToAxis(self._ax, style.grid, style.gridMode, style.gridDensity, style.gridLabelDensity)
-        applyGrid3D(self._ax, style.grid, style.gridMode, style.gridDensity, style.gridLabelDensity)
+        applyGridToAxis(
+            self._ax,
+            style.grid,
+            style.gridMode,
+            style.gridDensity,
+            style.gridLabelDensity,
+        )
+        applyGrid3D(
+            self._ax,
+            style.grid,
+            style.gridMode,
+            style.gridDensity,
+            style.gridLabelDensity,
+        )
 
         self._canvas.draw()
 
@@ -254,7 +260,9 @@ class PlotPanel(QtWidgets.QWidget):
         # so we shift the range by epsilon to avoid a flat color.
         if generator:
             n_cmap = DEFAULT_COLORMAP_RESOLUTION
-            cmap_colors = [generator.getColorAt(i / (n_cmap - 1)) for i in range(n_cmap)]
+            cmap_colors = [
+                generator.getColorAt(i / (n_cmap - 1)) for i in range(n_cmap)
+            ]
             cmap = mpl.colors.ListedColormap(cmap_colors)
             z_norm = (z_arr - z_min) / (z_max - z_min + DEFAULT_NORMALIZED_EPSILON)
             cf = self._ax.contourf(
@@ -269,7 +277,12 @@ class PlotPanel(QtWidgets.QWidget):
             for i, level in enumerate(np.linspace(0, 1, levels)):
                 color = generator.getColorAt(level)
                 self._ax.contour(
-                    x_arr, y_arr, z_norm, levels=[level], colors=[color], linewidths=DEFAULT_CONTOUR_LINE_WIDTH
+                    x_arr,
+                    y_arr,
+                    z_norm,
+                    levels=[level],
+                    colors=[color],
+                    linewidths=DEFAULT_CONTOUR_LINE_WIDTH,
                 )
         else:
             contour_levels = np.linspace(z_min, z_max, levels)
@@ -285,12 +298,8 @@ class PlotPanel(QtWidgets.QWidget):
         cbar = self._figure.colorbar(cf, ax=self._ax)
         cbar.set_label(wrap_latex("Z_ABC"), fontsize=style.labelFontSize)
 
-        self._ax.set_xlabel(
-            wrap_latex(x_label or "x"), fontsize=style.labelFontSize
-        )
-        self._ax.set_ylabel(
-            wrap_latex(y_label or "y"), fontsize=style.labelFontSize
-        )
+        self._ax.set_xlabel(wrap_latex(x_label or "x"), fontsize=style.labelFontSize)
+        self._ax.set_ylabel(wrap_latex(y_label or "y"), fontsize=style.labelFontSize)
 
         if title:
             self._ax.set_title(wrap_latex(title), fontsize=style.titleFontSize)
@@ -298,7 +307,13 @@ class PlotPanel(QtWidgets.QWidget):
         self._ax.set_xlim(0, 1)
         self._ax.set_ylim(0, 1)
         self._ax.tick_params(axis="both", labelsize=style.tickFontSize)
-        applyGridToAxis(self._ax, style.grid, style.gridMode, style.gridDensity, style.gridLabelDensity)
+        applyGridToAxis(
+            self._ax,
+            style.grid,
+            style.gridMode,
+            style.gridDensity,
+            style.gridLabelDensity,
+        )
 
         self._canvas.draw()
 

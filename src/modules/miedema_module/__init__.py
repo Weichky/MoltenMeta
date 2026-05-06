@@ -1,4 +1,5 @@
 from pathlib import Path
+
 try:
     import tomllib
 except ModuleNotFoundError:
