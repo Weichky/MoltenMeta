@@ -87,8 +87,6 @@ class MiedemaRangeWizardDialog(QDialog):
         self._calcBtn.clicked.connect(self._onCalculate)
 
     def _onCalculate(self):
-        from importlib import import_module
-
         elemA = elemSymbolToId(self._elemACombo.currentText())
         elemB = elemSymbolToId(self._elemBCombo.currentText())
         x_start = self._xStartSpin.value()
@@ -104,23 +102,16 @@ class MiedemaRangeWizardDialog(QDialog):
             return
 
         try:
-            miedema_calc = import_module("modules.miedema_module.miedema_module")
-            MiedemaCalc = getattr(miedema_calc, "MiedemaCalc")
-            miedema = MiedemaCalc()
-            result = miedema.calculateRange(elemA, elemB, x_start, x_end, n_points)
-
-            self._ms.cacheResult(
-                "miedema_module",
-                "calculateRange",
-                result,
-                elem_A=elemA,
-                elem_B=elemB,
-                x_start=x_start,
-                x_end=x_end,
-                n_points=n_points,
+            self.resultReady.emit(
+                {
+                    "method_name": "calculateRange",
+                    "elem_A": elemA,
+                    "elem_B": elemB,
+                    "x_A_start": x_start,
+                    "x_A_end": x_end,
+                    "n_points": n_points,
+                }
             )
-
-            self.resultReady.emit(result)
             self.accept()
         except Exception as e:
             QMessageBox.critical(self, self.tr("Error"), str(e))

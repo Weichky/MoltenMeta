@@ -27,6 +27,7 @@ from catalog import (
     DEFAULT_CONTOUR_TRIANGULAR_ALPHA,
     DEFAULT_TRIANGULAR_GRID_ALPHA,
     DEFAULT_TRIANGULAR_GRID_LINE_WIDTH,
+    DEFAULT_CONTOUR_TRIANGULAR_CONTOUR_LABEL_FONT_SIZE,
 )
 
 from core.plot.color import ColorPalette, ColorGenerator, ThemeColors
@@ -80,6 +81,10 @@ class PlotStyleConfig:
     triangular_alpha: float = DEFAULT_CONTOUR_TRIANGULAR_ALPHA
     triangular_grid_alpha: float = DEFAULT_TRIANGULAR_GRID_ALPHA
     triangular_grid_line_width: float = DEFAULT_TRIANGULAR_GRID_LINE_WIDTH
+    triangular_contour_labels: bool = True
+    triangular_contour_label_font_size: int = (
+        DEFAULT_CONTOUR_TRIANGULAR_CONTOUR_LABEL_FONT_SIZE
+    )
 
 
 def _getDefaultSettings() -> dict:
@@ -442,6 +447,29 @@ class PlotStyleService:
             or DEFAULT_TRIANGULAR_GRID_LINE_WIDTH
         )
 
+        triangular_contour_labels = (
+            plot_config.get("contour_labels")
+            or module_plot_config.get("contour_labels")
+            or (
+                settings.plot_triangular_contour_labels
+                if settings and settings.plot_triangular_contour_labels is not None
+                else None
+            )
+            or True
+        )
+
+        triangular_contour_label_font_size = (
+            plot_config.get("contour_label_font_size")
+            or module_plot_config.get("contour_label_font_size")
+            or (
+                settings.plot_triangular_contour_label_font_size
+                if settings
+                and settings.plot_triangular_contour_label_font_size is not None
+                else None
+            )
+            or DEFAULT_CONTOUR_TRIANGULAR_CONTOUR_LABEL_FONT_SIZE
+        )
+
         bg = (
             plot_config.get("bg")
             or module_plot_config.get("bg")
@@ -481,4 +509,6 @@ class PlotStyleService:
             triangular_alpha=float(triangular_alpha),
             triangular_grid_alpha=float(triangular_grid_alpha),
             triangular_grid_line_width=float(triangular_grid_line_width),
+            triangular_contour_labels=triangular_contour_labels,
+            triangular_contour_label_font_size=int(triangular_contour_label_font_size),
         )

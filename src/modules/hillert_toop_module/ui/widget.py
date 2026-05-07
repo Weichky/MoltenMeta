@@ -175,7 +175,7 @@ class HillertToopWizardDialog(QDialog):
             self._updateButtons()
 
     def _onNext(self):
-        if self._currentStep < 4:
+        if self._currentStep < self._maxSteps:
             self._currentStep += 1
             self._stacked.setCurrentIndex(self._currentStep)
             self._updateButtons()

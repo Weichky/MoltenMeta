@@ -21,7 +21,9 @@ from ...geometric_model_core import (
 class ToopWizardDialog(QDialog):
     resultReady = Signal(dict)
 
-    def __init__(self, module_service, user_db_service, method_type="scatter", parent=None):
+    def __init__(
+        self, module_service, user_db_service, method_type="scatter", parent=None
+    ):
         super().__init__(parent)
         self._method_type = method_type
         self.setWindowTitle(self.tr("Toop Model Configuration"))
@@ -206,7 +208,9 @@ class ToopWizardDialog(QDialog):
 
         elemA, elemB, elemC = self._elementPage.getElements()
         nPoints = self._optionsPage.getNPoints()
-        plane = self._planeCombo.currentText() if self._method_type == "contour" else None
+        plane = (
+            self._planeCombo.currentText() if self._method_type == "contour" else None
+        )
 
         toop = ToopCalc()
         xAList, xBList, xCList = toop._generateGrid(nPoints)

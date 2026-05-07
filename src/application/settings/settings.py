@@ -212,3 +212,18 @@ class Settings:
             return float(val) if val else None
         except (ValueError, TypeError):
             return None
+
+    @property
+    def plot_triangular_contour_labels(self) -> bool | None:
+        val = self.get("plot", "triangular_contour_labels")
+        if val is None:
+            return None
+        return str(val).lower() in ("true", "1", "yes")
+
+    @property
+    def plot_triangular_contour_label_font_size(self) -> int | None:
+        val = self.get("plot", "triangular_contour_label_font_size")
+        try:
+            return int(val) if val else None
+        except (ValueError, TypeError):
+            return None

@@ -58,11 +58,25 @@ class UiSimulationPage:
 
         self.plotContainer = QtWidgets.QStackedWidget()
 
+        plot_controls_layout = QtWidgets.QHBoxLayout()
+        self.plotType3dBtn = QtWidgets.QPushButton("Surface")
+        self.plotType3dBtn.setCheckable(True)
+        self.plotType3dBtn.setVisible(False)
+        self.plotTypeTriangularBtn = QtWidgets.QPushButton("3D Surface")
+        self.plotTypeTriangularBtn.setCheckable(True)
+        self.plotTypeTriangularBtn.setVisible(False)
+        self.exportBtn = QtWidgets.QPushButton("Export")
+        plot_controls_layout.addWidget(self.plotType3dBtn)
+        plot_controls_layout.addWidget(self.plotTypeTriangularBtn)
+        plot_controls_layout.addStretch()
+        plot_controls_layout.addWidget(self.exportBtn)
+
         plot_frame = QtWidgets.QFrame()
         plot_frame.setFrameShape(QtWidgets.QFrame.Shape.Box)
         plot_layout = QtWidgets.QVBoxLayout(plot_frame)
         plot_layout.setContentsMargins(2, 2, 2, 2)
-        plot_layout.addWidget(self.plotContainer)
+        plot_layout.addLayout(plot_controls_layout)
+        plot_layout.addWidget(self.plotContainer, stretch=1)
 
         main_layout.addWidget(control_frame, stretch=1)
         main_layout.addWidget(plot_frame, stretch=3)

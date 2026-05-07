@@ -218,6 +218,8 @@ def renderTriangularContour(
     contour_alpha = config.triangular_alpha
     grid_alpha = config.triangular_grid_alpha
     grid_line_width = config.triangular_grid_line_width
+    contour_labels = config.triangular_contour_labels
+    contour_label_font_size = config.triangular_contour_label_font_size
 
     if conditions:
         elem_labels = [
@@ -314,7 +316,7 @@ def renderTriangularContour(
             alpha=contour_alpha,
             extend="neither",
         )
-        ax.tricontour(
+        cs = ax.tricontour(
             triang,
             z_valid,
             levels=contour_levels,
@@ -328,6 +330,21 @@ def renderTriangularContour(
             levels=contour_levels,
             cmap="viridis",
             alpha=contour_alpha,
+        )
+        cs = ax.tricontour(
+            triang,
+            z_valid,
+            levels=contour_levels,
+            colors="white",
+            linewidths=DEFAULT_CONTOUR_TRIANGULAR_LINE_WIDTH,
+        )
+
+    if contour_labels:
+        ax.clabel(
+            cs,
+            fontsize=contour_label_font_size,
+            inline=True,
+            fmt="%.4g",
         )
 
     cbar = figure.colorbar(cf, ax=ax)

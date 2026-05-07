@@ -64,6 +64,22 @@ class ModuleService:
             )
 
         skip_cache = kwargs.pop("_skip_cache", False)
+        kwargs = {
+            k: v
+            for k, v in kwargs.items()
+            if not k.startswith("_")
+            and k
+            not in (
+                "method_name",
+                "conditions",
+                "values",
+                "units",
+                "latex",
+                "dims",
+                "main_dim",
+                "method",
+            )
+        }
 
         result = method(**kwargs)
 
@@ -82,6 +98,20 @@ class ModuleService:
         """Cache a pre-computed result. Useful for module methods called outside callMethod."""
         if not self._computation_cache_repo:
             return ""
+        result_keys = {
+            "conditions",
+            "values",
+            "units",
+            "latex",
+            "dims",
+            "main_dim",
+            "method",
+        }
+        kwargs = {
+            k: v
+            for k, v in kwargs.items()
+            if not k.startswith("_") and k not in result_keys
+        }
         run_id = self._cacheResult(module_id, method_name, result, kwargs)
         result["_run_id"] = run_id
         return run_id
