@@ -68,11 +68,11 @@ class ElementSelectionPage(QWidget):
         self._elemCCombo = QComboBox()
 
         self._elemACombo.addItems(ELEMENT_SYMBOLS)
-        self._elemACombo.setCurrentText("Fe")
+        self._elemACombo.setCurrentText("Al")
         self._elemBCombo.addItems(ELEMENT_SYMBOLS)
-        self._elemBCombo.setCurrentText("Cu")
+        self._elemBCombo.setCurrentText("Si")
         self._elemCCombo.addItems(ELEMENT_SYMBOLS)
-        self._elemCCombo.setCurrentText("Al")
+        self._elemCCombo.setCurrentText("Mg")
 
         layout.addWidget(QLabel(self.tr("Element A (solvent):")), 0, 0)
         layout.addWidget(self._elemACombo, 0, 1)
