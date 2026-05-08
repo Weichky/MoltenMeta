@@ -85,6 +85,7 @@ class PlotStyleConfig:
     triangular_contour_label_font_size: int = (
         DEFAULT_CONTOUR_TRIANGULAR_CONTOUR_LABEL_FONT_SIZE
     )
+    triangular_edge_labels: bool = True
 
 
 def _getDefaultSettings() -> dict:
@@ -470,6 +471,17 @@ class PlotStyleService:
             or DEFAULT_CONTOUR_TRIANGULAR_CONTOUR_LABEL_FONT_SIZE
         )
 
+        triangular_edge_labels = (
+            plot_config.get("edge_labels")
+            or module_plot_config.get("edge_labels")
+            or (
+                settings.plot_triangular_edge_labels
+                if settings and settings.plot_triangular_edge_labels is not None
+                else None
+            )
+            or True
+        )
+
         bg = (
             plot_config.get("bg")
             or module_plot_config.get("bg")
@@ -511,4 +523,5 @@ class PlotStyleService:
             triangular_grid_line_width=float(triangular_grid_line_width),
             triangular_contour_labels=triangular_contour_labels,
             triangular_contour_label_font_size=int(triangular_contour_label_font_size),
+            triangular_edge_labels=triangular_edge_labels,
         )

@@ -195,6 +195,45 @@ def drawTriangularAxes(
         fontsize=style.labelFontSize,
     )
 
+    mid_bc = (0.5, -DEFAULT_LABEL_DISTANCE * 2)
+    mid_ac = (
+        0.75 + DEFAULT_LABEL_DISTANCE * 1.732,
+        h / 2 + DEFAULT_LABEL_DISTANCE,
+    )
+    mid_ab = (
+        0.25 - DEFAULT_LABEL_DISTANCE * 1.732,
+        h / 2 + DEFAULT_LABEL_DISTANCE,
+    )
+
+    label_bottom = f"x({label_b})"
+    label_right = f"x({label_c})"
+    label_left = f"x({label_a})"
+
+    ax.text(
+        mid_bc[0],
+        mid_bc[1],
+        label_bottom,
+        ha="center",
+        va="top",
+        fontsize=style.tickFontSize,
+    )
+    ax.text(
+        mid_ac[0],
+        mid_ac[1],
+        label_right,
+        ha="left",
+        va="center",
+        fontsize=style.tickFontSize,
+    )
+    ax.text(
+        mid_ab[0],
+        mid_ab[1],
+        label_left,
+        ha="right",
+        va="center",
+        fontsize=style.tickFontSize,
+    )
+
 
 def renderTriangularContour(
     figure,

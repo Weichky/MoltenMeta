@@ -227,3 +227,10 @@ class Settings:
             return int(val) if val else None
         except (ValueError, TypeError):
             return None
+
+    @property
+    def plot_triangular_edge_labels(self) -> bool | None:
+        val = self.get("plot", "triangular_edge_labels")
+        if val is None:
+            return None
+        return str(val).lower() in ("true", "1", "yes")
