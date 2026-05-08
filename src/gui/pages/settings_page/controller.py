@@ -123,7 +123,9 @@ class SettingsController(QObject):
         )
 
         self.ui.primary_color_input.textChanged.connect(self._onPrimaryColorSubmitted)
-        self.ui.secondary_color_input.textChanged.connect(self._onSecondaryColorSubmitted)
+        self.ui.secondary_color_input.textChanged.connect(
+            self._onSecondaryColorSubmitted
+        )
 
         self.ui.palette_combo.currentIndexChanged.connect(self._onColorschemeChanged)
         self.ui.algorithm_combo.currentIndexChanged.connect(
@@ -203,8 +205,14 @@ class SettingsController(QObject):
         colorscheme = settings.plot_colorscheme or "default"
 
         if colorscheme == "custom":
-            primary = settings.get("plot", "custom_primary") or THEME_COLORS_DEFAULT["primary"]
-            secondary = settings.get("plot", "custom_secondary") or THEME_COLORS_DEFAULT["secondary"]
+            primary = (
+                settings.get("plot", "custom_primary")
+                or THEME_COLORS_DEFAULT["primary"]
+            )
+            secondary = (
+                settings.get("plot", "custom_secondary")
+                or THEME_COLORS_DEFAULT["secondary"]
+            )
         else:
             from core.plot.color import ColorPalette
 
@@ -318,7 +326,10 @@ class SettingsController(QObject):
             text = text.upper()
             self.ui.primary_color_input.setText(text)
             self._saveAndReload([SettingsSnapshot("appearance", "primary_color", text)])
-            secondary = self.ui.secondary_color_input.text() or self._theme_service._secondary_color
+            secondary = (
+                self.ui.secondary_color_input.text()
+                or self._theme_service._secondary_color
+            )
             self._theme_service.updateThemeColors(text, secondary)
 
     def _onSecondaryColorSubmitted(self, text: str):
@@ -333,7 +344,9 @@ class SettingsController(QObject):
             self._saveAndReload(
                 [SettingsSnapshot("appearance", "secondary_color", text)]
             )
-            primary = self.ui.primary_color_input.text() or self._theme_service._primary_color
+            primary = (
+                self.ui.primary_color_input.text() or self._theme_service._primary_color
+            )
             self._theme_service.updateThemeColors(primary, text)
 
     def _onColorAlgorithmChanged(self, index: int):
@@ -425,18 +438,23 @@ class SettingsController(QObject):
 
     # Emit plot_settings_changed so SimulationPage can re-render triangular plots
     def _onTriangularGridAlphaChanged(self, value: float):
-        self._saveAndReload([SettingsSnapshot("plot", "triangular_grid_alpha", str(value))])
+        self._saveAndReload(
+            [SettingsSnapshot("plot", "triangular_grid_alpha", str(value))]
+        )
         self._scheduleUpdatePlotPreview()
         self.plot_settings_changed.emit()
 
     # Emit plot_settings_changed so SimulationPage can re-render triangular plots
     def _onTriangularGridLineWidthChanged(self, value: float):
-        self._saveAndReload([SettingsSnapshot("plot", "triangular_grid_line_width", str(value))])
+        self._saveAndReload(
+            [SettingsSnapshot("plot", "triangular_grid_line_width", str(value))]
+        )
         self._scheduleUpdatePlotPreview()
         self.plot_settings_changed.emit()
 
     def _validateColor(self, text: str) -> bool:
         import re
+
         color_pattern = re.compile(r"^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")
         return bool(color_pattern.match(text.strip()))
 

@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt
 from .ui import UiSimulationPage
 from .controller import SimulationController
 from .plot_panel.panel import PlotPanel
+from .export_dialog import ExportDialog
 
 from core.plot import PlotStyleService, ResultResolver
 
@@ -65,6 +66,8 @@ class SimulationPage(QtWidgets.QWidget):
         self._result_resolver: ResultResolver | None = None
         self._current_result: dict | None = None
         self._module_widget: QtWidgets.QWidget | None = None
+        self._plot_3d_surface: bool = False
+        self._plot_triangular_surface: bool = False
 
         self.ui = UiSimulationPage()
         self.ui.setupUi(self)
@@ -78,6 +81,9 @@ class SimulationPage(QtWidgets.QWidget):
 
         self._connectSignals()
         self._populateCategories()
+        self.ui.plotType3dBtn.clicked.connect(self._onPlotType3dToggled)
+        self.ui.plotTypeTriangularBtn.clicked.connect(self._onPlotTypeTriangularToggled)
+        self.ui.exportBtn.clicked.connect(self._onExportClicked)
         if self._context.core_db is not None:
             self._context.core_db.settingsReloaded.connect(self._onSettingsReloaded)
 
@@ -161,47 +167,45 @@ class SimulationPage(QtWidgets.QWidget):
             if dialog is None:
                 self.ui.statusLabel.setText("Error: No wizard for this method")
                 return
-            dialog.resultReady.connect(self._onModuleWidgetResult)
+            dialog.resultReady.connect(self._onWizardConfigured)
             dialog.exec()
         else:
-            accepted, inputs = self._controller.showInputDialog(
-                self._current_method, self
-            )
-            if accepted:
-                self._pending_inputs = inputs
-                self.ui.statusLabel.setText(f"Ready: {len(inputs)} inputs configured")
+            self.ui.statusLabel.setText("Error: No wizard available for this module")
 
     def _onCalculateClicked(self) -> None:
         if not self._current_module or not self._current_method:
             return
 
-        inputs = getattr(self, "_pending_inputs", {})
-        if not inputs:
+        if not hasattr(self, "_pending_inputs") or not self._pending_inputs:
             self._onConfigureClicked()
             return
 
         try:
+            method_name = self._pending_inputs.pop("method_name", self._current_method)
             result = self._controller.callCalculation(
-                self._current_module, self._current_method, **inputs
+                self._current_module, method_name, **self._pending_inputs
             )
             self._displayResult(result)
             self.ui.statusLabel.setText("Calculation complete")
         except Exception as e:
             self.ui.statusLabel.setText(f"Error: {e}")
 
-    def _onModuleWidgetResult(self, result: dict) -> None:
-        if not self._current_module:
-            return
-
-        try:
-            self._displayResult(result)
-            self.ui.statusLabel.setText("Calculation complete")
-        except Exception as e:
-            self.ui.statusLabel.setText(f"Error: {e}")
+    def _onWizardConfigured(self, params: dict) -> None:
+        self._pending_inputs = params
+        self.ui.statusLabel.setText(f"Configured: {len(params)} parameters")
 
     def _setupCoordSelector(self) -> None:
         if not self._result_resolver:
             return
+
+        plot_type = self._result_resolver.plotType
+        self.ui.plotType3dBtn.setVisible(plot_type == "scatter_3d")
+        self.ui.plotType3dBtn.setChecked(False)
+        self._plot_3d_surface = False
+
+        self.ui.plotTypeTriangularBtn.setVisible(plot_type == "contour_triangular")
+        self.ui.plotTypeTriangularBtn.setChecked(False)
+        self._plot_triangular_surface = False
 
         if hasattr(self.ui, "coordSelector"):
             if not self._result_resolver.hasMultipleCoords:
@@ -229,6 +233,24 @@ class SimulationPage(QtWidgets.QWidget):
             self._result_resolver.setCurrentCoord(index)
         if self._current_result:
             self._displayResult(self._current_result)
+
+    def _onPlotType3dToggled(self, checked: bool) -> None:
+        self._plot_3d_surface = checked
+        self.ui.plotType3dBtn.setText("Scatter" if checked else "Surface")
+        if self._current_result:
+            self._displayResult(self._current_result)
+
+    def _onPlotTypeTriangularToggled(self, checked: bool) -> None:
+        self._plot_triangular_surface = checked
+        self.ui.plotTypeTriangularBtn.setText("Contour" if checked else "3D Surface")
+        if self._current_result:
+            self._displayResult(self._current_result)
+
+    def _onExportClicked(self) -> None:
+        dialog = ExportDialog(self)
+        if dialog.exec():
+            path, fmt, dpi = dialog.getExportInfo()
+            self._plot_panel.exportImage(path, fmt, dpi)
 
     def _onSettingsReloaded(self) -> None:
         if self._current_result:
@@ -280,17 +302,30 @@ class SimulationPage(QtWidgets.QWidget):
             conditions = resolved.get("conditions", {})
             title = resolved.get("title", "")
             if x_data and y_data and z_data:
-                self._plot_panel.scatter_3d(
-                    plot_config,
-                    x_data,
-                    y_data,
-                    z_data,
-                    x_label,
-                    y_label,
-                    z_label,
-                    title,
-                )
-                self.ui.resultLabel.setText(f"Scatter 3D: {len(x_data)} points")
+                if self._plot_3d_surface:
+                    self._plot_panel.surface_3d(
+                        plot_config,
+                        x_data,
+                        y_data,
+                        z_data,
+                        x_label,
+                        y_label,
+                        z_label,
+                        title,
+                    )
+                    self.ui.resultLabel.setText(f"Surface 3D: {len(x_data)} points")
+                else:
+                    self._plot_panel.scatter_3d(
+                        plot_config,
+                        x_data,
+                        y_data,
+                        z_data,
+                        x_label,
+                        y_label,
+                        z_label,
+                        title,
+                    )
+                    self.ui.resultLabel.setText(f"Scatter 3D: {len(x_data)} points")
             else:
                 self.ui.statusLabel.setText("Error: Empty result data")
                 return
@@ -319,11 +354,18 @@ class SimulationPage(QtWidgets.QWidget):
                 if resolved.get("z_axis")
                 else ""
             )
+            plane = conditions.get("plane", "x_A-x_B") if conditions else "x_A-x_B"
             if values:
-                self._plot_panel.contour_triangular(
-                    plot_config, values, conditions, title, z_label
-                )
-                self.ui.resultLabel.setText("Triangular contour plot")
+                if self._plot_triangular_surface:
+                    self._plot_panel.surface_3d_triangular(
+                        plot_config, values, conditions, title, z_label, plane
+                    )
+                    self.ui.resultLabel.setText("Triangular 3D surface")
+                else:
+                    self._plot_panel.contour_triangular(
+                        plot_config, values, conditions, title, z_label
+                    )
+                    self.ui.resultLabel.setText("Triangular contour plot")
             else:
                 self.ui.statusLabel.setText("Error: Empty values for triangular plot")
                 return

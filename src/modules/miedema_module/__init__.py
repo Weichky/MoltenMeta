@@ -1,4 +1,5 @@
 from pathlib import Path
+
 try:
     import tomllib
 except ModuleNotFoundError:
@@ -29,6 +30,10 @@ class _ModuleDataSource:
     @property
     def source_name(self) -> str:
         return self._module
+
+    @property
+    def display_name(self) -> str:
+        return f"{self._module} ({self._output_symbol})"
 
     @property
     def output_symbol(self) -> str:

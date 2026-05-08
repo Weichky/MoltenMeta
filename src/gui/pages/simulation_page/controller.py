@@ -7,8 +7,6 @@ from PySide6 import QtWidgets
 
 from core.platform import getRuntimePath
 
-from .input_dialog import InputDialog
-
 
 class SimulationController:
     def __init__(self, context):
@@ -53,17 +51,6 @@ class SimulationController:
     def getCurrentConfig(self) -> dict:
         return self._current_config
 
-    def showInputDialog(self, method_name: str, parent=None) -> tuple[bool, dict]:
-        config = self._current_config.get(method_name, {})
-        if not config:
-            return False, {}
-
-        inputs_config = config.get("inputs", {})
-        dialog = InputDialog(inputs_config, self._context.user_db, parent)
-        if dialog.exec() == QtWidgets.QDialog.Accepted:
-            return True, dialog.getInputs()
-        return False, {}
-
     def callCalculation(self, package_name: str, method_name: str, **kwargs) -> dict:
         self._logger.info(f"Calling {package_name}.{method_name}")
         self._logger.debug(f"Arguments: {kwargs}")
@@ -88,10 +75,20 @@ class SimulationController:
         ui_dir = getRuntimePath() / "modules" / package_name / "ui"
         if not ui_dir.exists():
             return False
-        for f in ui_dir.iterdir():
-            if f.name.startswith("widget_") and f.suffix == ".py":
-                return True
-        return False
+        ui_init = ui_dir / "__init__.py"
+        if not ui_init.exists():
+            return False
+        import sys
+        from importlib import import_module
+
+        runtime_path = str(getRuntimePath())
+        if runtime_path not in sys.path:
+            sys.path.insert(0, runtime_path)
+        try:
+            ui_module = import_module(f"modules.{package_name}.ui")
+            return hasattr(ui_module, "createWizard")
+        except Exception:
+            return False
 
     def getModuleWidget(
         self, package_name: str, method_name: str = ""

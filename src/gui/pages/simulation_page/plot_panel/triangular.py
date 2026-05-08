@@ -195,6 +195,45 @@ def drawTriangularAxes(
         fontsize=style.labelFontSize,
     )
 
+    mid_bc = (0.5, -DEFAULT_LABEL_DISTANCE * 2)
+    mid_ac = (
+        0.75 + DEFAULT_LABEL_DISTANCE * 1.732,
+        h / 2 + DEFAULT_LABEL_DISTANCE,
+    )
+    mid_ab = (
+        0.25 - DEFAULT_LABEL_DISTANCE * 1.732,
+        h / 2 + DEFAULT_LABEL_DISTANCE,
+    )
+
+    label_bottom = f"x({label_b})"
+    label_right = f"x({label_c})"
+    label_left = f"x({label_a})"
+
+    ax.text(
+        mid_bc[0],
+        mid_bc[1],
+        label_bottom,
+        ha="center",
+        va="top",
+        fontsize=style.tickFontSize,
+    )
+    ax.text(
+        mid_ac[0],
+        mid_ac[1],
+        label_right,
+        ha="left",
+        va="center",
+        fontsize=style.tickFontSize,
+    )
+    ax.text(
+        mid_ab[0],
+        mid_ab[1],
+        label_left,
+        ha="right",
+        va="center",
+        fontsize=style.tickFontSize,
+    )
+
 
 def renderTriangularContour(
     figure,
@@ -218,6 +257,8 @@ def renderTriangularContour(
     contour_alpha = config.triangular_alpha
     grid_alpha = config.triangular_grid_alpha
     grid_line_width = config.triangular_grid_line_width
+    contour_labels = config.triangular_contour_labels
+    contour_label_font_size = config.triangular_contour_label_font_size
 
     if conditions:
         elem_labels = [
@@ -314,7 +355,7 @@ def renderTriangularContour(
             alpha=contour_alpha,
             extend="neither",
         )
-        ax.tricontour(
+        cs = ax.tricontour(
             triang,
             z_valid,
             levels=contour_levels,
@@ -328,6 +369,21 @@ def renderTriangularContour(
             levels=contour_levels,
             cmap="viridis",
             alpha=contour_alpha,
+        )
+        cs = ax.tricontour(
+            triang,
+            z_valid,
+            levels=contour_levels,
+            colors="white",
+            linewidths=DEFAULT_CONTOUR_TRIANGULAR_LINE_WIDTH,
+        )
+
+    if contour_labels:
+        ax.clabel(
+            cs,
+            fontsize=contour_label_font_size,
+            inline=True,
+            fmt="%.4g",
         )
 
     cbar = figure.colorbar(cf, ax=ax)

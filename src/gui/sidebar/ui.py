@@ -70,7 +70,9 @@ class UiSidebar(QObject):
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.simulationButton.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.simulationButton.sizePolicy().hasHeightForWidth()
+        )
         self.simulationButton.setSizePolicy(sizePolicy)
 
         self.sidebarLayout.addWidget(self.simulationButton)

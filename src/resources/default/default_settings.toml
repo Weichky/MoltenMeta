@@ -44,3 +44,6 @@ levels = 20
 alpha = 0.8
 grid_alpha = 0.3
 grid_line_width = 0.1
+contour_labels = true
+contour_label_font_size = 8
+edge_labels = true

@@ -121,6 +121,7 @@ class ToopCalc(GeometricModelCalculator):
         elem_C: int,
         n_points: int = 50,
         z_symbol: str | None = None,
+        sources: dict | None = None,
     ) -> dict:
         """
         Calculate Toop model for a triangular grid.
@@ -131,6 +132,8 @@ class ToopCalc(GeometricModelCalculator):
             elem_C: Atomic number of element C
             n_points: Number of points per edge (total ~ n_points^2/2)
             z_symbol: Output symbol name (e.g. "Delta_H_mix"). If None, uses config default.
+            sources: Optional dict of DataSource objects with keys "Z_AB", "Z_AC", "Z_BC".
+                     If provided, overrides the internal binary provider.
 
         Returns:
             Dictionary containing calculation results
@@ -138,7 +141,7 @@ class ToopCalc(GeometricModelCalculator):
         if n_points < 0:
             raise ValueError(f"n_points must be non-negative, got {n_points}")
 
-        if self._provider is None:
+        if sources is None and self._provider is None:
             raise RuntimeError("No BinaryDataProvider configured for ToopCalc")
 
         x_A_list, x_B_list, x_C_list = self._generateGrid(n_points)
@@ -152,13 +155,27 @@ class ToopCalc(GeometricModelCalculator):
                 extra_conditions={"output_symbol": z_symbol} if z_symbol else None,
             )
 
-        Z_AB_list = self._provider.getValues(elem_A, elem_B, x_A_list)
+        def get_values(elem_1: int, elem_2: int, x_list: list):
+            if sources is not None:
+                if (elem_1, elem_2) in [(elem_A, elem_B), (elem_B, elem_A)]:
+                    source = sources.get("Z_AB")
+                elif (elem_1, elem_2) in [(elem_A, elem_C), (elem_C, elem_A)]:
+                    source = sources.get("Z_AC")
+                elif (elem_1, elem_2) in [(elem_B, elem_C), (elem_C, elem_B)]:
+                    source = sources.get("Z_BC")
+                else:
+                    source = None
+                if source is not None:
+                    return source.getValues(elem_1, elem_2, x_list)
+            return self._provider.getValues(elem_1, elem_2, x_list)
+
+        Z_AB_list = get_values(elem_A, elem_B, x_A_list)
         if len(Z_AB_list) != len(x_A_list):
             raise ValueError(
                 f"Provider Z_AB returned {len(Z_AB_list)} values, expected {len(x_A_list)}"
             )
 
-        Z_AC_list = self._provider.getValues(elem_A, elem_C, x_A_list)
+        Z_AC_list = get_values(elem_A, elem_C, x_A_list)
         if len(Z_AC_list) != len(x_A_list):
             raise ValueError(
                 f"Provider Z_AC returned {len(Z_AC_list)} values, expected {len(x_A_list)}"
@@ -168,7 +185,7 @@ class ToopCalc(GeometricModelCalculator):
             x_B / (x_B + x_C) if (x_B + x_C) > 0 else 0
             for x_B, x_C in zip(x_B_list, x_C_list)
         ]
-        Z_BC_list = self._provider.getValues(elem_B, elem_C, w_B_list)
+        Z_BC_list = get_values(elem_B, elem_C, w_B_list)
         if len(Z_BC_list) != len(w_B_list):
             raise ValueError(
                 f"Provider Z_BC returned {len(Z_BC_list)} values, expected {len(w_B_list)}"
@@ -223,6 +240,7 @@ class ToopCalc(GeometricModelCalculator):
         elem_C: int,
         plane: str,
         n_points: int = 50,
+        sources: dict | None = None,
     ) -> dict:
         """
         Calculate contour data for x_i-x_j plane.
@@ -233,6 +251,8 @@ class ToopCalc(GeometricModelCalculator):
             elem_C: Atomic number of element C
             plane: Projection plane - "x_A-x_B", "x_A-x_C", or "x_B-x_C"
             n_points: Number of points per axis (grid will be n_points x n_points)
+            sources: Optional dict of DataSource objects with keys "Z_AB", "Z_AC", "Z_BC".
+                     If provided, overrides the internal binary provider.
 
         Returns:
             Dictionary containing meshgrid data for contour plotting:
@@ -249,8 +269,22 @@ class ToopCalc(GeometricModelCalculator):
         if plane not in ("x_A-x_B", "x_A-x_C", "x_B-x_C"):
             raise ValueError(f"plane must be x_A-x_B, x_A-x_C, or x_B-x_C, got {plane}")
 
-        if self._provider is None:
+        if sources is None and self._provider is None:
             raise RuntimeError("No BinaryDataProvider configured for ToopCalc")
+
+        def get_values(elem_1: int, elem_2: int, x_list: list):
+            if sources is not None:
+                if (elem_1, elem_2) in [(elem_A, elem_B), (elem_B, elem_A)]:
+                    source = sources.get("Z_AB")
+                elif (elem_1, elem_2) in [(elem_A, elem_C), (elem_C, elem_A)]:
+                    source = sources.get("Z_AC")
+                elif (elem_1, elem_2) in [(elem_B, elem_C), (elem_C, elem_B)]:
+                    source = sources.get("Z_BC")
+                else:
+                    source = None
+                if source is not None:
+                    return source.getValues(elem_1, elem_2, x_list)
+            return self._provider.getValues(elem_1, elem_2, x_list)
 
         if n_points == 0:
             return {
@@ -324,13 +358,13 @@ class ToopCalc(GeometricModelCalculator):
                 "plane": plane,
             }
 
-        Z_AB_list = self._provider.getValues(elem_A, elem_B, x_A_flat.tolist())
+        Z_AB_list = get_values(elem_A, elem_B, x_A_flat.tolist())
         if len(Z_AB_list) != len(x_A_flat):
             raise ValueError(
                 f"Provider Z_AB returned {len(Z_AB_list)} values, expected {len(x_A_flat)}"
             )
 
-        Z_AC_list = self._provider.getValues(elem_A, elem_C, x_A_flat.tolist())
+        Z_AC_list = get_values(elem_A, elem_C, x_A_flat.tolist())
         if len(Z_AC_list) != len(x_A_flat):
             raise ValueError(
                 f"Provider Z_AC returned {len(Z_AC_list)} values, expected {len(x_A_flat)}"
@@ -342,7 +376,7 @@ class ToopCalc(GeometricModelCalculator):
                 x_B_flat / (x_B_flat + x_C_flat),
                 0.0,
             )
-        Z_BC_list = self._provider.getValues(elem_B, elem_C, w_B_flat.tolist())
+        Z_BC_list = get_values(elem_B, elem_C, w_B_flat.tolist())
         if len(Z_BC_list) != len(w_B_flat):
             raise ValueError(
                 f"Provider Z_BC returned {len(Z_BC_list)} values, expected {len(w_B_flat)}"

@@ -7,7 +7,9 @@ from catalog.plot_style import (
 )
 
 
-def _calcInterval(axis_min: float, axis_max: float, gridMode: str, gridDensity: float) -> float:
+def _calcInterval(
+    axis_min: float, axis_max: float, gridMode: str, gridDensity: float
+) -> float:
     range_val = axis_max - axis_min
     if gridMode == "absolute":
         return gridDensity

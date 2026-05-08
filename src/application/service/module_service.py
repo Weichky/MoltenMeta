@@ -12,7 +12,9 @@ class ModuleService:
     def __init__(self, runtime_path: Path, log_service: LogService):
         self._logger = log_service.getLogger(__name__)
         self._data_source_registry = DataSourceRegistry
-        self._manager = ModuleManager(runtime_path, log_service, self._data_source_registry)
+        self._manager = ModuleManager(
+            runtime_path, log_service, self._data_source_registry
+        )
         self._computation_cache_repo = None
         self._property_tags_repo = None
         self._symbols_repo = None
@@ -62,6 +64,22 @@ class ModuleService:
             )
 
         skip_cache = kwargs.pop("_skip_cache", False)
+        kwargs = {
+            k: v
+            for k, v in kwargs.items()
+            if not k.startswith("_")
+            and k
+            not in (
+                "method_name",
+                "conditions",
+                "values",
+                "units",
+                "latex",
+                "dims",
+                "main_dim",
+                "method",
+            )
+        }
 
         result = method(**kwargs)
 
@@ -80,6 +98,20 @@ class ModuleService:
         """Cache a pre-computed result. Useful for module methods called outside callMethod."""
         if not self._computation_cache_repo:
             return ""
+        result_keys = {
+            "conditions",
+            "values",
+            "units",
+            "latex",
+            "dims",
+            "main_dim",
+            "method",
+        }
+        kwargs = {
+            k: v
+            for k, v in kwargs.items()
+            if not k.startswith("_") and k not in result_keys
+        }
         run_id = self._cacheResult(module_id, method_name, result, kwargs)
         result["_run_id"] = run_id
         return run_id
@@ -109,6 +141,12 @@ class ModuleService:
                 val = value_record[main_dim]
                 if val is None:
                     continue
+                try:
+                    float_val = float(val)
+                    if str(float_val) == "nan" or str(float_val) == "inf":
+                        continue
+                except (ValueError, TypeError):
+                    continue
                 params = {
                     c: value_record[c] for c in condition_dims if c in value_record
                 }
@@ -116,7 +154,7 @@ class ModuleService:
                     run_id=run_id,
                     module_id=module_id,
                     method_name=method_name,
-                    value=float(val),
+                    value=float_val,
                     unit=units.get(main_dim, ""),
                     params_json=json.dumps(params) if params else None,
                     parent_run_id=parent_run_id,
@@ -132,11 +170,17 @@ class ModuleService:
                         val = value_record[dim]
                         if val is None:
                             continue
+                        try:
+                            float_val = float(val)
+                            if str(float_val) == "nan" or str(float_val) == "inf":
+                                continue
+                        except (ValueError, TypeError):
+                            continue
                         entry = ComputationCacheSnapshot(
                             run_id=run_id,
                             module_id=module_id,
                             method_name=method_name,
-                            value=float(val),
+                            value=float_val,
                             unit=units.get(dim, ""),
                             params_json=json.dumps(value_record),
                             parent_run_id=parent_run_id,

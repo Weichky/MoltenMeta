@@ -7,7 +7,11 @@ import matplotlib as mpl
 import numpy as np
 
 from core.log import getLogLevelMap
-from catalog import getSupportedLanguagesNameMap, UI_THEME_PRIMARY_DEFAULT, UI_THEME_SECONDARY_DEFAULT
+from catalog import (
+    getSupportedLanguagesNameMap,
+    UI_THEME_PRIMARY_DEFAULT,
+    UI_THEME_SECONDARY_DEFAULT,
+)
 from catalog.plot_style import (
     DEFAULT_FIGURE_SIZE,
     DEFAULT_COLORMAP_RESOLUTION,
@@ -478,7 +482,10 @@ class UiSettingsPage(QObject):
         self.triangular_levels_spin.setObjectName("triangularLevelsSpin")
         self.triangular_levels_spin.setRange(3, 100)
         self.triangular_levels_spin.setValue(
-            int(self._settings.plot_triangular_levels or DEFAULT_CONTOUR_TRIANGULAR_LEVELS)
+            int(
+                self._settings.plot_triangular_levels
+                or DEFAULT_CONTOUR_TRIANGULAR_LEVELS
+            )
         )
         triangular_grid.addWidget(QtWidgets.QLabel(self.tr("Levels")), 0, 0)
         triangular_grid.addWidget(self.triangular_levels_spin, 0, 1)
@@ -489,7 +496,9 @@ class UiSettingsPage(QObject):
         self.triangular_alpha_spin.setSingleStep(0.05)
         self.triangular_alpha_spin.setDecimals(2)
         self.triangular_alpha_spin.setValue(
-            float(self._settings.plot_triangular_alpha or DEFAULT_CONTOUR_TRIANGULAR_ALPHA)
+            float(
+                self._settings.plot_triangular_alpha or DEFAULT_CONTOUR_TRIANGULAR_ALPHA
+            )
         )
         triangular_grid.addWidget(QtWidgets.QLabel(self.tr("Fill Alpha")), 1, 0)
         triangular_grid.addWidget(self.triangular_alpha_spin, 1, 1)
@@ -500,18 +509,26 @@ class UiSettingsPage(QObject):
         self.triangular_grid_alpha_spin.setSingleStep(0.05)
         self.triangular_grid_alpha_spin.setDecimals(2)
         self.triangular_grid_alpha_spin.setValue(
-            float(self._settings.plot_triangular_grid_alpha or DEFAULT_TRIANGULAR_GRID_ALPHA)
+            float(
+                self._settings.plot_triangular_grid_alpha
+                or DEFAULT_TRIANGULAR_GRID_ALPHA
+            )
         )
         triangular_grid.addWidget(QtWidgets.QLabel(self.tr("Grid Alpha")), 2, 0)
         triangular_grid.addWidget(self.triangular_grid_alpha_spin, 2, 1)
 
         self.triangular_grid_line_width_spin = QtWidgets.QDoubleSpinBox()
-        self.triangular_grid_line_width_spin.setObjectName("triangularGridLineWidthSpin")
+        self.triangular_grid_line_width_spin.setObjectName(
+            "triangularGridLineWidthSpin"
+        )
         self.triangular_grid_line_width_spin.setRange(0.1, 5.0)
         self.triangular_grid_line_width_spin.setSingleStep(0.1)
         self.triangular_grid_line_width_spin.setDecimals(1)
         self.triangular_grid_line_width_spin.setValue(
-            float(self._settings.plot_triangular_grid_line_width or DEFAULT_TRIANGULAR_GRID_LINE_WIDTH)
+            float(
+                self._settings.plot_triangular_grid_line_width
+                or DEFAULT_TRIANGULAR_GRID_LINE_WIDTH
+            )
         )
         triangular_grid.addWidget(QtWidgets.QLabel(self.tr("Grid Width")), 3, 0)
         triangular_grid.addWidget(self.triangular_grid_line_width_spin, 3, 1)
@@ -530,7 +547,9 @@ class UiSettingsPage(QObject):
         preview_label.setText(self.tr("Preview"))
         page_layout.addWidget(preview_label)
 
-        self.preview_figure = Figure(figsize=DEFAULT_FIGURE_SIZE, constrained_layout=True)
+        self.preview_figure = Figure(
+            figsize=DEFAULT_FIGURE_SIZE, constrained_layout=True
+        )
         dpi = mpl.rcParams["figure.dpi"]
         fig_width, fig_height = self.preview_figure.get_size_inches()
         min_size = QtCore.QSize(int(fig_width * dpi), int(fig_height * dpi))
