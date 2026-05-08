@@ -1,0 +1,48 @@
+[module]
+package_name = "gp_module"
+entry_class = "GPCalc"
+all_methods = ["train", "predict"]
+version = "1.0.0"
+author = "Weichky"
+license = "MIT"
+description = "Gaussian Process regression module for residual modeling and uncertainty propagation"
+
+[train.inputs]
+symbol = ["data_points", "target_mode", "prior", "kernel_type"]
+input_method = "raw"
+
+[train.inputs.raw]
+method_map = [
+    ["data_points", "array_input"],
+    ["target_mode", "text_input"],
+    ["prior", "dict_input"],
+    ["kernel_type", "text_input"]
+]
+
+[train.inputs.description]
+data_points = "List of DataPoint(features tuple, target float)"
+target_mode = "Target mode: 'direct' or 'residual'"
+prior = "Prior configuration dict: {module, method, elem_A, elem_B}"
+kernel_type = "Kernel type: 'rbf' or 'matern'"
+
+[train.inputs.unit]
+data_points = ""
+target_mode = ""
+prior = ""
+kernel_type = ""
+
+
+[predict.inputs]
+symbol = ["features_array"]
+input_method = "raw"
+
+[predict.inputs.raw]
+method_map = [
+    ["features_array", "array_input"]
+]
+
+[predict.inputs.description]
+features_array = "List of feature tuples (e.g., [(x, T), ...])"
+
+[predict.inputs.unit]
+features_array = ""

@@ -1,0 +1,112 @@
+[module]
+package_name = "rk_module"
+entry_class = "RKCalc"
+all_methods = ["fit", "evaluate", "getLCoefficients", "getSigmaL", "sampleL", "dG_E_df0", "dG_E_df1"]
+version = "1.0.0"
+author = "Weichky"
+license = "MIT"
+description = "General Redlich-Kister polynomial expansion module with WLS fitting and uncertainty propagation"
+
+[fit.inputs]
+symbol = ["points", "order", "use_variance_weighting"]
+input_method = "raw"
+
+[fit.inputs.raw]
+method_map = [
+    ["points", "array_input"],
+    ["order", "int_input"],
+    ["use_variance_weighting", "bool_input"]
+]
+
+[fit.inputs.description]
+points = "List of DataPoint(features tuple, target float, variance float)"
+order = "RK polynomial order k (0, 1, 2)"
+use_variance_weighting = "Use variance for weighted least squares"
+
+[fit.inputs.unit]
+points = ""
+order = ""
+use_variance_weighting = ""
+
+
+[evaluate.inputs]
+symbol = ["features", "L_coeffs"]
+input_method = "raw"
+
+[evaluate.inputs.raw]
+method_map = [
+    ["features", "array_input"],
+    ["L_coeffs", "array_input"]
+]
+
+[evaluate.inputs.description]
+features = "Feature tuple (e.g., (x, T))"
+L_coeffs = "L coefficients [a0, b0, a1, b1, a2, b2]"
+
+[evaluate.inputs.unit]
+features = ""
+L_coeffs = ""
+
+
+[getLCoefficients]
+symbol = []
+input_method = "none"
+
+
+[getSigmaL]
+symbol = []
+input_method = "none"
+
+
+[sampleL.inputs]
+symbol = ["n_samples"]
+input_method = "raw"
+
+[sampleL.inputs.raw]
+method_map = [
+    ["n_samples", "int_input"]
+]
+
+[sampleL.inputs.description]
+n_samples = "Number of samples"
+
+[sampleL.inputs.unit]
+n_samples = ""
+
+
+[dG_E_df0.inputs]
+symbol = ["features", "L_coeffs"]
+input_method = "raw"
+
+[dG_E_df0.inputs.raw]
+method_map = [
+    ["features", "array_input"],
+    ["L_coeffs", "array_input"]
+]
+
+[dG_E_df0.inputs.description]
+features = "Feature tuple (e.g., (x, T))"
+L_coeffs = "L coefficients [a0, b0, a1, b1, a2, b2]"
+
+[dG_E_df0.inputs.unit]
+features = ""
+L_coeffs = ""
+
+
+[dG_E_df1.inputs]
+symbol = ["features", "L_coeffs"]
+input_method = "raw"
+
+[dG_E_df1.inputs.raw]
+method_map = [
+    ["features", "array_input"],
+    ["L_coeffs", "array_input"]
+]
+
+[dG_E_df1.inputs.description]
+features = "Feature tuple (e.g., (x, T))"
+L_coeffs = "L coefficients [a0, b0, a1, b1, a2, b2]"
+
+[dG_E_df1.inputs.unit]
+features = ""
+L_coeffs = ""

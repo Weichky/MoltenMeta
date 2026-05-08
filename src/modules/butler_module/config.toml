@@ -1,0 +1,69 @@
+[module]
+package_name = "butler_module"
+entry_class = "ButlerCalc"
+all_methods = ["fit", "solve", "sample", "getLCoefficients"]
+version = "1.0.0"
+author = "Weichky"
+license = "MIT"
+description = "Butler surface tension model with switchable data sources and Monte Carlo uncertainty propagation"
+
+[fit.inputs]
+symbol = ["config"]
+input_method = "raw"
+
+[fit.inputs.raw]
+method_map = [
+    ["config", "dict_input"]
+]
+
+[fit.inputs.description]
+config = "ButlerConfig containing L_coeffs, Sigma_L, order, elem_A, elem_B"
+
+[fit.inputs.unit]
+config = ""
+
+
+[solve.inputs]
+symbol = ["T", "x_bulk_A"]
+input_method = "raw"
+
+[solve.inputs.raw]
+method_map = [
+    ["T", "float_input"],
+    ["x_bulk_A", "float_input"]
+]
+
+[solve.inputs.description]
+T = "Temperature in K"
+x_bulk_A = "Bulk mole fraction of component A"
+
+[solve.inputs.unit]
+T = "K"
+x_bulk_A = ""
+
+
+[sample.inputs]
+symbol = ["T", "x_bulk_A", "n_samples"]
+input_method = "raw"
+
+[sample.inputs.raw]
+method_map = [
+    ["T", "float_input"],
+    ["x_bulk_A", "float_input"],
+    ["n_samples", "int_input"]
+]
+
+[sample.inputs.description]
+T = "Temperature in K"
+x_bulk_A = "Bulk mole fraction of component A"
+n_samples = "Number of Monte Carlo samples"
+
+[sample.inputs.unit]
+T = "K"
+x_bulk_A = ""
+n_samples = ""
+
+
+[getLCoefficients]
+symbol = []
+input_method = "none"

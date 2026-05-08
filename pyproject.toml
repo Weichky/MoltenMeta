@@ -12,6 +12,7 @@ dependencies = [
     "pyside6-essentials",
     "pyside6-qtads",
     "scipy",
+    "scikit-learn",
     "tomli>=1.1.0; python_version < '3.11'",
 ]
 
