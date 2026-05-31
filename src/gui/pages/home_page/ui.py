@@ -87,7 +87,7 @@ class UiHomePage(QObject):
         tiles_layout.setAlignment(QtCore.Qt.AlignLeft)
 
         tile_names = [
-            self.tr("Project"),
+            self.tr("Workflow"),
             self.tr("Data"),
             self.tr("Simulation"),
             self.tr("Settings"),
@@ -135,13 +135,13 @@ class UiHomePage(QObject):
         )
 
         tile_names = [
-            self.tr("Project"),
+            self.tr("Workflow"),
             self.tr("Data"),
             self.tr("Simulation"),
             self.tr("Settings"),
         ]
         tile_tooltips = [
-            self.tr("Create and manage projects"),
+            self.tr("Run prediction workflows"),
             self.tr("Import and organize data"),
             self.tr("Run thermodynamic calculations"),
             self.tr("Configure application settings"),

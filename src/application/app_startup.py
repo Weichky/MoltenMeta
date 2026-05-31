@@ -2,6 +2,7 @@ from core.log import LogService
 from core.platform import getArgs, getRuntimePath
 
 from db.core import DatabaseManager
+from db.modules_db_manager import ModulesDbManager
 from catalog import (
     DatabaseType,
     DatabaseConnInfo,
@@ -39,6 +40,16 @@ def _createUserDbManager(settings: Settings) -> DatabaseManager:
 
     db_type = DatabaseType(settings.database_type)
     conn_info = DatabaseConnInfo(db_type=db_type, file_path=db_path)
+    db_manager.applyConnection(conn_info)
+    return db_manager
+
+
+def _createModulesDbManager() -> ModulesDbManager:
+    db_manager = ModulesDbManager()
+    runtime_path = getRuntimePath()
+    db_path = runtime_path / "data" / "modules" / "modules_db.mmdb"
+
+    conn_info = DatabaseConnInfo(db_type=DatabaseType.SQLITE, file_path=db_path)
     db_manager.applyConnection(conn_info)
     return db_manager
 
@@ -100,5 +111,8 @@ def initApp(app) -> AppContext:
     context.modules.registerAllModulesProperties()
 
     context.unified_data = UnifiedDataQueryService(context.log, user_db_service)
+
+    modules_db_manager = _createModulesDbManager()
+    context.modules_db = modules_db_manager
 
     return context

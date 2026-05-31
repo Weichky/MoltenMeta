@@ -24,7 +24,9 @@ from ...geometric_model_core import (
 class KohlerWizardDialog(QDialog):
     resultReady = Signal(dict)
 
-    def __init__(self, module_service, user_db_service, method_type="scatter", parent=None):
+    def __init__(
+        self, module_service, user_db_service, method_type="scatter", parent=None
+    ):
         super().__init__(parent)
         self._method_type = method_type
         self.setWindowTitle(self.tr("Kohler Model Configuration"))
@@ -169,9 +171,17 @@ class KohlerWizardDialog(QDialog):
     def _updateSources(self):
         elemA, elemB, elemC = self._elementPage.getElements()
 
-        sourcesAB = self._discovery.findSources("thermodynamic", elemA, elemB)
-        sourcesBC = self._discovery.findSources("thermodynamic", elemB, elemC)
-        sourcesAC = self._discovery.findSources("thermodynamic", elemA, elemC)
+        required_tags = ["binary_data"]
+        accepted_tags = ["Delta_H_mix", "Any"]
+        sourcesAB = self._discovery.findSources(
+            required_tags, accepted_tags, elemA, elemB
+        )
+        sourcesBC = self._discovery.findSources(
+            required_tags, accepted_tags, elemB, elemC
+        )
+        sourcesAC = self._discovery.findSources(
+            required_tags, accepted_tags, elemA, elemC
+        )
 
         if sourcesAB:
             self._sources["Z_AB"] = sourcesAB[0]
@@ -238,7 +248,9 @@ class KohlerWizardDialog(QDialog):
 
         elemA, elemB, elemC = self._elementPage.getElements()
         nPoints = self._optionsPage.getNPoints()
-        plane = self._planeCombo.currentText() if self._method_type == "contour" else None
+        plane = (
+            self._planeCombo.currentText() if self._method_type == "contour" else None
+        )
 
         kohler = KohlerCalc()
         xAList, xBList, xCList = kohler._generateGrid(nPoints)

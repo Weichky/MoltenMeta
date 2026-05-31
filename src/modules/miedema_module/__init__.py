@@ -17,11 +17,13 @@ class _ModuleDataSource:
         module_name: str,
         method_name: str,
         output_symbol: str,
+        tags: list[str] | None = None,
     ):
         self._ms = module_service
         self._module = module_name
         self._method = method_name
         self._output_symbol = output_symbol
+        self._tags = tags or []
 
     @property
     def source_type(self) -> str:
@@ -38,6 +40,10 @@ class _ModuleDataSource:
     @property
     def output_symbol(self) -> str:
         return self._output_symbol
+
+    @property
+    def tags(self) -> list[str]:
+        return self._tags
 
     def getValue(self, elem_1: int, elem_2: int, x: float) -> float:
         result = self._ms.callMethod(
@@ -69,16 +75,20 @@ def _createMiedemaSource(module_service):
     batch_config = config.get("calculateSingleBatch", {})
     outputs = batch_config.get("outputs", {})
     output_symbol = outputs.get("symbol", ["Delta_H_mix"])[0]
+    source_tags = ["Miedema", "Delta_H_mix", "binary_data", "thermodynamic", "Any"]
 
     return _ModuleDataSource(
         module_service,
         module_name="miedema_module",
         method_name="calculateSingleBatch",
         output_symbol=output_symbol,
+        tags=source_tags,
     )
 
 
 def registerDataSources(registry) -> None:
     """Register data sources provided by this module."""
+    registry.register("Delta_H_mix", _createMiedemaSource)
+    registry.register("Miedema", _createMiedemaSource)
     registry.register("binary_data", _createMiedemaSource)
     registry.register("thermodynamic", _createMiedemaSource)

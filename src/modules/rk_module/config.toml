@@ -2,6 +2,8 @@
 package_name = "rk_module"
 entry_class = "RKCalc"
 all_methods = ["fit", "evaluate", "getLCoefficients", "getSigmaL", "sampleL", "dG_E_df0", "dG_E_df1"]
+type = "simulation"
+category = "generic"
 version = "1.0.0"
 author = "Weichky"
 license = "MIT"
@@ -46,6 +48,20 @@ L_coeffs = "L coefficients [a0, b0, a1, b1, a2, b2]"
 [evaluate.inputs.unit]
 features = ""
 L_coeffs = ""
+
+[evaluate.outputs]
+symbol = ["G_E"]
+tags = ["R-K", "G_E", "binary_data", "Any"]
+is_virtual = true
+
+[evaluate.outputs.latex]
+G_E = "G^E"
+
+[evaluate.outputs.description]
+G_E = "Redlich-Kister excess Gibbs energy"
+
+[evaluate.outputs.unit]
+G_E = "J/mol"
 
 
 [getLCoefficients]

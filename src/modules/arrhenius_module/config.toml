@@ -1,0 +1,74 @@
+[module]
+package_name = "arrhenius_module"
+entry_class = "ArrheniusCalc"
+all_methods = ["fit", "predict", "get_params"]
+type = "simulation"
+category = "viscosity"
+version = "1.0.0"
+author = "Weichky"
+license = "MIT"
+description = "Arrhenius model for temperature-dependent viscosity of pure elements"
+
+[fit.inputs]
+symbol = ["eta_exp", "order"]
+input_method = "raw"
+
+[fit.inputs.raw]
+method_map = [
+    ["eta_exp", "array_input"],
+    ["order", "int_input"]
+]
+
+[fit.inputs.description]
+eta_exp = "List of (eta, T) tuples - experimental viscosity and temperature"
+order = "Polynomial order for ln(eta) vs 1/T fit (default 1)"
+
+[fit.inputs.unit]
+eta_exp = ""
+order = ""
+
+[fit.outputs]
+symbol = ["eta_0", "E_a", "residuals"]
+tags = ["viscosity", "Arrhenius", "pure_element"]
+is_virtual = true
+
+[fit.outputs.latex]
+eta_0 = "\\eta_0"
+E_a = "E_a"
+
+[fit.outputs.description]
+eta_0 = "Pre-exponential factor (Pa·s)"
+E_a = "Activation energy (J/mol)"
+
+[fit.outputs.unit]
+eta_0 = "Pa·s"
+E_a = "J/mol"
+
+[predict.inputs]
+symbol = ["T"]
+input_method = "raw"
+
+[predict.inputs.raw]
+method_map = [
+    ["T", "float_input"]
+]
+
+[predict.inputs.description]
+T = "Temperature in K"
+
+[predict.inputs.unit]
+T = "K"
+
+[predict.outputs]
+symbol = ["eta"]
+tags = ["viscosity", "Arrhenius", "pure_element"]
+is_virtual = true
+
+[predict.outputs.latex]
+eta = "\\eta"
+
+[predict.outputs.description]
+eta = "Viscosity at temperature T"
+
+[predict.outputs.unit]
+eta = "Pa·s"

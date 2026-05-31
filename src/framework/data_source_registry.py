@@ -20,10 +20,37 @@ class DataSourceRegistry:
         return factory(*args, **kwargs)
 
     @classmethod
-    def findByTag(cls, tag: str, module_service=None):
-        factory = cls._factories.get(tag)
-        if factory is None:
-            return []
-        if module_service is not None:
-            return [factory(module_service)]
-        return [factory()]
+    def findByTag(
+        cls,
+        required_tags: list[str],
+        accepted_tags: list[str],
+        module_service=None,
+    ) -> list:
+        candidates = []
+        seen = set()
+
+        for tag in required_tags:
+            if tag == "Any":
+                for t, factory in cls._factories.items():
+                    source = factory(module_service) if module_service else factory()
+                    if id(source) not in seen:
+                        candidates.append(source)
+                        seen.add(id(source))
+            else:
+                factory = cls._factories.get(tag)
+                if factory is not None:
+                    source = factory(module_service) if module_service else factory()
+                    if id(source) not in seen:
+                        candidates.append(source)
+                        seen.add(id(source))
+
+        if "Any" in accepted_tags:
+            return candidates
+
+        filtered = []
+        for source in candidates:
+            source_tags = getattr(source, "tags", [])
+            if any(tag in accepted_tags for tag in source_tags):
+                filtered.append(source)
+
+        return filtered

@@ -6,6 +6,7 @@ from application.service.core_db_service import CoreDbService
 from application.service.user_db_service import UserDbService
 from application.service.module_service import ModuleService
 from application.service.unified_data_query_service import UnifiedDataQueryService
+from db.modules_db_manager import ModulesDbManager
 
 
 class AppContext:
@@ -19,6 +20,7 @@ class AppContext:
         user_db: UserDbService | None = None,
         modules: ModuleService | None = None,
         unified_data: UnifiedDataQueryService | None = None,
+        modules_db: ModulesDbManager | None = None,
     ):
         self.log = log
         self._settings = settings
@@ -28,6 +30,7 @@ class AppContext:
         self.user_db = user_db
         self.modules = modules
         self.unified_data = unified_data
+        self.modules_db = modules_db
 
     @property
     def settings(self) -> Settings | None:

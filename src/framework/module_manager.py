@@ -11,7 +11,9 @@ from core.log import LogService
 
 
 class ModuleManager:
-    def __init__(self, runtime_path: Path, log_service: LogService, data_source_registry):
+    def __init__(
+        self, runtime_path: Path, log_service: LogService, data_source_registry
+    ):
         """
         Initializes the Module Manager.
         :param runtime_path: Absolute path to the runtime directory.
@@ -34,7 +36,7 @@ class ModuleManager:
 
     def _discover(self, modules_dir: Path) -> None:
         """
-        Scans the modules directory, loads config.toml, and dynamically 
+        Scans the modules directory, loads config.toml, and dynamically
         instantiates module entry classes using physical file paths.
         """
         if not modules_dir.exists():
@@ -99,10 +101,23 @@ class ModuleManager:
         ]
 
     def getMethods(self, package_name: str) -> list[str]:
-        """Returns the list of available methods for a specific module."""
+        """Returns the list of visible methods for a specific module.
+
+        Filters out methods marked with is_virtual = true at method level.
+        """
         if package_name not in self._module_infos:
             raise KeyError(f"Module not found: {package_name}")
-        return self._module_infos[package_name]["module"].get("all_methods", [])
+        all_methods = self._module_infos[package_name]["module"].get("all_methods", [])
+        config = self._module_infos[package_name]
+        visible = []
+        for method in all_methods:
+            method_config = config.get(method, {})
+            if method_config.get("is_virtual") is True:
+                continue
+            visible.append(method)
+        if not visible:
+            return all_methods
+        return visible
 
     def getModuleConfig(self, package_name: str) -> dict | None:
         """Returns the full configuration dictionary for a module."""

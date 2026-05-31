@@ -1,0 +1,171 @@
+[module]
+package_name = "surface_workflow"
+entry_class = "SurfaceWorkflowCalc"
+all_methods = ["fit", "predict", "predictCurve"]
+type = "workflow"
+category = "workflow"
+version = "1.0.0"
+author = "Weichky"
+license = "MIT"
+description = "Butler surface tension workflow with Monte Carlo uncertainty propagation"
+
+[fit.inputs]
+symbol = ["elem_A", "elem_B", "L_coeffs", "order"]
+input_method = "raw"
+
+[fit.inputs.raw]
+method_map = [
+    ["elem_A", "int_input"],
+    ["elem_B", "int_input"],
+    ["L_coeffs", "array_input"],
+    ["order", "int_input"]
+]
+
+[fit.inputs.description]
+elem_A = "Atomic number of element A"
+elem_B = "Atomic number of element B"
+L_coeffs = "Redlich-Kister L coefficients [a0, b0, a1, b1, ...]"
+order = "RK polynomial order"
+
+[fit.inputs.unit]
+elem_A = ""
+elem_B = ""
+L_coeffs = ""
+order = ""
+
+[fit.outputs]
+symbol = ["status", "L_coeffs"]
+tags = ["surface_tension", "Butler", "workflow"]
+is_virtual = true
+
+[fit.outputs.latex]
+status = "\\text{status}"
+L_coeffs = "L_{coeffs}"
+
+[fit.outputs.description]
+status = "Fitting status"
+L_coeffs = "Redlich-Kister coefficients"
+
+[fit.outputs.unit]
+status = ""
+L_coeffs = "J/mol"
+
+
+[predict.inputs]
+symbol = ["T", "x_bulk_A"]
+input_method = "raw"
+
+[predict.inputs.raw]
+method_map = [
+    ["T", "float_input"],
+    ["x_bulk_A", "float_input"]
+]
+
+[predict.inputs.description]
+T = "Temperature in K"
+x_bulk_A = "Bulk mole fraction of component A"
+
+[predict.inputs.unit]
+T = "K"
+x_bulk_A = ""
+
+[predict.outputs]
+symbol = ["sigma", "x_A_surface", "x_B_surface"]
+tags = ["surface_tension", "Butler", "workflow", "prediction"]
+is_virtual = true
+
+[predict.outputs.latex]
+sigma = "\\sigma"
+x_A_surface = "x_A^s"
+x_B_surface = "x_B^s"
+
+[predict.outputs.description]
+sigma = "Surface tension in N/m"
+x_A_surface = "Surface mole fraction of A"
+x_B_surface = "Surface mole fraction of B"
+
+[predict.outputs.unit]
+sigma = "N/m"
+x_A_surface = ""
+x_B_surface = ""
+
+
+[sample.inputs]
+symbol = ["T", "x_bulk_A", "n_samples"]
+input_method = "raw"
+
+[sample.inputs.raw]
+method_map = [
+    ["T", "float_input"],
+    ["x_bulk_A", "float_input"],
+    ["n_samples", "int_input"]
+]
+
+[sample.inputs.description]
+T = "Temperature in K"
+x_bulk_A = "Bulk mole fraction of component A"
+n_samples = "Number of Monte Carlo samples"
+
+[sample.inputs.unit]
+T = "K"
+x_bulk_A = ""
+n_samples = ""
+
+[sample.outputs]
+symbol = ["sigma_samples", "sigma_percentiles"]
+tags = ["surface_tension", "Butler", "workflow", "uncertainty"]
+is_virtual = true
+
+[sample.outputs.latex]
+sigma_samples = "\\sigma_{\\text{samples}}"
+sigma_percentiles = "\\sigma_{\\text{percentiles}}"
+
+[sample.outputs.description]
+sigma_samples = "Array of surface tension samples"
+sigma_percentiles = "Percentile statistics (p5, p50, p95, mean, std)"
+
+[sample.outputs.unit]
+sigma_samples = "N/m"
+sigma_percentiles = "N/m"
+
+
+[predictCurve.inputs]
+symbol = ["T", "n_points"]
+input_method = "raw"
+
+[predictCurve.inputs.raw]
+method_map = [
+    ["T", "float_input"],
+    ["n_points", "int_input"]
+]
+
+[predictCurve.inputs.description]
+T = "Temperature in K"
+n_points = "Number of composition points"
+
+[predictCurve.inputs.unit]
+T = "K"
+n_points = ""
+
+[predictCurve.outputs]
+symbol = ["sigma", "x_bulk_A", "x_A_surface", "x_B_surface"]
+tags = ["surface_tension", "Butler", "workflow", "curve"]
+is_virtual = true
+
+[predictCurve.outputs.latex]
+sigma = "\\sigma"
+x_bulk_A = "x^{\\text{bulk}}_A"
+x_A_surface = "x_A^s"
+x_B_surface = "x_B^s"
+
+[predictCurve.outputs.description]
+sigma = "Surface tension curve in N/m"
+x_bulk_A = "Bulk mole fraction of A"
+x_A_surface = "Surface mole fraction of A"
+x_B_surface = "Surface mole fraction of B"
+
+[predictCurve.outputs.unit]
+sigma = "N/m"
+x_bulk_A = ""
+x_A_surface = ""
+x_B_surface = ""

@@ -8,7 +8,7 @@ from .ui import UiHomePage
 
 
 class HomePage(QtWidgets.QWidget):
-    projectButtonClicked = Signal()
+    workflowButtonClicked = Signal()
     databaseButtonClicked = Signal()
     simulationButtonClicked = Signal()
     settingsButtonClicked = Signal()
@@ -28,13 +28,13 @@ class HomePage(QtWidgets.QWidget):
         self._apply_title_color()
 
     def _connect_signals(self):
-        # Tile order: [Project, Data, Simulation, Settings] — must match ui.py layout.
-        PROJECT_INDEX = 0
+        # Tile order: [Workflow, Data, Simulation, Settings] — must match ui.py layout.
+        WORKFLOW_INDEX = 0
         DATABASE_INDEX = 1
         SIMULATION_INDEX = 2
         SETTINGS_INDEX = 3
 
-        self.ui.tiles[PROJECT_INDEX].clicked.connect(self.projectButtonClicked.emit)
+        self.ui.tiles[WORKFLOW_INDEX].clicked.connect(self.workflowButtonClicked.emit)
         self.ui.tiles[DATABASE_INDEX].clicked.connect(self.databaseButtonClicked.emit)
         self.ui.tiles[SIMULATION_INDEX].clicked.connect(
             self.simulationButtonClicked.emit

@@ -44,9 +44,7 @@ class ButlerSampleDict(TypedDict):
 
 
 class ButlerCalc:
-    def __init__(self, GE_functions: ButlerGEFunctions):
-        if GE_functions is None:
-            raise ValueError("GE_functions must be provided")
+    def __init__(self, GE_functions: ButlerGEFunctions | None = None):
         self._GE_functions = GE_functions
         self._is_fitted = False
         self._config: ButlerConfig | None = None

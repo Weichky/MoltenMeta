@@ -1,7 +1,9 @@
 [module]
 package_name = "butler_module"
 entry_class = "ButlerCalc"
-all_methods = ["fit", "solve", "sample", "getLCoefficients"]
+all_methods = ["solve"]
+type = "simulation"
+category = "surface_tension"
 version = "1.0.0"
 author = "Weichky"
 license = "MIT"
@@ -41,29 +43,16 @@ x_bulk_A = "Bulk mole fraction of component A"
 T = "K"
 x_bulk_A = ""
 
+[solve.outputs]
+symbol = ["sigma"]
+tags = ["sigma", "surface_tension", "binary_data"]
+is_virtual = true
 
-[sample.inputs]
-symbol = ["T", "x_bulk_A", "n_samples"]
-input_method = "raw"
+[solve.outputs.latex]
+sigma = "\\sigma"
 
-[sample.inputs.raw]
-method_map = [
-    ["T", "float_input"],
-    ["x_bulk_A", "float_input"],
-    ["n_samples", "int_input"]
-]
+[solve.outputs.description]
+sigma = "Surface tension"
 
-[sample.inputs.description]
-T = "Temperature in K"
-x_bulk_A = "Bulk mole fraction of component A"
-n_samples = "Number of Monte Carlo samples"
-
-[sample.inputs.unit]
-T = "K"
-x_bulk_A = ""
-n_samples = ""
-
-
-[getLCoefficients]
-symbol = []
-input_method = "none"
+[solve.outputs.unit]
+sigma = "N/m"

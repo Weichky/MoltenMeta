@@ -31,29 +31,32 @@ class BinaryDataSourceDiscovery:
         self._user_db = user_db_service
         self._registry = registry
 
-    def findSources(self, tag: str, elem_1: int, elem_2: int) -> list:
+    def findSources(
+        self,
+        required_tags: list[str],
+        accepted_tags: list[str],
+        elem_1: int,
+        elem_2: int,
+    ) -> list:
         sources = []
 
-        module_sources = self._registry.findByTag(tag, self._ms)
+        module_sources = self._registry.findByTag(
+            required_tags, accepted_tags, self._ms
+        )
         sources.extend(module_sources)
 
-        db_sources = self._findDbSources(tag, elem_1, elem_2)
+        db_sources = self._findDbSources(required_tags, accepted_tags, elem_1, elem_2)
         sources.extend(db_sources)
 
         return sources
 
-    def _findDbSources(self, tag: str, elem_1: int, elem_2: int) -> list:
-        """
-        Find database records matching the tag and element pair.
-
-        Args:
-            tag: Data source tag
-            elem_1: Atomic number of first element
-            elem_2: Atomic number of second element
-
-        Returns:
-            List of DatabaseDataSource objects
-        """
+    def _findDbSources(
+        self,
+        required_tags: list[str],
+        accepted_tags: list[str],
+        elem_1: int,
+        elem_2: int,
+    ) -> list:
         return []
 
 

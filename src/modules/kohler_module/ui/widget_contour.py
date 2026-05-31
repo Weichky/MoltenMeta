@@ -83,9 +83,17 @@ class KohlerContourWizardDialog(QDialog):
     def _updateSources(self):
         elemA, elemB, elemC = self._elementPage.getElements()
 
-        sourcesAB = self._discovery.findSources("thermodynamic", elemA, elemB)
-        sourcesBC = self._discovery.findSources("thermodynamic", elemB, elemC)
-        sourcesAC = self._discovery.findSources("thermodynamic", elemA, elemC)
+        required_tags = ["binary_data"]
+        accepted_tags = ["Delta_H_mix", "Any"]
+        sourcesAB = self._discovery.findSources(
+            required_tags, accepted_tags, elemA, elemB
+        )
+        sourcesBC = self._discovery.findSources(
+            required_tags, accepted_tags, elemB, elemC
+        )
+        sourcesAC = self._discovery.findSources(
+            required_tags, accepted_tags, elemA, elemC
+        )
 
         if sourcesAB:
             self._sources["Z_AB"] = sourcesAB[0]

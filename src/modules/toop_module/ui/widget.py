@@ -142,9 +142,17 @@ class ToopWizardDialog(QDialog):
     def _updateSources(self):
         elemA, elemB, elemC = self._elementPage.getElements()
 
-        sourcesAB = self._discovery.findSources("thermodynamic", elemA, elemB)
-        sourcesAC = self._discovery.findSources("thermodynamic", elemA, elemC)
-        sourcesBC = self._discovery.findSources("thermodynamic", elemB, elemC)
+        required_tags = ["binary_data"]
+        accepted_tags = ["Delta_H_mix", "Any"]
+        sourcesAB = self._discovery.findSources(
+            required_tags, accepted_tags, elemA, elemB
+        )
+        sourcesAC = self._discovery.findSources(
+            required_tags, accepted_tags, elemA, elemC
+        )
+        sourcesBC = self._discovery.findSources(
+            required_tags, accepted_tags, elemB, elemC
+        )
 
         self._zAbPage.setSources(sourcesAB)
         self._zAcPage.setSources(sourcesAC)

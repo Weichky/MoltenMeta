@@ -6,6 +6,7 @@ from gui.pages.home_page import HomePage
 from gui.pages.settings_page import SettingsPage
 from gui.pages.data_page import DataPage
 from gui.pages.simulation_page import SimulationPage
+from gui.pages.workflow_page import WorkflowPage
 
 from application import AppContext
 
@@ -82,6 +83,12 @@ class PageController(QObject):
             factory=lambda: SimulationPage(context),
         )
 
+        self._workflow_spec = DockPageSpec(
+            key="workflow",
+            titleProvider=lambda: QCoreApplication.translate("DockPage", "Workflow"),
+            factory=lambda: WorkflowPage(context),
+        )
+
         self.dock_manager = dock_manager
         self.background_layer = background_layer
         self.pages = {}  # Page cache
@@ -91,6 +98,7 @@ class PageController(QObject):
             self._settings_spec.key: self._settings_spec,
             self._data_spec.key: self._data_spec,
             self._simulation_spec.key: self._simulation_spec,
+            self._workflow_spec.key: self._workflow_spec,
         }
 
         # Pre-load settings page to avoid cold start when user first navigates to it
@@ -122,8 +130,8 @@ class PageController(QObject):
                     simulation_page._onPlotSettingsChanged
                 )
 
-    def showProject(self):
-        self.logger.debug("Project page not implemented yet")
+    def showWorkflow(self):
+        self._showPage(self._workflow_spec)
 
     def showData(self):
         self._showPage(self._data_spec)
@@ -230,7 +238,7 @@ class PageController(QObject):
         return dock
 
     def _connectHomeSignals(self, page: HomePage):
-        page.projectButtonClicked.connect(self.showProject)
+        page.workflowButtonClicked.connect(self.showWorkflow)
         page.databaseButtonClicked.connect(self.showData)
         page.simulationButtonClicked.connect(self.showSimulation)
         page.settingsButtonClicked.connect(self.showSettings)

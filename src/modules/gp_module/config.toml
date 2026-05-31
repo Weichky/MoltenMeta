@@ -2,6 +2,8 @@
 package_name = "gp_module"
 entry_class = "GPCalc"
 all_methods = ["train", "predict"]
+type = "simulation"
+category = "generic"
 version = "1.0.0"
 author = "Weichky"
 license = "MIT"
@@ -46,3 +48,17 @@ features_array = "List of feature tuples (e.g., [(x, T), ...])"
 
 [predict.inputs.unit]
 features_array = ""
+
+[predict.outputs]
+symbol = ["GP_prediction"]
+tags = ["GP", "Any"]
+is_virtual = true
+
+[predict.outputs.latex]
+GP_prediction = "\\text{GP prediction}"
+
+[predict.outputs.description]
+GP_prediction = "Gaussian Process prediction"
+
+[predict.outputs.unit]
+GP_prediction = ""

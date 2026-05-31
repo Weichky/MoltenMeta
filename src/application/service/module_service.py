@@ -264,11 +264,14 @@ class ModuleService:
             return
 
         module_cfg = config.get("module", {})
+        if module_cfg.get("type") != "workflow":
+            return
+
         for method_name in module_cfg.get("all_methods", []):
             method_config = config.get(method_name, {})
             outputs = method_config.get("outputs", {})
 
-            if outputs.get("is_virtual"):
+            if method_config.get("is_virtual"):
                 continue
 
             output_symbols = outputs.get("symbol", [])
@@ -288,28 +291,43 @@ class ModuleService:
                     prop_symbol = self._symbols_repo.findBySymbol(symbol)
 
                 unit_str = output_units.get(symbol, "")
-                unit_symbol = None
-                unit_id = None
-                if unit_str:
+                if not unit_str:
+                    continue
+
+                unit_symbol = self._symbols_repo.findBySymbol(unit_str)
+                if unit_symbol is None:
+                    unit_symbol = SymbolSnapshot(symbol=unit_str, category="unit")
+                    self._symbols_repo.upsert([unit_symbol])
                     unit_symbol = self._symbols_repo.findBySymbol(unit_str)
-                    if unit_symbol is None:
-                        unit_symbol = SymbolSnapshot(symbol=unit_str, category="unit")
-                        self._symbols_repo.upsert([unit_symbol])
-                        unit_symbol = self._symbols_repo.findBySymbol(unit_str)
-                    if unit_symbol:
-                        unit_id = self._units_repo.upsertBySymbolId(unit_symbol.id)
+                if unit_symbol:
+                    unit_id = self._units_repo.upsertBySymbolId(unit_symbol.id)
+
+                if prop_symbol is None:
+                    self._logger.warning(
+                        f"Skipping property {symbol}: symbol not found"
+                    )
+                    continue
+
+                if unit_id is None:
+                    self._logger.warning(
+                        f"Skipping property {symbol}: failed to upsert unit '{unit_str}'"
+                    )
+                    continue
 
                 from db.snapshot import PropertySnapshot
 
                 new_prop = PropertySnapshot(
                     name=symbol,
                     symbol_id=prop_symbol.id,
-                    unit_id=unit_id or 0,
+                    unit_id=unit_id,
                     category=module_cfg.get("category"),
                 )
-                new_id = self._properties_repo.upsert(new_prop)
-                self._symbol_to_property_id[symbol] = new_id
-                self._logger.debug(f"Registered property: {symbol} (id={new_id})")
+                try:
+                    new_id = self._properties_repo.upsert(new_prop)
+                    self._symbol_to_property_id[symbol] = new_id
+                    self._logger.debug(f"Registered property: {symbol} (id={new_id})")
+                except Exception as e:
+                    self._logger.warning(f"Failed to register property {symbol}: {e}")
 
     def registerAllModulesProperties(self) -> None:
         """Register properties for all discovered modules."""

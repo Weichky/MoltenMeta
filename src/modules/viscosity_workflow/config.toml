@@ -1,0 +1,225 @@
+[module]
+package_name = "viscosity_workflow"
+entry_class = "ViscosityWorkflowCalc"
+all_methods = ["fit", "predict", "predictBatch", "predictOnGrid", "setArrheniusParams", "getArrheniusParams", "getBinaryModels", "getMDData"]
+type = "workflow"
+category = "workflow"
+version = "2.0.0"
+author = "Weichky"
+license = "MIT"
+description = "Ti-Al-Ni ternary viscosity prediction workflow: Arrhenius + RK + GP (binary + ternary GP correction)"
+
+[fit]
+is_virtual = false
+
+[fit.inputs]
+symbol = ["ternary_data", "arrhenius_params", "params"]
+input_method = "raw"
+
+[fit.inputs.raw]
+method_map = [
+    ["ternary_data", "dict_input"],
+    ["arrhenius_params", "dict_input"],
+    ["params", "dict_input"]
+]
+
+[fit.inputs.description]
+ternary_data = "Dict with keys x_Ti, x_Al, x_Ni, vi (extracted from single CSV)"
+arrhenius_params = "Dict of {element: (eta_0, E_a)} e.g. {'Ti': (0.4288, 27.0)}"
+params = "ViscosityWorkflowParams with alpha, kernel_type, nu, model_name"
+
+[fit.inputs.unit]
+ternary_data = ""
+arrhenius_params = ""
+params = ""
+
+[fit.outputs]
+symbol = ["status", "binary_results", "md_data"]
+tags = ["viscosity", "workflow", "Ti-Al-Ni"]
+
+[fit.outputs.latex]
+status = "\\text{status}"
+binary_results = "\\text{binary_results}"
+md_data = "\\text{md_data}"
+
+[fit.outputs.description]
+status = "Fitting status"
+binary_results = "Binary model fitting results (RMSE, R2, length_scale)"
+md_data = "Original MD data (x_Ti, x_Al, x_Ni, vi)"
+
+[fit.outputs.unit]
+status = ""
+binary_results = ""
+md_data = ""
+
+[predict]
+is_virtual = false
+
+[predict.inputs]
+symbol = ["x_tuple", "T", "model_name", "include_ternary_gp"]
+input_method = "raw"
+
+[predict.inputs.raw]
+method_map = [
+    ["x_tuple", "array_input"],
+    ["T", "float_input"],
+    ["model_name", "text_input"],
+    ["include_ternary_gp", "bool_input"]
+]
+
+[predict.inputs.description]
+x_tuple = "Composition tuple (x_Ti, x_Al, x_Ni)"
+T = "Temperature in K"
+model_name = "Geometric model: 'kohler', 'toop', 'maggianu', 'hillert_toop'"
+include_ternary_gp = "Include ternary GP correction"
+
+[predict.inputs.unit]
+x_tuple = ""
+T = "K"
+model_name = ""
+include_ternary_gp = ""
+
+[predict.outputs]
+symbol = ["eta", "eta_binary", "eta_correction"]
+tags = ["viscosity", "workflow", "Ti-Al-Ni", "prediction"]
+
+[predict.outputs.latex]
+eta = "\\eta"
+eta_binary = "\\eta_{\\text{binary}}"
+eta_correction = "\\Delta\\eta_{\\text{GP}}"
+
+[predict.outputs.description]
+eta = "Predicted viscosity in Pa·s"
+eta_binary = "Binary model prediction (no ternary GP)"
+eta_correction = "Ternary GP correction"
+
+[predict.outputs.unit]
+eta = "Pa·s"
+eta_binary = "Pa·s"
+eta_correction = "Pa·s"
+
+[predictBatch]
+is_virtual = false
+
+[predictBatch.inputs]
+symbol = ["x_tuples", "T", "model_name", "include_ternary_gp"]
+input_method = "raw"
+
+[predictBatch.inputs.raw]
+method_map = [
+    ["x_tuples", "array_input"],
+    ["T", "float_input"],
+    ["model_name", "text_input"],
+    ["include_ternary_gp", "bool_input"]
+]
+
+[predictBatch.inputs.description]
+x_tuples = "List of composition tuples [(x_Ti, x_Al, x_Ni), ...]"
+T = "Temperature in K"
+model_name = "Geometric model name"
+include_ternary_gp = "Include ternary GP correction"
+
+[predictBatch.inputs.unit]
+x_tuples = ""
+T = "K"
+model_name = ""
+include_ternary_gp = ""
+
+[predictBatch.outputs]
+symbol = ["results"]
+tags = ["viscosity", "workflow", "Ti-Al-Ni", "batch_prediction"]
+
+[predictBatch.outputs.latex]
+results = "\\text{results}"
+
+[predictBatch.outputs.description]
+results = "Batch prediction results"
+
+[predictBatch.outputs.unit]
+results = ""
+
+[predictOnGrid]
+is_virtual = false
+
+[predictOnGrid.inputs]
+symbol = ["n_points", "include_ternary_gp"]
+input_method = "raw"
+
+[predictOnGrid.inputs.raw]
+method_map = [
+    ["n_points", "int_input"],
+    ["include_ternary_gp", "bool_input"]
+]
+
+[predictOnGrid.inputs.description]
+n_points = "Number of points per triangle edge"
+include_ternary_gp = "Include ternary GP correction"
+
+[predictOnGrid.inputs.unit]
+n_points = ""
+include_ternary_gp = ""
+
+[predictOnGrid.outputs]
+symbol = ["eta", "eta_binary", "eta_correction", "x_A", "x_B", "x_C", "grid"]
+tags = ["viscosity", "workflow", "Ti-Al-Ni", "grid_prediction"]
+
+[predictOnGrid.outputs.latex]
+eta = "\\eta"
+eta_binary = "\\eta_{\\text{binary}}"
+eta_correction = "\\Delta\\eta_{\\text{GP}}"
+x_A = "x_A"
+x_B = "x_B"
+x_C = "x_C"
+grid = "\\text{grid}"
+
+[predictOnGrid.outputs.description]
+eta = "Total predicted viscosity (binary + GP correction)"
+eta_binary = "Binary model prediction only"
+eta_correction = "Ternary GP correction"
+x_A = "Ti composition"
+x_B = "Al composition"
+x_C = "Ni composition"
+grid = "Grid point list"
+
+[predictOnGrid.outputs.unit]
+eta = "Pa·s"
+eta_binary = "Pa·s"
+eta_correction = "Pa·s"
+x_A = ""
+x_B = ""
+x_C = ""
+grid = ""
+
+[getMDData]
+is_virtual = true
+
+[getMDData.outputs]
+symbol = ["x_Ti", "x_Al", "x_Ni", "vi"]
+tags = ["viscosity", "workflow", "Ti-Al-Ni", "md_data"]
+
+[getMDData.outputs.latex]
+x_Ti = "x_{Ti}"
+x_Al = "x_{Al}"
+x_Ni = "x_{Ni}"
+vi = "\\eta"
+
+[getMDData.outputs.description]
+x_Ti = "Ti mole fractions"
+x_Al = "Al mole fractions"
+x_Ni = "Ni mole fractions"
+vi = "Viscosity measurements"
+
+[getMDData.outputs.unit]
+x_Ti = ""
+x_Al = ""
+x_Ni = ""
+vi = "mPa·s"
+
+[setArrheniusParams]
+is_virtual = true
+
+[getArrheniusParams]
+is_virtual = true
+
+[getBinaryModels]
+is_virtual = true

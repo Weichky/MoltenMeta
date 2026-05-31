@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 from typing import TypedDict, Callable
 import numpy as np
+import logging
 
 
 RK_CENTER = 0.5
 WEIGHT_EPSILON = 1e-10
+_logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -31,6 +33,8 @@ class RKCalc:
         self._L_coeffs: list[float] | None = None
         self._Sigma_L: list[list[float]] | None = None
         self._X_design: np.ndarray | None = None
+        self._effective_order: int = 2
+        self._warning_reason: str | None = None
 
     def fit(
         self,
@@ -42,18 +46,58 @@ class RKCalc:
             raise ValueError("points cannot be empty")
 
         self._order = order
+        effective_order, warning_reason = self._detectCollinearity(points, order)
+        self._effective_order = effective_order
+        self._warning_reason = warning_reason
+
+        if warning_reason:
+            _logger.warning(f"RK auto-adjust: {warning_reason}")
+
         self._fitWLS(points, use_variance_weighting)
         self._is_fitted = True
         return {
             "status": "fitted",
             "n_points": len(points),
             "order": order,
-            "n_params": (order + 1) * 2,
+            "effective_order": self._effective_order,
+            "n_params": (self._effective_order + 1) * 2,
+            "warning": warning_reason,
         }
+
+    def _detectCollinearity(
+        self, points: list[DataPoint], requested_order: int
+    ) -> tuple[int, str | None]:
+        x_vals = set(p.features[0] for p in points)
+        T_vals = set(p.features[1] for p in points)
+
+        x_unique = len(x_vals)
+        T_unique = len(T_vals)
+
+        if x_unique == 1 and T_unique == 1:
+            raise ValueError(
+                "Need both x and T variation - only one unique point provided"
+            )
+
+        if x_unique == 1:
+            return (
+                0,
+                f"x is fixed (single value), using order=0 (temperature term only)",
+            )
+
+        if T_unique == 1:
+            max_order = min(requested_order, 1)
+            if requested_order > 1:
+                return (
+                    max_order,
+                    f"T is fixed, capping order from {requested_order} to {max_order}",
+                )
+            return max_order, None
+
+        return requested_order, None
 
     def _fitWLS(self, points: list[DataPoint], use_variance_weighting: bool) -> None:
         n_points = len(points)
-        n_params = (self._order + 1) * 2
+        n_params = (self._effective_order + 1) * 2
 
         X_design = self._buildDesignMatrix(points)
         y = np.array([p.target for p in points])
@@ -99,7 +143,7 @@ class RKCalc:
 
     def _buildDesignMatrix(self, points: list[DataPoint]) -> np.ndarray:
         n_points = len(points)
-        n_params = (self._order + 1) * 2
+        n_params = (self._effective_order + 1) * 2
         X = np.zeros((n_points, n_params))
 
         for i, dp in enumerate(points):
@@ -107,7 +151,7 @@ class RKCalc:
             f1 = dp.features[1]
             delta = 2 * (f0 - RK_CENTER)
             factor = f0 * (1 - f0)
-            for k in range(self._order + 1):
+            for k in range(self._effective_order + 1):
                 X[i, 2 * k] = delta**k * factor
                 X[i, 2 * k + 1] = delta**k * f1 * factor
 
@@ -126,7 +170,7 @@ class RKCalc:
         delta = 2 * (f0 - RK_CENTER)
 
         polynomial = 0.0
-        for k in range(self._order + 1):
+        for k in range(self._effective_order + 1):
             a_k = L_coeffs[2 * k]
             b_k = L_coeffs[2 * k + 1]
             L_k = a_k + b_k * f1
@@ -147,14 +191,15 @@ class RKCalc:
         delta = 2 * (f0 - RK_CENTER)
 
         L_vals = [
-            L_coeffs[2 * k] + L_coeffs[2 * k + 1] * f1 for k in range(self._order + 1)
+            L_coeffs[2 * k] + L_coeffs[2 * k + 1] * f1
+            for k in range(self._effective_order + 1)
         ]
-        poly = sum(L_vals[k] * (delta**k) for k in range(self._order + 1))
+        poly = sum(L_vals[k] * (delta**k) for k in range(self._effective_order + 1))
 
         term1 = (1 - 2 * f0) * poly
 
         term2 = 0.0
-        for k in range(1, self._order + 1):
+        for k in range(1, self._effective_order + 1):
             term2 += L_vals[k] * k * (delta ** (k - 1))
         term2 *= f0 * (1 - f0) * 2
 
@@ -172,7 +217,7 @@ class RKCalc:
         delta = 2 * (f0 - RK_CENTER)
 
         result = 0.0
-        for k in range(1, self._order + 1):
+        for k in range(1, self._effective_order + 1):
             b_k = L_coeffs[2 * k + 1]
             result += k * (delta ** (k - 1)) * 2 * b_k
 
@@ -185,7 +230,7 @@ class RKCalc:
             return None
         return {
             "coeffs": self._L_coeffs,
-            "order": self._order,
+            "order": self._effective_order,
         }
 
     def getSigmaL(self) -> SigmaLDict | None:
@@ -193,7 +238,7 @@ class RKCalc:
             return None
         return {
             "Sigma_L": self._Sigma_L,
-            "n_params": (self._order + 1) * 2,
+            "n_params": (self._effective_order + 1) * 2,
         }
 
     def sampleL(self, n_samples: int = 1000) -> dict:
@@ -251,7 +296,7 @@ class RKCalc:
         def GE_func(x: float, T: float) -> float:
             delta = 2 * (x - RK_CENTER)
             polynomial = 0.0
-            for k in range(self._order + 1):
+            for k in range(self._effective_order + 1):
                 a_k = self._L_coeffs[2 * k]
                 b_k = self._L_coeffs[2 * k + 1]
                 L_k = a_k + b_k * T
@@ -262,12 +307,12 @@ class RKCalc:
             delta = 2 * (x - RK_CENTER)
             L_vals = [
                 self._L_coeffs[2 * k] + self._L_coeffs[2 * k + 1] * T
-                for k in range(self._order + 1)
+                for k in range(self._effective_order + 1)
             ]
-            poly = sum(L_vals[k] * (delta**k) for k in range(self._order + 1))
+            poly = sum(L_vals[k] * (delta**k) for k in range(self._effective_order + 1))
             term1 = (1 - 2 * x) * poly
             term2 = 0.0
-            for k in range(1, self._order + 1):
+            for k in range(1, self._effective_order + 1):
                 term2 += L_vals[k] * k * (delta ** (k - 1))
             term2 *= x * (1 - x) * 2
             return term1 + term2
